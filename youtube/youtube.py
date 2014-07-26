@@ -39,7 +39,10 @@ class YouTubeClient(object):
                   'hl': self._HL}
         return self._executeApi('guideCategories', params)
     
-    def search(self, text):
+    def search(self, text, nextPageToken=None):
         params = {'q': text,
                   'part': 'snippet'}
+        if nextPageToken!=None:
+            params['pageToken'] = nextPageToken
+
         return self._executeApi('search', params)
