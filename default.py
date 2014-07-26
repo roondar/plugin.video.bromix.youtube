@@ -103,6 +103,21 @@ def _listResult(jsonData, additionalParams={}, pageIndex=1):
                 params = {'action': __ACTION_SHOW_PLAYLIST__,
                           'id': uploadId}
                 __plugin__.addDirectory(name=title, params=params, thumbnailImage=thumbnailImage, fanart=__FANART__)
+            elif kind=='youtube#playlistItem' and snippet!=None:
+                title = snippet.get('title')
+                description = snippet.get('description')
+                
+                thumbnailImage = _getBestThumbnailImage(item)
+                resourceId = snippet.get('resourceId', {})
+                videoId = resourceId.get('videoId', None)
+                if videoId!=None:
+                    
+                    params = {'action': __ACTION_PLAY__,
+                              'id': videoId}
+                    
+                    infoLabels = {'plot': description}
+                    __plugin__.addVideoLink(name=title, params=params, thumbnailImage=thumbnailImage, fanart=__FANART__, infoLabels=infoLabels)
+                    pass
                 pass
             pass
         
@@ -175,6 +190,6 @@ elif action == __ACTION_BROWSE_CHANNELS__:
 elif action == __ACTION_SHOW_CHANNEL_CATEGORY__ and id!=None:
     showChannelCategory(_id, pageToken, pageIndex)
 elif action == __ACTION_SHOW_PLAYLIST__ and id!=None:
-    showPlaylist(_id, pageToken, pageIndex)(_id, pageToken, pageIndex)
+    showPlaylist(_id, pageToken, pageIndex)
 else:
     showIndex()

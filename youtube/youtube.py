@@ -56,7 +56,7 @@ class YouTubeClient(object):
         if nextPageToken!=None:
             params['pageToken'] = nextPageToken
 
-        return self._executeApi('channels', params)
+        return self._executeApi('playlistItems', params)
     
     def search(self, text, nextPageToken=None):
         params = {'q': text,
