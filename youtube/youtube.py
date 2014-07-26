@@ -79,7 +79,7 @@ class YouTubeClient(object):
         html = content.read()
         
         # first find the format list and create a map of the resolutions
-        fmtListMatch = re.compile('.+\"fmt_list\": \"(.+?)\".+', re.DOTALL).findall(html)
+        fmtListMatch = re.compile(".+\"fmt_list\": \"(.+?)\".+").findall(html)
         if fmtListMatch!=None and len(fmtListMatch)>0 and len(fmtListMatch[0])>=1:
             valueString = fmtListMatch[0]
             values = valueString.split(',')
@@ -97,7 +97,7 @@ class YouTubeClient(object):
                 pass
             pass
         
-        streamsMatch = re.compile('.+\"url_encoded_fmt_stream_map\": \"(.+?)\".+', re.DOTALL).findall(html)
+        streamsMatch = re.compile('.+\"url_encoded_fmt_stream_map\": \"(.+?)\".+').findall(html)
         if streamsMatch!=None and len(streamsMatch)>0 and len(streamsMatch[0])>=1:
             valueString = streamsMatch[0]
             values = valueString.split(',')
@@ -117,7 +117,7 @@ class YouTubeClient(object):
                     pass
         
         """     
-        adaptiveFormatsMatch = re.compile('.+\"adaptive_fmts\": \"(.+?)\".+', re.DOTALL).findall(html)
+        adaptiveFormatsMatch = re.compile('.+\"adaptive_fmts\": \"(.+?)\".+').findall(html)
         if adaptiveFormatsMatch!=None and len(adaptiveFormatsMatch)>0 and len(adaptiveFormatsMatch[0])>=1:
             valueString = adaptiveFormatsMatch[0]
             values = valueString.split(',')
