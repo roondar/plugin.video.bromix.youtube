@@ -41,8 +41,17 @@ class YouTubeClient(object):
         return self._executeApi('guideCategories', params)
     
     def getChannelCategory(self, categoryId, nextPageToken=None):
-        params = {'part': 'snippet',
+        params = {'part': 'snippet,contentDetails',
                   'categoryId': categoryId,
+                  'maxResults': self._MaxResult}
+        if nextPageToken!=None:
+            params['pageToken'] = nextPageToken
+
+        return self._executeApi('channels', params)
+    
+    def getPlaylistItems(self, playlistId, nextPageToken=None):
+        params = {'part': 'snippet',
+                  'playlistId': playlistId,
                   'maxResults': self._MaxResult}
         if nextPageToken!=None:
             params['pageToken'] = nextPageToken

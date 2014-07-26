@@ -25,6 +25,7 @@ if not __SETTING_SHOW_FANART__:
 __ACTION_SEARCH__ = 'search'
 __ACTION_BROWSE_CHANNELS__ = 'browseChannels'
 __ACTION_SHOW_CHANNEL_CATEGORY__ = 'showChannelCategory'
+__ACTION_SHOW_PLAYLIST__ = 'showPlaylist'
 __ACTION_WHAT_TO_WATCH__ = 'whatToWatch'
 __ACTION_PLAY__ = 'play'
 
@@ -41,6 +42,29 @@ def showIndex():
     
     __plugin__.endOfDirectory()
     
+def _getPlaylistId(jsonData, name='uploads'):
+    contentDetails = jsonData.get('contentDetails', {})
+    relatedPlaylists = contentDetails.get('relatedPlaylists', {})
+    return relatedPlaylists.get(name, None)
+
+def _getBestThumbnailImage(jsonData):
+    snippet = jsonData.get('snippet', {})
+    thumbnails = snippet.get('thumbnails', {})
+    #imageResList = ['maxres', 'standard', 'high', 'medium', 'default']
+    imageResList = ['high', 'medium', 'default']
+    for imageRes in imageResList:
+        item = thumbnails.get(imageRes, None)
+        if item!=None:
+            width = item.get('width', None)
+            height = item.get('height', None)
+            
+            url = item.get('url', None)
+            if url!=None and (url.find('yt3.')>0 or imageRes=='medium' or (width!=None and height!=None)):
+                return url
+        pass
+    
+    return ''
+    
 def _listResult(jsonData, additionalParams={}, pageIndex=1):
     items = jsonData.get('items', None)
     if items!=None:
@@ -51,7 +75,6 @@ def _listResult(jsonData, additionalParams={}, pageIndex=1):
             snippet = item.get('snippet', None)
             
             if kind=='youtube#guideCategory' and snippet!=None:
-                channelId = snippet.get('channelId')
                 title = snippet.get('title')
                 
                 params = {'action': __ACTION_SHOW_CHANNEL_CATEGORY__,
@@ -64,19 +87,7 @@ def _listResult(jsonData, additionalParams={}, pageIndex=1):
                 
                 title = snippet.get('title')
                 description = snippet.get('description', '')
-                thumbnails = snippet.get('thumbnails', {})
-                imageResList = ['high', 'medium', 'default']
-                for imageRes in imageResList:
-                    thumbnailImage = thumbnails.get(imageRes, None)
-                    if thumbnailImage!=None:
-                        url = thumbnailImage.get('url', None)
-                        if url!=None:
-                            thumbnailImage=url
-                            break
-                    pass
-                if thumbnailImage==None:
-                    thumbnailImage=''
-                    pass
+                thumbnailImage = _getBestThumbnailImage(item)
                 
                 params = {'action': __ACTION_PLAY__,
                           'id': videoId}
@@ -87,22 +98,10 @@ def _listResult(jsonData, additionalParams={}, pageIndex=1):
             elif kind=='youtube#channel' and snippet!=None:
                 title = snippet.get('title')
                 
-                thumbnails = snippet.get('thumbnails', {})
-                imageResList = ['high', 'medium', 'default']
-                for imageRes in imageResList:
-                    thumbnailImage = thumbnails.get(imageRes, None)
-                    if thumbnailImage!=None:
-                        url = thumbnailImage.get('url', None)
-                        if url!=None and (url.find('yt3.')>0 or imageRes=='medium'):
-                            thumbnailImage=url
-                            break
-                    pass
-                if thumbnailImage==None:
-                    thumbnailImage=''
-                    pass
-                
-                params = {'action': __ACTION_SHOW_CHANNEL_CATEGORY__,
-                          'id': _id}
+                thumbnailImage = _getBestThumbnailImage(item)
+                uploadId = _getPlaylistId(item, name='uploads')
+                params = {'action': __ACTION_SHOW_PLAYLIST__,
+                          'id': uploadId}
                 __plugin__.addDirectory(name=title, params=params, thumbnailImage=thumbnailImage, fanart=__FANART__)
                 pass
             pass
@@ -154,6 +153,14 @@ def showChannelCategory(_id, pageToken, pageIndex):
     _listResult(jsonData, additionalParams=additionalParams, pageIndex=pageIndex)
     
     __plugin__.endOfDirectory()
+    
+def showPlaylist(_id, pageToken, pageIndex):
+    jsonData = __client__.getPlaylistItems(_id, pageToken)
+    additionalParams = {'action': __ACTION_SHOW_PLAYLIST__,
+                        'id': _id}
+    _listResult(jsonData, additionalParams=additionalParams, pageIndex=pageIndex)
+    
+    __plugin__.endOfDirectory()
 
 action = bromixbmc.getParam('action')
 _id = bromixbmc.getParam('id')
@@ -165,7 +172,9 @@ if action == __ACTION_SEARCH__:
     search(query, pageToken, pageIndex)
 elif action == __ACTION_BROWSE_CHANNELS__:
     browseChannels();
-elif action == __ACTION_SHOW_CHANNEL_CATEGORY__ and _id!=None:
+elif action == __ACTION_SHOW_CHANNEL_CATEGORY__ and id!=None:
     showChannelCategory(_id, pageToken, pageIndex)
+elif action == __ACTION_SHOW_PLAYLIST__ and id!=None:
+    showPlaylist(_id, pageToken, pageIndex)(_id, pageToken, pageIndex)
 else:
     showIndex()
