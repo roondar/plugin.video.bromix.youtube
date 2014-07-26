@@ -176,6 +176,13 @@ def showPlaylist(_id, pageToken, pageIndex):
     _listResult(jsonData, additionalParams=additionalParams, pageIndex=pageIndex)
     
     __plugin__.endOfDirectory()
+    
+def play(videoId):
+    
+    stream = __client__.getBestFittingVideoStream(videoId=videoId)
+    url = stream.get('url', None)
+    if url!=None:
+        __plugin__.setResolvedUrl(url)
 
 action = bromixbmc.getParam('action')
 _id = bromixbmc.getParam('id')
@@ -191,5 +198,7 @@ elif action == __ACTION_SHOW_CHANNEL_CATEGORY__ and id!=None:
     showChannelCategory(_id, pageToken, pageIndex)
 elif action == __ACTION_SHOW_PLAYLIST__ and id!=None:
     showPlaylist(_id, pageToken, pageIndex)
+elif action == __ACTION_PLAY__:
+    play(_id)
 else:
     showIndex()
