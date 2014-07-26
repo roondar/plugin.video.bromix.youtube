@@ -16,7 +16,7 @@ class YouTubeClient(object):
         self._RegionCode = _language[1]
         
         self._API_Key = __YOUTUBE_API_KEY__
-        self._MaxResult = 5
+        self._MaxResult = 50
         pass
     
     def _createUrl(self, command, params={}):

@@ -2,8 +2,8 @@
 
 import os
 
-import pydevd
-pydevd.settrace('localhost', stdoutToServer=True, stderrToServer=True)
+#import pydevd
+#pydevd.settrace('localhost', stdoutToServer=True, stderrToServer=True)
 
 import bromixbmc
 __plugin__ = bromixbmc.Plugin()
@@ -26,16 +26,12 @@ __ACTION_SEARCH__ = 'search'
 __ACTION_BROWSE_CHANNELS__ = 'browseChannels'
 __ACTION_SHOW_CHANNEL_CATEGORY__ = 'showChannelCategory'
 __ACTION_SHOW_PLAYLIST__ = 'showPlaylist'
-__ACTION_WHAT_TO_WATCH__ = 'whatToWatch'
 __ACTION_PLAY__ = 'play'
 
 
 def showIndex():
     params = {'action': __ACTION_SEARCH__}
     __plugin__.addDirectory("[B]"+__plugin__.localize(30000)+"[/B]", params = params, thumbnailImage=__ICON_FALLBACK__, fanart=__FANART__)
-    
-    params = {'action': __ACTION_WHAT_TO_WATCH__}
-    __plugin__.addDirectory(__plugin__.localize(30002), params = params, thumbnailImage=__ICON_FALLBACK__, fanart=__FANART__)
     
     params = {'action': __ACTION_BROWSE_CHANNELS__}
     __plugin__.addDirectory(__plugin__.localize(30001), params = params, thumbnailImage=__ICON_FALLBACK__, fanart=__FANART__)
@@ -124,7 +120,7 @@ def _listResult(jsonData, additionalParams={}, pageIndex=1):
             params = {'pageIndex': str(pageIndex+1),
                       'pageToken': nextPageToken}
             params.update(additionalParams)
-            __plugin__.addDirectory(__plugin__.localize(30003)+' ('+str(pageIndex+1)+')', params=params, fanart=__FANART__)
+            __plugin__.addDirectory(__plugin__.localize(30002)+' ('+str(pageIndex+1)+')', params=params, fanart=__FANART__)
             pass
         pass
     pass
