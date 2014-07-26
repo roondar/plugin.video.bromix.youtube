@@ -24,6 +24,7 @@ if not __SETTING_SHOW_FANART__:
 #actions
 __ACTION_SEARCH__ = 'search'
 __ACTION_BROWSE_CHANNELS__ = 'browseChannels'
+__ACTION_SHOW_CHANNEL_CATEGORY__ = 'showChannelCategory'
 __ACTION_WHAT_TO_WATCH__ = 'whatToWatch'
 __ACTION_PLAY__ = 'play'
 
@@ -53,8 +54,8 @@ def _listResult(jsonData, additionalParams={}, pageIndex=1):
                 channelId = snippet.get('channelId')
                 title = snippet.get('title')
                 
-                params = {'action': '',
-                          'channelId': channelId}
+                params = {'action': __ACTION_SHOW_CHANNEL_CATEGORY__,
+                          'id': _id}
                 __plugin__.addDirectory(name=title, params=params, thumbnailImage=__ICON_FALLBACK__, fanart=__FANART__)
                 pass
             elif kind=='youtube#searchResult' and snippet!=None and _id!=None:
@@ -78,10 +79,31 @@ def _listResult(jsonData, additionalParams={}, pageIndex=1):
                     pass
                 
                 params = {'action': __ACTION_PLAY__,
-                          'videoId': videoId}
+                          'id': videoId}
                 params.update(additionalParams)
                 infoLabels = {'plot': description}
                 __plugin__.addVideoLink(name=title, params=params, thumbnailImage=thumbnailImage, fanart=__FANART__, infoLabels=infoLabels)
+                pass
+            elif kind=='youtube#channel' and snippet!=None:
+                title = snippet.get('title')
+                
+                thumbnails = snippet.get('thumbnails', {})
+                imageResList = ['high', 'medium', 'default']
+                for imageRes in imageResList:
+                    thumbnailImage = thumbnails.get(imageRes, None)
+                    if thumbnailImage!=None:
+                        url = thumbnailImage.get('url', None)
+                        if url!=None and (url.find('yt3.')>0 or imageRes=='medium'):
+                            thumbnailImage=url
+                            break
+                    pass
+                if thumbnailImage==None:
+                    thumbnailImage=''
+                    pass
+                
+                params = {'action': __ACTION_SHOW_CHANNEL_CATEGORY__,
+                          'id': _id}
+                __plugin__.addDirectory(name=title, params=params, thumbnailImage=thumbnailImage, fanart=__FANART__)
                 pass
             pass
         
@@ -124,8 +146,17 @@ def browseChannels():
     _listResult(jsonData)
     
     __plugin__.endOfDirectory()
+    
+def showChannelCategory(_id, pageToken, pageIndex):
+    jsonData = __client__.getChannelCategory(_id, pageToken)
+    additionalParams = {'action': __ACTION_SHOW_CHANNEL_CATEGORY__,
+                        'id': _id}
+    _listResult(jsonData, additionalParams=additionalParams, pageIndex=pageIndex)
+    
+    __plugin__.endOfDirectory()
 
 action = bromixbmc.getParam('action')
+_id = bromixbmc.getParam('id')
 query = bromixbmc.getParam('query')
 pageToken = bromixbmc.getParam('pageToken')
 pageIndex = int(bromixbmc.getParam('pageIndex', '1'))
@@ -134,5 +165,7 @@ if action == __ACTION_SEARCH__:
     search(query, pageToken, pageIndex)
 elif action == __ACTION_BROWSE_CHANNELS__:
     browseChannels();
+elif action == __ACTION_SHOW_CHANNEL_CATEGORY__ and _id!=None:
+    showChannelCategory(_id, pageToken, pageIndex)
 else:
     showIndex()
