@@ -1,3 +1,6 @@
+1.0.0~alpha5
+- version bump for tests
+
 1.0.0~alpha4
 - added runtime for each video (crazy hack)
 - disabled debug
