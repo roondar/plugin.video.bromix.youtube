@@ -7,8 +7,10 @@
 	
 	<!-- Settings -->
 	<string id="30500">Fanart anzeigen</string>
-	<!--string id="30501">Veröffentlichungsdatum im Titel anzeigen</string>
-	<string id="30502">Livestream-Qualität</string>
-	<string id="30503">Normal</string>
-	<string id="30504">Hoch</string-->
+	<string id="30501">Video Quality</string>
+	<string id="30502">SD</string>
+	<string id="30503">HD (720p)</string>
+	<string id="30504">Full HD (1080p)</string>
+	
+	<string id="30510">Einträge pro Seite</string>
 </strings>

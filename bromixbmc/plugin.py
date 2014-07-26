@@ -91,9 +91,14 @@ class Plugin(object):
     def getSettingAsBool(self, name):
         return self._addon.getSetting(name)=="true"
     
-    def getSettingAsInt(self, name, default=-1):
+    def getSettingAsInt(self, name, default=-1, mapping=None):
         try:
-            return int(self._addon.getSetting(name))
+            result = int(self._addon.getSetting(name))
+            
+            if mapping!=None:
+                result = mapping[result]
+            
+            return result
         except:
             # do nothing
             pass

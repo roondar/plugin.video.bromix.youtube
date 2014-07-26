@@ -1,4 +1,7 @@
 """
+Version 2.0.8 (2014.07.26)
+- ADD: plugin.getSettingAsInt(mapping={....}) for mapping values
+
 Version 2.0.7 (2014.07.25)
 - ADD: addImage(...) will also set the setInfo('pictures'...) info labels
 

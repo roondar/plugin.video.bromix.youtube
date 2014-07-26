@@ -2,14 +2,11 @@
 
 import os
 
-#import pydevd
-#pydevd.settrace('localhost', stdoutToServer=True, stderrToServer=True)
+import pydevd
+pydevd.settrace('localhost', stdoutToServer=True, stderrToServer=True)
 
 import bromixbmc
 __plugin__ = bromixbmc.Plugin()
-
-from youtube import YouTubeClient
-__client__ = YouTubeClient(language=bromixbmc.getLanguageId());
 
 # icons and images
 __FANART__ = os.path.join(__plugin__.getPath(), "fanart.jpg")
@@ -20,6 +17,7 @@ __ICON_SEARCH__ = os.path.join(__plugin__.getPath(), "resources/media/search.png
 __SETTING_SHOW_FANART__ = __plugin__.getSettingAsBool('showFanart')
 if not __SETTING_SHOW_FANART__:
     __FANART__ = ''
+__SETTING_RESULTPERPAGE__ = __plugin__.getSettingAsInt('resultPerPage', mapping={0:5, 1:10, 2:15, 3:20, 4:25, 5:30, 6:35, 7:40, 8:45, 9:50})
 
 #actions
 __ACTION_SEARCH__ = 'search'
@@ -27,6 +25,9 @@ __ACTION_BROWSE_CHANNELS__ = 'browseChannels'
 __ACTION_SHOW_CHANNEL_CATEGORY__ = 'showChannelCategory'
 __ACTION_SHOW_PLAYLIST__ = 'showPlaylist'
 __ACTION_PLAY__ = 'play'
+
+from youtube import YouTubeClient
+__client__ = YouTubeClient(language=bromixbmc.getLanguageId(), maxResult=__SETTING_RESULTPERPAGE__);
 
 
 def showIndex():

@@ -7,7 +7,7 @@ import urlparse
 __YOUTUBE_API_KEY__ = 'AIzaSyA8eiZmM1FaDVjRy-df2KTyQ_vz_yYM39w'
 
 class YouTubeClient(object):
-    def __init__(self, language='en-US'):
+    def __init__(self, language='en-US', maxResult=5):
         self._opener = urllib2.build_opener()
         #opener.addheaders = [('User-Agent', 'stagefright/1.2 (Linux;Android 4.4.2)')]
         
@@ -16,7 +16,7 @@ class YouTubeClient(object):
         self._RegionCode = _language[1]
         
         self._API_Key = __YOUTUBE_API_KEY__
-        self._MaxResult = 50
+        self._MaxResult = maxResult
         pass
     
     def _createUrl(self, command, params={}):
