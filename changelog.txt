@@ -1,2 +1,6 @@
+1.0.0~alpha2
+- added youtube channels and search
+- added playback
+
 1.0.0~alpha
 - initial version for tests
