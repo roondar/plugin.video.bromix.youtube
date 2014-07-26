@@ -1,3 +1,6 @@
+1.0.0~alpha4
+- disabled debug
+
 1.0.0~alpha3
 - little fixes regarding youtube channels
 
