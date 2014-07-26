@@ -191,8 +191,8 @@ def showPlaylist(_id, pageToken, pageIndex):
     __plugin__.endOfDirectory()
     
 def play(videoId):
-    
-    stream = __client__.getBestFittingVideoStream(videoId=videoId)
+    quality = __plugin__.getSettingAsInt('videoQuality', mapping={0:576, 1:720, 2:1080})
+    stream = __client__.getBestFittingVideoStream(videoId=videoId, size=quality)
     if stream!=None:
         url = stream.get('url', None)
         if url!=None:
