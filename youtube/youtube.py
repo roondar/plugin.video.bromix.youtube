@@ -14,6 +14,7 @@ class YouTubeClient(object):
         self._RegionCode = _language[1]
         
         self._API_Key = __YOUTUBE_API_KEY__
+        self._MaxResult = 5
         pass
     
     def _createUrl(self, command, params={}):
@@ -41,7 +42,8 @@ class YouTubeClient(object):
     
     def search(self, text, nextPageToken=None):
         params = {'q': text,
-                  'part': 'snippet'}
+                  'part': 'snippet',
+                  'maxResults': self._MaxResult}
         if nextPageToken!=None:
             params['pageToken'] = nextPageToken
 
