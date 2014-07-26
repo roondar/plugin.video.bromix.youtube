@@ -66,6 +66,25 @@ def _listResult(jsonData, additionalParams={}, pageIndex=1):
     items = jsonData.get('items', None)
     if items!=None:
         nextPageToken = jsonData.get('nextPageToken', None)
+        
+        # first try to collect all videos
+        videoIds = []
+        for item in items:
+            kind = item.get('kind', '')
+            if kind=='youtube#searchResult':
+                _id = item.get('id', {})
+                videoId = _id.get('videoId', None)
+                if videoId!=None:
+                    videoIds.append(videoId)
+            elif kind=='youtube#playlistItem':
+                snippet = item.get('snippet', {})
+                resourceId = snippet.get('resourceId', {})
+                videoId = resourceId.get('videoId', None)
+                if videoId!=None:
+                    videoIds.append(videoId)
+                    
+        videoInfos = __client__.getVideosInfo(videoIds)
+        
         for item in items:
             kind = item.get('kind', '')
             #_id = item.get('id', None)
@@ -103,7 +122,10 @@ def _listResult(jsonData, additionalParams={}, pageIndex=1):
                         _id = _id.get('videoId', '')
                         params = {'action': __ACTION_PLAY__,
                                   'id': _id}
-                        infoLabels = {'plot': description}
+                        
+                        videoInfo = videoInfos.get(_id, {})
+                        infoLabels = {'plot': description,
+                                      'duration': videoInfo.get('duration', '1')}
                         __plugin__.addVideoLink(name=title, params=params, thumbnailImage=thumbnailImage, fanart=__FANART__, infoLabels=infoLabels)
                     pass
                 pass
@@ -128,7 +150,9 @@ def _listResult(jsonData, additionalParams={}, pageIndex=1):
                     params = {'action': __ACTION_PLAY__,
                               'id': videoId}
                     
-                    infoLabels = {'plot': description}
+                    videoInfo = videoInfos.get(videoId, {})
+                    infoLabels = {'plot': description,
+                                  'duration': videoInfo.get('duration', '1')}
                     __plugin__.addVideoLink(name=title, params=params, thumbnailImage=thumbnailImage, fanart=__FANART__, infoLabels=infoLabels)
                     pass
                 pass
@@ -183,6 +207,7 @@ def showChannelCategory(_id, pageToken, pageIndex):
     __plugin__.endOfDirectory()
     
 def showPlaylist(_id, pageToken, pageIndex):
+    __plugin__.setContent('episodes')
     jsonData = __client__.getPlaylistItems(_id, pageToken)
     additionalParams = {'action': __ACTION_SHOW_PLAYLIST__,
                         'id': _id}

@@ -1,4 +1,5 @@
 1.0.0~alpha4
+- added runtime for each video (crazy hack)
 - disabled debug
 
 1.0.0~alpha3

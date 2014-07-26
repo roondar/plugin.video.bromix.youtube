@@ -38,6 +38,54 @@ class YouTubeClient(object):
         content = self._opener.open(url)
         return json.load(content)
     
+    def _makeCommaSeparatedList(self, values=[]):
+        result = ''
+        
+        for value in values:
+            result = result+value
+            result = result+','
+        if len(result)>0:
+            result = result[:-1]
+        
+        return result;
+    
+    def getVideosInfo(self, videoIds=[]):
+        result = {}
+        
+        if len(videoIds)==0:
+            return result
+        
+        videos = self.getVideos(videoIds)
+        videos = videos.get('items', [])
+        for video in videos:
+            _id = video.get('id', None)
+            contentDetails = video.get('contentDetails', {})
+            duration = contentDetails.get('duration', None)
+            if id!=None and duration!=None:
+                durationMatch = re.compile('PT((\d)*H)*((\d*)M)+((\d*)S)+').findall(duration)
+                
+                minutes = 1
+                if durationMatch!=None and len(durationMatch)>0:
+                    minutes = 1
+                    if len(durationMatch[0])>=2 and durationMatch[0][3]!='':
+                        minutes = int(durationMatch[0][3])
+                        
+                    if len(durationMatch[0])>=1 and durationMatch[0][1]!='':
+                        minutes = minutes+ int(durationMatch[0][1])*60
+                    pass
+                
+                duration = str(minutes)
+                result[_id] = {'duration': duration}
+                pass
+            pass
+        
+        return result
+    
+    def getVideos(self, videoIds=[]):
+        params = {'part': 'contentDetails',
+                  'id': self._makeCommaSeparatedList(videoIds)}
+        return self._executeApi('videos', params)
+    
     def getGuideCategories(self):
         params = {'part': 'snippet',
                   'regionCode': self._RegionCode,
