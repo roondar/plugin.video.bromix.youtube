@@ -91,7 +91,6 @@ def _listResult(jsonData, additionalParams={}, pageIndex=1):
                 
                 params = {'action': __ACTION_PLAY__,
                           'id': videoId}
-                params.update(additionalParams)
                 infoLabels = {'plot': description}
                 __plugin__.addVideoLink(name=title, params=params, thumbnailImage=thumbnailImage, fanart=__FANART__, infoLabels=infoLabels)
                 pass
@@ -180,9 +179,10 @@ def showPlaylist(_id, pageToken, pageIndex):
 def play(videoId):
     
     stream = __client__.getBestFittingVideoStream(videoId=videoId)
-    url = stream.get('url', None)
-    if url!=None:
-        __plugin__.setResolvedUrl(url)
+    if stream!=None:
+        url = stream.get('url', None)
+        if url!=None:
+            __plugin__.setResolvedUrl(url)
 
 action = bromixbmc.getParam('action')
 _id = bromixbmc.getParam('id')
