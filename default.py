@@ -2,8 +2,8 @@
 
 import os
 
-import pydevd
-pydevd.settrace('localhost', stdoutToServer=True, stderrToServer=True)
+#import pydevd
+#pydevd.settrace('localhost', stdoutToServer=True, stderrToServer=True)
 
 import bromixbmc
 __plugin__ = bromixbmc.Plugin()
@@ -68,28 +68,44 @@ def _listResult(jsonData, additionalParams={}, pageIndex=1):
         nextPageToken = jsonData.get('nextPageToken', None)
         for item in items:
             kind = item.get('kind', '')
-            _id = item.get('id', None)
+            #_id = item.get('id', None)
             snippet = item.get('snippet', None)
             
             if kind=='youtube#guideCategory' and snippet!=None:
+                _id = item.get('id', None)
                 title = snippet.get('title')
                 
                 params = {'action': __ACTION_SHOW_CHANNEL_CATEGORY__,
                           'id': _id}
                 __plugin__.addDirectory(name=title, params=params, thumbnailImage=__ICON_FALLBACK__, fanart=__FANART__)
                 pass
-            elif kind=='youtube#searchResult' and snippet!=None and _id!=None:
-                kind = _id.get('id', '')
-                videoId = _id.get('videoId', '')
-                
-                title = snippet.get('title')
-                description = snippet.get('description', '')
-                thumbnailImage = _getBestThumbnailImage(item)
-                
-                params = {'action': __ACTION_PLAY__,
-                          'id': videoId}
-                infoLabels = {'plot': description}
-                __plugin__.addVideoLink(name=title, params=params, thumbnailImage=thumbnailImage, fanart=__FANART__, infoLabels=infoLabels)
+            elif kind=='youtube#searchResult' and snippet!=None:
+                _id = item.get('id', {})
+                kind = _id.get('kind', None)
+                if kind!=None:
+                    title = snippet.get('title')
+                    description = snippet.get('description', '')
+                    thumbnailImage = _getBestThumbnailImage(item)
+                    
+                    if kind=='youtube#channel':
+                        _id = _id.get('channelId', '')
+                        
+                        channels = __client__.getChannels(channelId=_id)
+                        if channels!=None:
+                            items = channels.get('items', [])
+                            if len(items)>0:
+                                _id = _getPlaylistId(items[0], 'uploads')
+                        
+                                params = {'action': __ACTION_SHOW_PLAYLIST__,
+                                  'id': _id}
+                                __plugin__.addDirectory(name=title, params=params, thumbnailImage=thumbnailImage, fanart=__FANART__)
+                    elif kind=='youtube#video':
+                        _id = _id.get('videoId', '')
+                        params = {'action': __ACTION_PLAY__,
+                                  'id': _id}
+                        infoLabels = {'plot': description}
+                        __plugin__.addVideoLink(name=title, params=params, thumbnailImage=thumbnailImage, fanart=__FANART__, infoLabels=infoLabels)
+                    pass
                 pass
             elif kind=='youtube#channel' and snippet!=None:
                 title = snippet.get('title')

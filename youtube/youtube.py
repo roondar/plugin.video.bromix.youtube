@@ -1,3 +1,5 @@
+# -*- coding: utf-8 -*-
+
 import urllib
 import urllib2
 import json
@@ -34,7 +36,7 @@ class YouTubeClient(object):
     def _executeApi(self, command, params={}):
         url = self._createUrl(command=command, params=params)
         content = self._opener.open(url)
-        return json.load(content, encoding='utf-8')
+        return json.load(content)
     
     def getGuideCategories(self):
         params = {'part': 'snippet',
@@ -51,6 +53,15 @@ class YouTubeClient(object):
 
         return self._executeApi('channels', params)
     
+    def getPlaylists(self, channelId, nextPageToken=None):
+        params = {'part': 'snippet',
+                  'channelId': channelId,
+                  'maxResults': self._MaxResult}
+        if nextPageToken!=None:
+            params['pageToken'] = nextPageToken
+
+        return self._executeApi('playlists', params)
+    
     def getPlaylistItems(self, playlistId, nextPageToken=None):
         params = {'part': 'snippet',
                   'playlistId': playlistId,
@@ -59,6 +70,13 @@ class YouTubeClient(object):
             params['pageToken'] = nextPageToken
 
         return self._executeApi('playlistItems', params)
+    
+    def getChannels(self, channelId):
+        params = {'part': 'snippet, contentDetails',
+                  'id': channelId,
+                  }
+
+        return self._executeApi('channels', params)
     
     def search(self, text, nextPageToken=None):
         params = {'q': text,
