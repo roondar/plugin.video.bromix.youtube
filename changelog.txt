@@ -1,3 +1,6 @@
+1.0.0~alpha3
+- little fixes regarding youtube channels
+
 1.0.0~alpha2
 - added youtube channels and search
 - added playback

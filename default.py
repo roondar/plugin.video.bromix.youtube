@@ -2,8 +2,8 @@
 
 import os
 
-#import pydevd
-#pydevd.settrace('localhost', stdoutToServer=True, stderrToServer=True)
+import pydevd
+pydevd.settrace('localhost', stdoutToServer=True, stderrToServer=True)
 
 import bromixbmc
 __plugin__ = bromixbmc.Plugin()
@@ -112,6 +112,7 @@ def _listResult(jsonData, additionalParams={}, pageIndex=1):
                 
                 thumbnailImage = _getBestThumbnailImage(item)
                 uploadId = _getPlaylistId(item, name='uploads')
+                
                 params = {'action': __ACTION_SHOW_PLAYLIST__,
                           'id': uploadId}
                 __plugin__.addDirectory(name=title, params=params, thumbnailImage=thumbnailImage, fanart=__FANART__)
