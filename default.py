@@ -2,11 +2,14 @@
 
 import os
 
-#import pydevd
-#pydevd.settrace('localhost', stdoutToServer=True, stderrToServer=True)
+import pydevd
+pydevd.settrace('localhost', stdoutToServer=True, stderrToServer=True)
 
 import bromixbmc
 __plugin__ = bromixbmc.Plugin()
+
+from youtube import YouTubeClient
+__client__ = YouTubeClient();
 
 # icons and images
 __FANART__ = os.path.join(__plugin__.getPath(), "fanart.jpg")
@@ -45,7 +48,9 @@ def search():
         success = True
         
         search_string = keyboard.getText().replace(" ", "+")
-        result = __now_client__.search(search_string)
+        result = __client__.search(search_string)
+        
+        """
         result = result.get('content', {})
         result = result.get('list', {})
         for key in result:
@@ -57,6 +62,7 @@ def search():
                     params = {'action': __ACTION_SHOW_EPISODES__,
                               'id': id}
                     __plugin__.addDirectory(title, params=params)
+                    """
         
     __plugin__.endOfDirectory(success)
 
