@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<settings>
+	<!--setting id="liveStreamQuality" type="enum" label="30502" lvalues="30503|30504" default="1" />
+	<setting id="showFanart" type="bool" label="30500" default="true"/>
+	<setting id="showPublicationDate" type="bool" label="30501" default="true"/-->
+</settings>

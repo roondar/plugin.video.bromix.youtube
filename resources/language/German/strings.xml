@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<strings>
+	<!-- Global strings -->
+	<string id="30000">Sendungen (A-Z)</string>
+	<string id="30001">Tips</string>
+	<string id="30002">Neu</string>
+	<string id="30003">Top 10</string>
+	<string id="30004">Suche</string>
+	<string id="30005">Livestream</string>
+	
+	<string id="30006">Zu Addon Favs hinzufügen</string>
+	<string id="30007">Entfernen</string>
+	<string id="30008">Favoriten</string>
+	
+	<string id="30009">Nächste Seite</string>
+	
+	<!-- Settings -->
+	<string id="30500">Fanart anzeigen</string>
+	<string id="30501">Veröffentlichungsdatum im Titel anzeigen</string>
+	<string id="30502">Livestream-Qualität</string>
+	<string id="30503">Normal</string>
+	<string id="30504">Hoch</string>
+</strings>
