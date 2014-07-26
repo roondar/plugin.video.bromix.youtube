@@ -9,7 +9,7 @@ import bromixbmc
 __plugin__ = bromixbmc.Plugin()
 
 from youtube import YouTubeClient
-__client__ = YouTubeClient();
+__client__ = YouTubeClient(language=bromixbmc.getLanguageId());
 
 # icons and images
 __FANART__ = os.path.join(__plugin__.getPath(), "fanart.jpg")
@@ -40,6 +40,25 @@ def showIndex():
     
     __plugin__.endOfDirectory()
     
+def _listResult(jsonData):
+    items = jsonData.get('items', None)
+    if items!=None:
+        for item in items:
+            kind = item.get('kind', '')
+            _id = item.get('id', '')
+            snippet = item.get('snippet', None)
+            if snippet!=None and kind=='youtube#guideCategory':
+                channelId = snippet.get('channelId')
+                title = snippet.get('title')
+                
+                params = {'action': '',
+                          'channelId': channelId}
+                __plugin__.addDirectory(name=title, params=params, thumbnailImage=__ICON_FALLBACK__, fanart=__FANART__)
+                pass
+            pass
+        pass
+    pass
+    
 def search():
     success = False
     
@@ -48,27 +67,22 @@ def search():
         success = True
         
         search_string = keyboard.getText().replace(" ", "+")
-        result = __client__.search(search_string)
-        
-        """
-        result = result.get('content', {})
-        result = result.get('list', {})
-        for key in result:
-            item = result.get(key,None)
-            if item!=None:
-                title = item.get('result', None)
-                id = item.get('formatid', None)
-                if title!=None and id!=None:
-                    params = {'action': __ACTION_SHOW_EPISODES__,
-                              'id': id}
-                    __plugin__.addDirectory(title, params=params)
-                    """
+        jsonData = __client__.search(search_string)
+        _listResult(jsonData)
         
     __plugin__.endOfDirectory(success)
+    
+def browseChannels():
+    jsonData = __client__.getGuideCategories()
+    _listResult(jsonData)
+    
+    __plugin__.endOfDirectory()
 
 action = bromixbmc.getParam('action')
 
 if action == __ACTION_SEARCH__:
     search()
+elif action == __ACTION_BROWSE_CHANNELS__:
+    browseChannels();
 else:
     showIndex()

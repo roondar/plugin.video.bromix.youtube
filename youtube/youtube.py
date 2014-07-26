@@ -5,9 +5,13 @@ import json
 __YOUTUBE_API_KEY__ = 'AIzaSyA8eiZmM1FaDVjRy-df2KTyQ_vz_yYM39w'
 
 class YouTubeClient(object):
-    def __init__(self):
+    def __init__(self, language='en-US'):
         self._opener = urllib2.build_opener()
         #opener.addheaders = [('User-Agent', 'stagefright/1.2 (Linux;Android 4.4.2)')]
+        
+        self._HL = language
+        _language = language.split('-')
+        self._RegionCode = _language[1]
         
         self._API_Key = __YOUTUBE_API_KEY__
         pass
@@ -24,13 +28,18 @@ class YouTubeClient(object):
         
         return url
     
-    def _doSearch(self, text):
-        params = {'q': text,
-                  'part': 'snippet'}
-        url = self._createUrl(command='search', params=params)
+    def _executeApi(self, command, params={}):
+        url = self._createUrl(command=command, params=params)
         content = self._opener.open(url)
         return json.load(content, encoding='utf-8')
     
+    def getGuideCategories(self):
+        params = {'part': 'snippet',
+                  'regionCode': self._RegionCode,
+                  'hl': self._HL}
+        return self._executeApi('guideCategories', params)
+    
     def search(self, text):
-        return self._doSearch(text)
-        pass
+        params = {'q': text,
+                  'part': 'snippet'}
+        return self._executeApi('search', params)
