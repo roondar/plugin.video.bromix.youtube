@@ -4,13 +4,15 @@
 	<string id="30000">Search</string>
 	<string id="30001">Browse Channels</string>
 	<string id="30002">Next Page</string>
+	<string id="30003">Playlists</string>
 	
 	<!-- Settings -->
-	<string id="30500">Show fanart</string>
+	<string id="30500">Show Fanart</string>
 	<string id="30501">Video Quality</string>
 	<string id="30502">SD</string>
 	<string id="30503">HD (720p)</string>
 	<string id="30504">Full HD (1080p)</string>
 	
 	<string id="30510">Results per page</string>
+	<string id="30511">Show Playlists</string>
 </strings>

@@ -4,6 +4,7 @@
 	<string id="30000">Suche</string>
 	<string id="30001">Kanäle finden</string>
 	<string id="30002">Nächste Seite</string>
+	<string id="30003">Playlists</string>
 	
 	<!-- Settings -->
 	<string id="30500">Fanart anzeigen</string>
@@ -13,4 +14,5 @@
 	<string id="30504">Full HD (1080p)</string>
 	
 	<string id="30510">Einträge pro Seite</string>
+	<string id="30511">Playlists anzeigen</string>
 </strings>

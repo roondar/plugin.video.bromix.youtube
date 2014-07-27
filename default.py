@@ -18,12 +18,14 @@ __SETTING_SHOW_FANART__ = __plugin__.getSettingAsBool('showFanart')
 if not __SETTING_SHOW_FANART__:
     __FANART__ = ''
 __SETTING_RESULTPERPAGE__ = __plugin__.getSettingAsInt('resultPerPage', mapping={0:5, 1:10, 2:15, 3:20, 4:25, 5:30, 6:35, 7:40, 8:45, 9:50})
+__SETTING_SHOW_PLAYLISTS__ = __plugin__.getSettingAsBool('showPlaylists')
 
 #actions
 __ACTION_SEARCH__ = 'search'
 __ACTION_BROWSE_CHANNELS__ = 'browseChannels'
 __ACTION_SHOW_CHANNEL_CATEGORY__ = 'showChannelCategory'
 __ACTION_SHOW_PLAYLIST__ = 'showPlaylist'
+__ACTION_SHOW_PLAYLISTS__ = 'showPlaylists'
 __ACTION_SHOW_CHANNEL__ = 'showChannel'
 __ACTION_PLAY__ = 'play'
 
@@ -125,17 +127,6 @@ def _listResult(jsonData, nextPageParams={}, pageIndex=1):
                                       'id': channelId}
                             __plugin__.addDirectory(name="[B]"+title+"[/B]", params=params, thumbnailImage=thumbnailImage, fanart=__FANART__)
                             pass
-                        """
-                        channels = __client__.getChannels(channelId=_id)
-                        if channels!=None:
-                            items = channels.get('items', [])
-                            if len(items)>0:
-                                _id = _getPlaylistId(items[0], 'uploads')
-                        
-                                params = {'action': __ACTION_SHOW_PLAYLIST__,
-                                  'id': _id}
-                                __plugin__.addDirectory(name="[B]"+title+"[/B]", params=params, thumbnailImage=thumbnailImage, fanart=__FANART__)
-                                """
                     elif kind=='youtube#video':
                         _id = _id.get('videoId', '')
                         params = {'action': __ACTION_PLAY__,
@@ -153,12 +144,17 @@ def _listResult(jsonData, nextPageParams={}, pageIndex=1):
                 
                 if title!=None and channelId!=None:
                     thumbnailImage = _getBestThumbnailImage(item)
-                    #uploadId = _getPlaylistId(item, name='uploads')
-                    
                     params = {'action': __ACTION_SHOW_CHANNEL__,
                               'id': channelId}
                     __plugin__.addDirectory(name="[B]"+title+"[/B]", params=params, thumbnailImage=thumbnailImage, fanart=__FANART__)
                     pass
+            elif kind=='youtube#playlist' and snippet!=None:
+                title = snippet.get('title')
+                playlistId = item.get('id')
+                thumbnailImage = _getBestThumbnailImage(item)
+                params = {'action': __ACTION_SHOW_PLAYLIST__,
+                          'id': playlistId}
+                __plugin__.addDirectory(name=title, params=params, thumbnailImage=thumbnailImage, fanart=__FANART__,)
             elif kind=='youtube#playlistItem' and snippet!=None:
                 title = snippet.get('title')
                 description = snippet.get('description')
@@ -241,8 +237,25 @@ def showPlaylist(_id, pageToken, pageIndex):
     
     __plugin__.endOfDirectory()
     
+def showPlaylists(channelId, pageToken, pageIndex):
+    jsonData = __client__.getPlaylists(channelId, pageToken)
+    nextPageParams = {'action': __ACTION_SHOW_PLAYLISTS__,
+                      'id': _id}
+    _listResult(jsonData, nextPageParams=nextPageParams, pageIndex=pageIndex)
+    
+    __plugin__.endOfDirectory()
+    
 def showChannel(channelId, pageToken, pageIndex):
     __plugin__.setContent('episodes')
+    
+    """
+    Show the playlists of a channel on the first page (only if the setting is true)
+    """
+    if __SETTING_SHOW_PLAYLISTS__:
+        params = {'action': __ACTION_SHOW_PLAYLISTS__,
+                  'id': channelId}
+        __plugin__.addDirectory(name="[B]"+__plugin__.localize(30003)+"[/B]", params=params, thumbnailImage=__ICON_FALLBACK__, fanart=__FANART__)
+        pass
     
     jsonData = __client__.getChannels(channelId=channelId)
     items = jsonData.get('items', [])
@@ -282,10 +295,12 @@ elif action == __ACTION_BROWSE_CHANNELS__:
     browseChannels();
 elif action == __ACTION_SHOW_CHANNEL__ and _id!=None:
     showChannel(_id, pageToken, pageIndex)
-elif action == __ACTION_SHOW_CHANNEL_CATEGORY__ and id!=None:
+elif action == __ACTION_SHOW_CHANNEL_CATEGORY__ and _id!=None:
     showChannelCategory(_id, pageToken, pageIndex)
-elif action == __ACTION_SHOW_PLAYLIST__ and id!=None:
+elif action == __ACTION_SHOW_PLAYLIST__ and _id!=None:
     showPlaylist(_id, pageToken, pageIndex)
+elif action == __ACTION_SHOW_PLAYLISTS__ and _id!=None:
+    showPlaylists(_id, pageToken, pageIndex)
 elif action == __ACTION_PLAY__:
     play(_id)
 else:
