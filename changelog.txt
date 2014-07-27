@@ -1,3 +1,6 @@
+1.0.0~alpha7
+- FIX: added support from freemake.com to decode signatures of some videos
+
 1.0.0~alpha6
 - added support of playlists of a channel (first page only)
 - optimized some major routines for easier support of all youtube's content 

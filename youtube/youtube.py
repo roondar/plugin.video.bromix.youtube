@@ -135,6 +135,24 @@ class YouTubeClient(object):
 
         return self._executeApi('search', params)
     
+    def _getDecodedSignature(self, signature):
+        result = ''
+        try:
+            url = 'http://www.freemake.com/SignatureDecoder/decoder.php?text=%s' % (signature)
+            request = urllib2.Request(url) 
+            request.add_header('Accept', 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8')
+            request.add_header('Accept-Language', 'en-US;q=0.6,en;q=0.4')
+            request.add_header('User-Agent', 'Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/32.0.1700.107 Safari/537.36')
+            request.add_header('Host', 'www.freemake.com')
+            
+            content = urllib2.urlopen(request)
+            result = content.read()
+        except:
+            # do nothing
+            pass
+        
+        return result
+    
     def getVideoStreams(self, videoId):
         result = {}
     
@@ -145,7 +163,7 @@ class YouTubeClient(object):
         html = content.read()
         
         # first find the format list and create a map of the resolutions
-        fmtListMatch = re.compile(".+\"fmt_list\": \"(.+?)\".+").findall(html)
+        fmtListMatch = re.compile('.+\"fmt_list\": \"(.+?)\".+').findall(html)
         if fmtListMatch!=None and len(fmtListMatch)>0 and len(fmtListMatch[0])>=1:
             valueString = fmtListMatch[0]
             values = valueString.split(',')
@@ -174,6 +192,18 @@ class YouTubeClient(object):
                 
                 try:
                     url = urllib.unquote(attr['url'])
+                    
+                    signature = None
+                    if attr.get('s', None)!=None:
+                        signature = self._getDecodedSignature(attr.get('s', None))
+                    elif attr.get('sig', None)!=None:
+                        signature = attr.get('sig', '')
+                        
+                    if signature!=None and len(signature)>0:
+                        url = url + '&signature='
+                        url = url + signature
+                        
+                    
                     id = attr['itag']
                     type = attr['type'].split(';')[0]
                     result[id]['url'] = url
@@ -182,7 +212,7 @@ class YouTubeClient(object):
                     # do nothing
                     pass
         
-        """     
+        """
         adaptiveFormatsMatch = re.compile('.+\"adaptive_fmts\": \"(.+?)\".+').findall(html)
         if adaptiveFormatsMatch!=None and len(adaptiveFormatsMatch)>0 and len(adaptiveFormatsMatch[0])>=1:
             valueString = adaptiveFormatsMatch[0]
@@ -194,6 +224,17 @@ class YouTubeClient(object):
                 
                 try:
                     url = urllib.unquote(attr['url'])
+                    
+                    signature = None
+                    if attr.get('s', None)!=None:
+                        signature = _getDecodedSignature(attr.get('s', None))
+                    elif attr.get('sig', None)!=None:
+                        signature = attr.get('sig', '')
+                        
+                    if signature!=None and len(signature)>0:
+                        url = url + '&signature='
+                        url = url + signature
+                    
                     id = attr['itag']
                     sizes = attr['size'].split('x')
                     type = attr['type'].split(';')[0]
