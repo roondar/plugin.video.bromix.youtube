@@ -1,3 +1,7 @@
+1.0.0~alpha6
+- added support of playlists of a channel (first page only)
+- optimized some major routines for easier support of all youtube's content 
+
 1.0.0~alpha5
 - version bump for tests
 
