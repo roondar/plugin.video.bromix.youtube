@@ -114,13 +114,18 @@ def _listResult(jsonData, nextPageParams={}, pageIndex=1):
                 _id = item.get('id', {})
                 kind = _id.get('kind', None)
                 if kind!=None:
-                    title = snippet.get('title')
+                    title = snippet.get('title', None)
                     description = snippet.get('description', '')
                     thumbnailImage = _getBestThumbnailImage(item)
                     
                     if kind=='youtube#channel':
-                        _id = _id.get('channelId', '')
-                        
+                        channelId = _id.get('channelId', None)
+                        if title!=None and channelId!=None:
+                            params = {'action': __ACTION_SHOW_CHANNEL__,
+                                      'id': channelId}
+                            __plugin__.addDirectory(name="[B]"+title+"[/B]", params=params, thumbnailImage=thumbnailImage, fanart=__FANART__)
+                            pass
+                        """
                         channels = __client__.getChannels(channelId=_id)
                         if channels!=None:
                             items = channels.get('items', [])
@@ -130,6 +135,7 @@ def _listResult(jsonData, nextPageParams={}, pageIndex=1):
                                 params = {'action': __ACTION_SHOW_PLAYLIST__,
                                   'id': _id}
                                 __plugin__.addDirectory(name="[B]"+title+"[/B]", params=params, thumbnailImage=thumbnailImage, fanart=__FANART__)
+                                """
                     elif kind=='youtube#video':
                         _id = _id.get('videoId', '')
                         params = {'action': __ACTION_PLAY__,
@@ -142,14 +148,17 @@ def _listResult(jsonData, nextPageParams={}, pageIndex=1):
                     pass
                 pass
             elif kind=='youtube#channel' and snippet!=None:
-                title = snippet.get('title')
+                title = snippet.get('title', None)
+                channelId = item.get('id', None)
                 
-                thumbnailImage = _getBestThumbnailImage(item)
-                uploadId = _getPlaylistId(item, name='uploads')
-                
-                params = {'action': __ACTION_SHOW_PLAYLIST__,
-                          'id': uploadId}
-                __plugin__.addDirectory(name="[B]"+title+"[/B]", params=params, thumbnailImage=thumbnailImage, fanart=__FANART__)
+                if title!=None and channelId!=None:
+                    thumbnailImage = _getBestThumbnailImage(item)
+                    #uploadId = _getPlaylistId(item, name='uploads')
+                    
+                    params = {'action': __ACTION_SHOW_CHANNEL__,
+                              'id': channelId}
+                    __plugin__.addDirectory(name="[B]"+title+"[/B]", params=params, thumbnailImage=thumbnailImage, fanart=__FANART__)
+                    pass
             elif kind=='youtube#playlistItem' and snippet!=None:
                 title = snippet.get('title')
                 description = snippet.get('description')
@@ -232,6 +241,27 @@ def showPlaylist(_id, pageToken, pageIndex):
     
     __plugin__.endOfDirectory()
     
+def showChannel(channelId, pageToken, pageIndex):
+    __plugin__.setContent('episodes')
+    
+    jsonData = __client__.getChannels(channelId=channelId)
+    items = jsonData.get('items', [])
+    if len(items)>0:
+        item = items[0]
+        contentDetails = item.get('contentDetails', {})
+        relatedPlaylists = contentDetails.get('relatedPlaylists', {})
+        playlistId = relatedPlaylists.get('uploads', None)
+        
+        if playlistId!=None:
+            jsonData = __client__.getPlaylistItems(playlistId, pageToken)
+            nextPageParams = {'action': __ACTION_SHOW_PLAYLIST__,
+                              'id': playlistId}
+            _listResult(jsonData, nextPageParams=nextPageParams, pageIndex=pageIndex)
+            pass
+        pass
+    
+    __plugin__.endOfDirectory()
+    
 def play(videoId):
     quality = __plugin__.getSettingAsInt('videoQuality', mapping={0:576, 1:720, 2:1080})
     stream = __client__.getBestFittingVideoStream(videoId=videoId, size=quality)
@@ -250,6 +280,8 @@ if action == __ACTION_SEARCH__:
     search(query, pageToken, pageIndex)
 elif action == __ACTION_BROWSE_CHANNELS__:
     browseChannels();
+elif action == __ACTION_SHOW_CHANNEL__ and _id!=None:
+    showChannel(_id, pageToken, pageIndex)
 elif action == __ACTION_SHOW_CHANNEL_CATEGORY__ and id!=None:
     showChannelCategory(_id, pageToken, pageIndex)
 elif action == __ACTION_SHOW_PLAYLIST__ and id!=None:
