@@ -37,7 +37,8 @@ from youtube import YouTubeClient
 This is a test token. This token will be generated and cached. The implementation of youtube should to that. So we can reuse the implementation without storing routines of
 the addon.
 """
-__CACHEDTESTTOKEN__ = 'ya29.TwCGscExleVOMlMAAADwmCCr54hGDTeAODnrxuttdbp8uZD75HGM7NbPgyZU-DWdgrDHapbyyM33PdvgAd70F8ha9h4Vz57HobWlz5lY253WaPxBeIlojLlnDZid3LBDm3L1bBkxEsY7-gIq_D4'
+#__CACHEDTESTTOKEN__ = 'ya29.TwCGscExleVOMlMAAADwmCCr54hGDTeAODnrxuttdbp8uZD75HGM7NbPgyZU-DWdgrDHapbyyM33PdvgAd70F8ha9h4Vz57HobWlz5lY253WaPxBeIlojLlnDZid3LBDm3L1bBkxEsY7-gIq_D4'
+__CACHEDTESTTOKEN__ = 'ya29.TwBoJK-9EwXmc1MAAACIQw69uQjgS3jSzO_mgUlFwcHJhMLaT4_him0PadKBFNhekFmtMrTj5ovLMc9mhwDMa_NIwJf0akRN0cJGQ7UtLTrbOxNb6uZPrr5y_u-CLDQGFELdhvJP93xXlBUwYoE'
 
 __client__ = YouTubeClient(username = __plugin__.getSettingAsString('username'),
                            password = __plugin__.getSettingAsString('password'),
@@ -261,11 +262,16 @@ def showChannelCategory(_id, pageToken, pageIndex):
     
     __plugin__.endOfDirectory()
     
-def showPlaylist(_id, pageToken, pageIndex):
+def showPlaylist(playlistId, pageToken, pageIndex):
+    mine = bromixbmc.getParam('mine', 'no')=='yes'
+    
     __plugin__.setContent('episodes')
-    jsonData = __client__.getPlaylistItems(_id, pageToken)
+    jsonData = __client__.getPlaylistItems(playlistId=playlistId, mine=mine, nextPageToken=pageToken)
     nextPageParams = {'action': __ACTION_SHOW_PLAYLIST__,
-                      'id': _id}
+                      'id': playlistId}
+    if mine==True:
+        nextPageParams['mine'] = 'yes'
+        
     _listResult(jsonData, nextPageParams=nextPageParams, pageIndex=pageIndex)
     
     __plugin__.endOfDirectory()
@@ -320,7 +326,8 @@ def showWatchLater(pageToken, pageIndex):
         if playlistId!=None:
             jsonData = __client__.getPlaylistItems(playlistId, mine=True, nextPageToken=pageToken)
             nextPageParams = {'action': __ACTION_SHOW_PLAYLIST__,
-                              'id': playlistId}
+                              'id': playlistId,
+                              'mine': 'yes'}
             _listResult(jsonData, nextPageParams=nextPageParams, pageIndex=pageIndex)
             pass
         pass
