@@ -117,7 +117,7 @@ def _listResult(jsonData, additionalParams={}, pageIndex=1):
                         
                                 params = {'action': __ACTION_SHOW_PLAYLIST__,
                                   'id': _id}
-                                __plugin__.addDirectory(name=title, params=params, thumbnailImage=thumbnailImage, fanart=__FANART__)
+                                __plugin__.addDirectory(name="[B]"+title+"[/B]", params=params, thumbnailImage=thumbnailImage, fanart=__FANART__)
                     elif kind=='youtube#video':
                         _id = _id.get('videoId', '')
                         params = {'action': __ACTION_PLAY__,
@@ -137,7 +137,7 @@ def _listResult(jsonData, additionalParams={}, pageIndex=1):
                 
                 params = {'action': __ACTION_SHOW_PLAYLIST__,
                           'id': uploadId}
-                __plugin__.addDirectory(name=title, params=params, thumbnailImage=thumbnailImage, fanart=__FANART__)
+                __plugin__.addDirectory(name="[B]"+title+"[/B]", params=params, thumbnailImage=thumbnailImage, fanart=__FANART__)
             elif kind=='youtube#playlistItem' and snippet!=None:
                 title = snippet.get('title')
                 description = snippet.get('description')
