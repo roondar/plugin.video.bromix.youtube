@@ -28,10 +28,15 @@ __ACTION_SHOW_PLAYLIST__ = 'showPlaylist'
 __ACTION_SHOW_PLAYLISTS__ = 'showPlaylists'
 __ACTION_SHOW_CHANNEL__ = 'showChannel'
 __ACTION_SHOW_SUBSCRIPTIONS__ = 'showSubscriptions'
+__ACTION_SHOW_WATCHLATER__ = 'showWatchLater'
 __ACTION_PLAY__ = 'play'
 
 from youtube import YouTubeClient
 
+"""
+This is a test token. This token will be generated and cached. The implementation of youtube should to that. So we can reuse the implementation without storing routines of
+the addon.
+"""
 __CACHEDTESTTOKEN__ = 'ya29.TwCGscExleVOMlMAAADwmCCr54hGDTeAODnrxuttdbp8uZD75HGM7NbPgyZU-DWdgrDHapbyyM33PdvgAd70F8ha9h4Vz57HobWlz5lY253WaPxBeIlojLlnDZid3LBDm3L1bBkxEsY7-gIq_D4'
 
 __client__ = YouTubeClient(username = __plugin__.getSettingAsString('username'),
@@ -47,6 +52,9 @@ def showIndex():
     __plugin__.addDirectory("[B]"+__plugin__.localize(30000)+"[/B]", params = params, thumbnailImage=__ICON_FALLBACK__, fanart=__FANART__)
     
     if __client__.hasLogin():
+        params = {'action': __ACTION_SHOW_WATCHLATER__}
+        __plugin__.addDirectory(__plugin__.localize(30005), params = params, thumbnailImage=__ICON_FALLBACK__, fanart=__FANART__)
+        
         params = {'action': __ACTION_SHOW_SUBSCRIPTIONS__}
         __plugin__.addDirectory(__plugin__.localize(30004), params = params, thumbnailImage=__ICON_FALLBACK__, fanart=__FANART__)
         pass
@@ -300,6 +308,25 @@ def showChannel(channelId, pageToken, pageIndex):
     
     __plugin__.endOfDirectory()
     
+def showWatchLater(pageToken, pageIndex):
+    jsonData = __client__.getChannels(mine=True)
+    items = jsonData.get('items', [])
+    if len(items)>0:
+        item = items[0]
+        contentDetails = item.get('contentDetails', {})
+        relatedPlaylists = contentDetails.get('relatedPlaylists', {})
+        playlistId = relatedPlaylists.get('watchLater', None)
+        
+        if playlistId!=None:
+            jsonData = __client__.getPlaylistItems(playlistId, mine=True, nextPageToken=pageToken)
+            nextPageParams = {'action': __ACTION_SHOW_PLAYLIST__,
+                              'id': playlistId}
+            _listResult(jsonData, nextPageParams=nextPageParams, pageIndex=pageIndex)
+            pass
+        pass
+    
+    __plugin__.endOfDirectory()
+    
 def showSubscriptions(pageToken, pageIndex):
     jsonData = __client__.getSubscriptions(mine=True, nextPageToken=pageToken)
     nextPageParams = {'action': __ACTION_SHOW_SUBSCRIPTIONS__}
@@ -324,6 +351,8 @@ if action == __ACTION_SEARCH__:
     search(query, pageToken, pageIndex)
 elif action == __ACTION_SHOW_SUBSCRIPTIONS__:
     showSubscriptions(pageToken, pageIndex)
+elif action == __ACTION_SHOW_WATCHLATER__:
+    showWatchLater(pageToken, pageIndex)
 elif action == __ACTION_BROWSE_CHANNELS__:
     browseChannels();
 elif action == __ACTION_SHOW_CHANNEL__ and _id!=None:
