@@ -24,6 +24,7 @@ __ACTION_SEARCH__ = 'search'
 __ACTION_BROWSE_CHANNELS__ = 'browseChannels'
 __ACTION_SHOW_CHANNEL_CATEGORY__ = 'showChannelCategory'
 __ACTION_SHOW_PLAYLIST__ = 'showPlaylist'
+__ACTION_SHOW_CHANNEL__ = 'showChannel'
 __ACTION_PLAY__ = 'play'
 
 from youtube import YouTubeClient
@@ -62,12 +63,17 @@ def _getBestThumbnailImage(jsonData):
     
     return ''
     
-def _listResult(jsonData, additionalParams={}, pageIndex=1):
+def _listResult(jsonData, nextPageParams={}, pageIndex=1):
     items = jsonData.get('items', None)
     if items!=None:
         nextPageToken = jsonData.get('nextPageToken', None)
         
-        # first try to collect all videos
+        """
+        First try to collect all video items. We need each video ID to collect the duration
+        in one go (max. 50 video IDs are possible). The YouTube API v3 only provide addtitional infos
+        on videos. So we request them with this method.
+        Per page this will cause one more call.        
+        """
         videoIds = []
         for item in items:
             kind = item.get('kind', '')
@@ -85,18 +91,24 @@ def _listResult(jsonData, additionalParams={}, pageIndex=1):
                     
         videoInfos = __client__.getVideosInfo(videoIds)
         
+        """
+        For each item we use some magic to show the content correct in XBMC.
+        On call for all :)
+        """
         for item in items:
             kind = item.get('kind', '')
-            #_id = item.get('id', None)
             snippet = item.get('snippet', None)
             
+            # a special kind of youtube category
             if kind=='youtube#guideCategory' and snippet!=None:
                 _id = item.get('id', None)
-                title = snippet.get('title')
+                title = snippet.get('title', None)
                 
-                params = {'action': __ACTION_SHOW_CHANNEL_CATEGORY__,
-                          'id': _id}
-                __plugin__.addDirectory(name=title, params=params, thumbnailImage=__ICON_FALLBACK__, fanart=__FANART__)
+                if title!=None and _id!=None:
+                    params = {'action': __ACTION_SHOW_CHANNEL_CATEGORY__,
+                              'id': _id}
+                    __plugin__.addDirectory(name=title, params=params, thumbnailImage=__ICON_FALLBACK__, fanart=__FANART__)
+                    pass
                 pass
             elif kind=='youtube#searchResult' and snippet!=None:
                 _id = item.get('id', {})
@@ -158,10 +170,15 @@ def _listResult(jsonData, additionalParams={}, pageIndex=1):
                 pass
             pass
         
+        """
+        A common solution for all results. If we have an nextPageToken then their will be more pages to go.
+        Therefore we use the nextPageParams array to provide the information need to make call for the
+        next page.
+        """
         if nextPageToken!=None:
             params = {'pageIndex': str(pageIndex+1),
                       'pageToken': nextPageToken}
-            params.update(additionalParams)
+            params.update(nextPageParams)
             __plugin__.addDirectory(__plugin__.localize(30002)+' ('+str(pageIndex+1)+')', params=params, fanart=__FANART__)
             pass
         pass
@@ -170,11 +187,11 @@ def _listResult(jsonData, additionalParams={}, pageIndex=1):
 def search(query=None, pageToken=None, pageIndex=1):
     success = False
     
-    additionalParams = {}
+    nextPageParams = {}
     jsonData = {}
     if query!=None and pageToken!=None:
-        additionalParams = {'query': query,
-                            'action': __ACTION_SEARCH__}
+        nextPageParams = {'query': query,
+                          'action': __ACTION_SEARCH__}
         jsonData = __client__.search(query, pageToken)
         success = True
     else:
@@ -183,13 +200,13 @@ def search(query=None, pageToken=None, pageIndex=1):
             success = True
             
             search_string = keyboard.getText().replace(" ", "+")
-            additionalParams = {'query': search_string,
-                                'action': __ACTION_SEARCH__}
+            nextPageParams = {'query': search_string,
+                              'action': __ACTION_SEARCH__}
             jsonData = __client__.search(search_string)
             pass
         pass
     
-    _listResult(jsonData, additionalParams=additionalParams, pageIndex=pageIndex)
+    _listResult(jsonData, nextPageParams=nextPageParams, pageIndex=pageIndex)
     __plugin__.endOfDirectory(success)
     
 def browseChannels():
@@ -200,18 +217,18 @@ def browseChannels():
     
 def showChannelCategory(_id, pageToken, pageIndex):
     jsonData = __client__.getChannelCategory(_id, pageToken)
-    additionalParams = {'action': __ACTION_SHOW_CHANNEL_CATEGORY__,
-                        'id': _id}
-    _listResult(jsonData, additionalParams=additionalParams, pageIndex=pageIndex)
+    nextPageParams = {'action': __ACTION_SHOW_CHANNEL_CATEGORY__,
+                      'id': _id}
+    _listResult(jsonData, nextPageParams=nextPageParams, pageIndex=pageIndex)
     
     __plugin__.endOfDirectory()
     
 def showPlaylist(_id, pageToken, pageIndex):
     __plugin__.setContent('episodes')
     jsonData = __client__.getPlaylistItems(_id, pageToken)
-    additionalParams = {'action': __ACTION_SHOW_PLAYLIST__,
-                        'id': _id}
-    _listResult(jsonData, additionalParams=additionalParams, pageIndex=pageIndex)
+    nextPageParams = {'action': __ACTION_SHOW_PLAYLIST__,
+                      'id': _id}
+    _listResult(jsonData, nextPageParams=nextPageParams, pageIndex=pageIndex)
     
     __plugin__.endOfDirectory()
     
