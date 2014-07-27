@@ -5,6 +5,7 @@
 	<string id="30001">Kanäle finden</string>
 	<string id="30002">Nächste Seite</string>
 	<string id="30003">Playlists</string>
+	<string id="30004">ABOS</string>
 	
 	<!-- Settings -->
 	<string id="30500">Fanart anzeigen</string>
@@ -15,4 +16,6 @@
 	
 	<string id="30510">Einträge pro Seite</string>
 	<string id="30511">Playlists anzeigen</string>
+	<string id="30512">Benutzername</string>
+	<string id="30513">Passwort</string>
 </strings>

@@ -9,9 +9,13 @@ import urlparse
 __YOUTUBE_API_KEY__ = 'AIzaSyA8eiZmM1FaDVjRy-df2KTyQ_vz_yYM39w'
 
 class YouTubeClient(object):
-    def __init__(self, language='en-US', maxResult=5):
+    def __init__(self, username=None, password=None, language='en-US', maxResult=5, cachedToken=None):
         self._opener = urllib2.build_opener()
         #opener.addheaders = [('User-Agent', 'stagefright/1.2 (Linux;Android 4.4.2)')]
+        
+        self._Username = username
+        self._Password = password
+        self._CachedToken = cachedToken
         
         self._HL = language
         _language = language.split('-')
@@ -20,6 +24,55 @@ class YouTubeClient(object):
         self._API_Key = __YOUTUBE_API_KEY__
         self._MaxResult = maxResult
         pass
+    
+    def hasLogin(self):
+        return self._CachedToken!=None and self._Username!=None and self._Password!=None
+    
+    def getUserToken(self):
+        params = {'device_country': self._RegionCode.lower(),
+                  'operatorCountry': self._RegionCode.lower(),
+                  'lang': self._HL.replace('-', '_'),
+                  'sdk_version': '19',
+                  #'google_play_services_version': '5084034',
+                  #'accountType' : 'HOSTED_OR_GOOGLE',
+                  'Email': self._Username,
+                  'service': 'oauth2:https://www.googleapis.com/auth/youtube https://www.googleapis.com/auth/plus.me https://www.googleapis.com/auth/emeraldsea.mobileapps.doritos.cookie https://www.googleapis.com/auth/plus.stream.read https://www.googleapis.com/auth/plus.stream.write https://www.googleapis.com/auth/plus.pages.manage',
+                  'source': 'android',
+                  #'androidId': '3b7ee32203b0465cb586551ee989b5ae',
+                  'app': 'com.google.android.youtube',
+                  #'callerPkg' : 'com.google.android.youtube',
+                  'Passwd' : self._Password
+                  }
+    
+        params = urllib.urlencode(params)
+        
+        result = {}
+        
+        try:
+            url = 'https://android.clients.google.com/auth'
+            request = urllib2.Request(url, data=params) 
+            #request.add_header('device', '3b7ee32203b0465cb586551ee989b5ae')
+            request.add_header('app', 'com.google.android.youtube')
+            request.add_header('User-Agent', 'GoogleAuth/1.4 (GT-I9100 KTU84P) (GT-I9100 KTU84P)')
+            request.add_header('content-type', 'application/x-www-form-urlencoded')
+            request.add_header('Host', 'android.clients.google.com')
+            request.add_header('Connection', 'Keep-Alive')
+            #request.add_header('Accept-Encoding', 'gzip') 
+            
+            content = urllib2.urlopen(request)
+            data = content.read()
+            lines = data.split('\n')
+            for line in lines:
+                _property = line.split('=')
+                if len(_property)>=2:
+                    result[_property[0]] = _property[1]
+        except:
+            # do nothing
+            pass
+        
+        self._CachedToken = result.get('Auth', None)
+        
+        return result
     
     def _createUrl(self, command, params={}):
         url = 'https://www.googleapis.com/youtube/v3/%s' % (command)
@@ -85,6 +138,18 @@ class YouTubeClient(object):
         params = {'part': 'contentDetails',
                   'id': self._makeCommaSeparatedList(videoIds)}
         return self._executeApi('videos', params)
+    
+    def getSubscriptions(self, mine=None, nextPageToken=None):
+        params = {'part': 'snippet'}
+        
+        if mine!=None and mine==True:
+            params['access_token'] = self._CachedToken
+            params['mine'] = 'true'
+            
+        if nextPageToken!=None:
+            params['pageToken'] = nextPageToken
+        
+        return self._executeApi('subscriptions', params)
     
     def getGuideCategories(self):
         params = {'part': 'snippet',

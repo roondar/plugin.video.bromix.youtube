@@ -27,15 +27,29 @@ __ACTION_SHOW_CHANNEL_CATEGORY__ = 'showChannelCategory'
 __ACTION_SHOW_PLAYLIST__ = 'showPlaylist'
 __ACTION_SHOW_PLAYLISTS__ = 'showPlaylists'
 __ACTION_SHOW_CHANNEL__ = 'showChannel'
+__ACTION_SHOW_SUBSCRIPTIONS__ = 'showSubscriptions'
 __ACTION_PLAY__ = 'play'
 
 from youtube import YouTubeClient
-__client__ = YouTubeClient(language=bromixbmc.getLanguageId(), maxResult=__SETTING_RESULTPERPAGE__);
+
+__CACHEDTESTTOKEN__ = 'ya29.TwCGscExleVOMlMAAADwmCCr54hGDTeAODnrxuttdbp8uZD75HGM7NbPgyZU-DWdgrDHapbyyM33PdvgAd70F8ha9h4Vz57HobWlz5lY253WaPxBeIlojLlnDZid3LBDm3L1bBkxEsY7-gIq_D4'
+
+__client__ = YouTubeClient(username = __plugin__.getSettingAsString('username'),
+                           password = __plugin__.getSettingAsString('password'),
+                           cachedToken = __CACHEDTESTTOKEN__,
+                           language = bromixbmc.getLanguageId(),
+                           maxResult = __SETTING_RESULTPERPAGE__
+                           );
 
 
 def showIndex():
     params = {'action': __ACTION_SEARCH__}
     __plugin__.addDirectory("[B]"+__plugin__.localize(30000)+"[/B]", params = params, thumbnailImage=__ICON_FALLBACK__, fanart=__FANART__)
+    
+    if __client__.hasLogin():
+        params = {'action': __ACTION_SHOW_SUBSCRIPTIONS__}
+        __plugin__.addDirectory(__plugin__.localize(30004), params = params, thumbnailImage=__ICON_FALLBACK__, fanart=__FANART__)
+        pass
     
     params = {'action': __ACTION_BROWSE_CHANNELS__}
     __plugin__.addDirectory(__plugin__.localize(30001), params = params, thumbnailImage=__ICON_FALLBACK__, fanart=__FANART__)
@@ -110,6 +124,17 @@ def _listResult(jsonData, nextPageParams={}, pageIndex=1):
                     params = {'action': __ACTION_SHOW_CHANNEL_CATEGORY__,
                               'id': _id}
                     __plugin__.addDirectory(name=title, params=params, thumbnailImage=__ICON_FALLBACK__, fanart=__FANART__)
+                    pass
+                pass
+            elif kind=='youtube#subscription' and snippet!=None:
+                title = snippet.get('title', None)
+                thumbnailImage = _getBestThumbnailImage(item)
+                resourceId = snippet.get('resourceId', {})
+                channelId = resourceId.get('channelId', None)
+                if channelId!=None and title!=None:
+                    params = {'action': __ACTION_SHOW_CHANNEL__,
+                              'id': channelId}
+                    __plugin__.addDirectory(name=title, params=params, thumbnailImage=thumbnailImage, fanart=__FANART__)
                     pass
                 pass
             elif kind=='youtube#searchResult' and snippet!=None:
@@ -275,6 +300,12 @@ def showChannel(channelId, pageToken, pageIndex):
     
     __plugin__.endOfDirectory()
     
+def showSubscriptions(pageToken, pageIndex):
+    jsonData = __client__.getSubscriptions(mine=True, nextPageToken=pageToken)
+    nextPageParams = {'action': __ACTION_SHOW_SUBSCRIPTIONS__}
+    _listResult(jsonData, nextPageParams=nextPageParams, pageIndex=pageIndex)
+    __plugin__.endOfDirectory()
+    
 def play(videoId):
     quality = __plugin__.getSettingAsInt('videoQuality', mapping={0:576, 1:720, 2:1080})
     stream = __client__.getBestFittingVideoStream(videoId=videoId, size=quality)
@@ -291,6 +322,8 @@ pageIndex = int(bromixbmc.getParam('pageIndex', '1'))
 
 if action == __ACTION_SEARCH__:
     search(query, pageToken, pageIndex)
+elif action == __ACTION_SHOW_SUBSCRIPTIONS__:
+    showSubscriptions(pageToken, pageIndex)
 elif action == __ACTION_BROWSE_CHANNELS__:
     browseChannels();
 elif action == __ACTION_SHOW_CHANNEL__ and _id!=None:

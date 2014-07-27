@@ -88,6 +88,9 @@ class Plugin(object):
     def localize(self, text_id):
         return self._addon.getLocalizedString(text_id)
     
+    def getSettingAsString(self, name, default=None):
+        return self._addon.getSetting(name)
+    
     def getSettingAsBool(self, name):
         return self._addon.getSetting(name)=="true"
     

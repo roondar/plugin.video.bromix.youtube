@@ -1,4 +1,7 @@
 """
+Version 2.0.9 (2014.07.27)
+- ADD: plugin.getSettingAsString(...)
+
 Version 2.0.8 (2014.07.26)
 - ADD: plugin.getSettingAsInt(mapping={....}) for mapping values
 
