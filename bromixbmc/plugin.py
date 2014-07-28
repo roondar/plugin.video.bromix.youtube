@@ -91,6 +91,20 @@ class Plugin(object):
     def getSettingAsString(self, name, default=None):
         return self._addon.getSetting(name)
     
+    def setSettingAsString(self, name, value):
+        self._addon.setSetting(name, value)
+        
+    def getSettingAsFloat(self, name, default=None):
+        try:
+            return float(self._addon.getSetting(name))
+        except:
+            # do nothing
+            pass
+        return default
+    
+    def setSettingAsFloat(self, name, value):
+        self._addon.setSetting(name, str(value))
+    
     def getSettingAsBool(self, name):
         return self._addon.getSetting(name)=="true"
     

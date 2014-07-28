@@ -5,17 +5,21 @@ import urllib2
 import json
 import re
 import urlparse
+import time
+from __builtin__ import None
 
 __YOUTUBE_API_KEY__ = 'AIzaSyA8eiZmM1FaDVjRy-df2KTyQ_vz_yYM39w'
 
 class YouTubeClient(object):
-    def __init__(self, username=None, password=None, language='en-US', maxResult=5, cachedToken=None):
+    def __init__(self, username=None, password=None, language='en-US', maxResult=5, cachedToken=None, accessTokenExpiresAt=-1):
         self._opener = urllib2.build_opener()
         #opener.addheaders = [('User-Agent', 'stagefright/1.2 (Linux;Android 4.4.2)')]
         
         self._Username = username
         self._Password = password
-        self._CachedToken = cachedToken
+        
+        self.AccessToken = cachedToken
+        self.AccessTokenExpiresAt = accessTokenExpiresAt
         
         self._HL = language
         _language = language.split('-')
@@ -26,7 +30,7 @@ class YouTubeClient(object):
         pass
     
     def hasLogin(self):
-        return self._CachedToken!=None and self._Username!=None and self._Password!=None
+        return self._Username!=None and len(self._Username)>0 and self._Password!=None and len(self._Password)>0
     
     def getUserToken(self):
         params = {'device_country': self._RegionCode.lower(),
@@ -70,7 +74,7 @@ class YouTubeClient(object):
             # do nothing
             pass
         
-        self._CachedToken = result.get('Auth', None)
+        self.AccessToken = result.get('Auth', None)
         
         return result
     
@@ -86,9 +90,27 @@ class YouTubeClient(object):
         
         return url
     
-    def _executeApi(self, command, params={}):
+    def _updateToken(self):
+        authData = self.getUserToken()
+        self.AccessToken = authData.get('Auth', None)
+        self.AccessTokenExpiresAt = authData.get('Expiry', None)
+    
+    def _executeApi(self, command, params={}, tries=1):
+        if 'access_token' in params:
+            isExpired = self.AccessTokenExpiresAt < time.time()
+            if (self.AccessToken==None or len(self.AccessToken)==0 or isExpired) and (self._Username!=None and self._Password!=None and len(self._Username)>0 and len(self._Password)>0):
+                self._updateToken()
+                params['access_token'] = self.AccessToken
+        
         url = self._createUrl(command=command, params=params)
-        content = self._opener.open(url)
+        try:
+            content = self._opener.open(url)
+        except urllib2.HTTPError, e:
+            if e.code==401 and tries>=1:
+                tries = tries-1
+                self.AccessToken = None
+                return self._executeApi(command, params, tries)
+            pass
         return json.load(content)
     
     def _makeCommaSeparatedList(self, values=[]):
@@ -149,7 +171,7 @@ class YouTubeClient(object):
                   'maxResults': self._MaxResult}
         
         if mine!=None and mine==True:
-            params['access_token'] = self._CachedToken
+            params['access_token'] = self.AccessToken
             params['mine'] = 'true'
             
         if nextPageToken!=None:
@@ -187,7 +209,7 @@ class YouTubeClient(object):
                   'maxResults': self._MaxResult}
         
         if mine==True:
-            params['access_token'] = self._CachedToken
+            params['access_token'] = self.AccessToken
             
         
         if nextPageToken!=None:
@@ -203,10 +225,10 @@ class YouTubeClient(object):
             params['channelId'] = channelId
         elif home!=None and home==True:
             params['home'] = 'true'
-            params['access_token'] = self._CachedToken
+            params['access_token'] = self.AccessToken
         elif mine!=None and mine==True:
             params['mine'] = 'true'
-            params['access_token'] = self._CachedToken
+            params['access_token'] = self.AccessToken
             
         if nextPageToken!=None:
             params['pageToken'] = nextPageToken
@@ -224,7 +246,7 @@ class YouTubeClient(object):
             
         if mine!=None and mine==True:
             params['mine'] = 'true'
-            params['access_token'] = self._CachedToken
+            params['access_token'] = self.AccessToken
             
         if nextPageToken!=None:
             params['pageToken'] = nextPageToken

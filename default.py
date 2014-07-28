@@ -31,17 +31,14 @@ __ACTION_SHOW_CHANNEL__ = 'showChannel'
 __ACTION_SHOW_SUBSCRIPTIONS__ = 'showSubscriptions'
 __ACTION_PLAY__ = 'play'
 
+__SETTING__ACCESS_TOKEN__ = __plugin__.getSettingAsString('oauth2_access_token', None)
+__SETTING__ACCESS_TOKEN_EXPIRES_AT__ = __plugin__.getSettingAsFloat('oauth2_access_token_expires_at', -1)
+
 from youtube import YouTubeClient
-
-"""
-This is a test token. This token will be generated and cached. The implementation of youtube should to that. So we can reuse the implementation without storing routines of
-the addon.
-"""
-__CACHEDTESTTOKEN__ = 'ya29.UABVx3IUzlJiWVMAAAD4d5AmkoQcEw1vjx0PeHnDDQNRr5oZWBJxLocyZNJnHz1jryRIEQjFKDmJUq23D5P5Q4IMSV1pYO3vBlCZm-v3gSnpzkLEJ9Hh_YNZb9zcSkbrdjPiv03nIv8zI5DrRWc'
-
 __client__ = YouTubeClient(username = __plugin__.getSettingAsString('username'),
                            password = __plugin__.getSettingAsString('password'),
-                           cachedToken = __CACHEDTESTTOKEN__,
+                           cachedToken = __SETTING__ACCESS_TOKEN__,
+                           accessTokenExpiresAt = __SETTING__ACCESS_TOKEN_EXPIRES_AT__,
                            language = bromixbmc.getLanguageId(),
                            maxResult = __SETTING_RESULTPERPAGE__
                            );
@@ -406,3 +403,9 @@ elif action == __ACTION_PLAY__:
     play(_id)
 else:
     showIndex()
+    
+if __SETTING__ACCESS_TOKEN__ != __client__.AccessToken:
+    __SETTING__ACCESS_TOKEN__ = __client__.AccessToken
+    if __SETTING__ACCESS_TOKEN__!=None or len(__SETTING__ACCESS_TOKEN__)>0:
+        __plugin__.setSettingAsFloat('oauth2_access_token_expires_at', __client__.AccessTokenExpiresAt)
+        __plugin__.setSettingAsString('oauth2_access_token', __SETTING__ACCESS_TOKEN__)

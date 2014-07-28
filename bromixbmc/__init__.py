@@ -1,6 +1,9 @@
 """
-Version 2.0.9 (2014.07.27)
-- ADD: plugin.getSettingAsString(...)
+Version 2.0.9 (2014.07.28)
+- ADD: plugin.getSettingAsFloat(name, default)
+- ADD: plugin.setSettingAsFloat(name, value)
+- ADD: plugin.setSettingAsString(name, value)
+- ADD: plugin.getSettingAsString(name, default)
 
 Version 2.0.8 (2014.07.26)
 - ADD: plugin.getSettingAsInt(mapping={....}) for mapping values
