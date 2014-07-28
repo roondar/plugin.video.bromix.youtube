@@ -24,6 +24,7 @@ __SETTING_SHOW_PLAYLISTS__ = __plugin__.getSettingAsBool('showPlaylists')
 __ACTION_SEARCH__ = 'search'
 __ACTION_BROWSE_CHANNELS__ = 'browseChannels'
 __ACTION_SHOW_CHANNEL_CATEGORY__ = 'showChannelCategory'
+__ACTION_SHOW_MYSUBSCRIPTIONS__ = 'showMySubscriptions'
 __ACTION_SHOW_PLAYLIST__ = 'showPlaylist'
 __ACTION_SHOW_PLAYLISTS__ = 'showPlaylists'
 __ACTION_SHOW_CHANNEL__ = 'showChannel'
@@ -36,8 +37,7 @@ from youtube import YouTubeClient
 This is a test token. This token will be generated and cached. The implementation of youtube should to that. So we can reuse the implementation without storing routines of
 the addon.
 """
-__CACHEDTESTTOKEN__ = 'ya29.UAAjnyNQbE5nOFMAAAChvdo6_RXMf1AYQxhEVwNUEPE1RSfGmQqBBjqAqR4CYZqAsC5J9Nhro6Dbxj_0NvZN-DoyjuL0pNscWcwPl8WQ-a2vCQICWQzQiGdSvWzPVMFM7F8sWnVL-br3L-_lC3I'
-#__CACHEDTESTTOKEN__ = 'ya29.TwBoJK-9EwXmc1MAAACIQw69uQjgS3jSzO_mgUlFwcHJhMLaT4_him0PadKBFNhekFmtMrTj5ovLMc9mhwDMa_NIwJf0akRN0cJGQ7UtLTrbOxNb6uZPrr5y_u-CLDQGFELdhvJP93xXlBUwYoE'
+__CACHEDTESTTOKEN__ = 'ya29.UACLvDKXtHNtaVMAAACqLhDd5F8jEo6a3bDzj1DuAZBAVBUBnl35S0qUYjeHxTXsfh_sX5PEUFmR8c8PhxIfpmlqqgzHzKhjsMk6AcFi6BWbPY3mch-bBDMOv-zM3F3BRZCaf3ygPMRdMpI97Wo'
 
 __client__ = YouTubeClient(username = __plugin__.getSettingAsString('username'),
                            password = __plugin__.getSettingAsString('password'),
@@ -48,6 +48,11 @@ __client__ = YouTubeClient(username = __plugin__.getSettingAsString('username'),
 
 
 def showIndex():
+    if __client__.hasLogin():
+        params = {'action': __ACTION_SHOW_MYSUBSCRIPTIONS__}
+        __plugin__.addDirectory("[B]"+__plugin__.localize(30007)+"[/B]", params = params, thumbnailImage=__ICON_FALLBACK__, fanart=__FANART__)
+        pass
+        
     params = {'action': __ACTION_SEARCH__}
     __plugin__.addDirectory("[B]"+__plugin__.localize(30000)+"[/B]", params = params, thumbnailImage=__ICON_FALLBACK__, fanart=__FANART__)
     
@@ -132,7 +137,13 @@ def _listResult(jsonData, nextPageParams={}, pageIndex=1):
                 videoId = resourceId.get('videoId', None)
                 if videoId!=None:
                     videoIds.append(videoId)
-                    
+            elif kind=='youtube#activity':
+                contentDetails = item.get('contentDetails', {})
+                upload = contentDetails.get('upload', {})
+                videoId = upload.get('videoId', None)
+                if videoId!=None:
+                    videoIds.append(videoId)
+
         videoInfos = __client__.getVideosInfo(videoIds)
         
         """
@@ -152,6 +163,22 @@ def _listResult(jsonData, nextPageParams={}, pageIndex=1):
                     params = {'action': __ACTION_SHOW_CHANNEL_CATEGORY__,
                               'id': _id}
                     __plugin__.addDirectory(name=title, params=params, thumbnailImage=__ICON_FALLBACK__, fanart=__FANART__)
+                    pass
+                pass
+            elif kind=='youtube#activity' and snippet!=None:
+                title = snippet.get('title', None)
+                description = snippet.get('description', '')
+                thumbnailImage = _getBestThumbnailImage(item)
+                contentDetails = item.get('contentDetails', {})
+                upload = contentDetails.get('upload', {})
+                videoId = upload.get('videoId', None)
+                if videoId!=None and title!=None:
+                    videoInfo = videoInfos.get(videoId, {})
+                    infoLabels = {'plot': description,
+                                  'duration': videoInfo.get('duration', '1')}
+                    params = {'action': __ACTION_PLAY__,
+                              'id': videoId}
+                    __plugin__.addVideoLink(name=title, params=params, thumbnailImage=thumbnailImage, fanart=__FANART__, infoLabels=infoLabels)
                     pass
                 pass
             elif kind=='youtube#subscription' and snippet!=None:
@@ -331,6 +358,12 @@ def showChannel(channelId, pageToken, pageIndex):
     
     __plugin__.endOfDirectory()
     
+def showMySubscriptions(pageToken, pageIndex):
+    jsonData = __client__.getActivities(home=True, nextPageToken=pageToken)
+    nextPageParams = {'action': __ACTION_SHOW_MYSUBSCRIPTIONS__}
+    _listResult(jsonData, nextPageParams=nextPageParams, pageIndex=pageIndex)
+    __plugin__.endOfDirectory()
+    
 def showSubscriptions(pageToken, pageIndex):
     jsonData = __client__.getSubscriptions(mine=True, nextPageToken=pageToken)
     nextPageParams = {'action': __ACTION_SHOW_SUBSCRIPTIONS__}
@@ -354,6 +387,8 @@ mine = bromixbmc.getParam('mine', 'no')=='yes'
 
 if action == __ACTION_SEARCH__:
     search(query, pageToken, pageIndex)
+elif action == __ACTION_SHOW_MYSUBSCRIPTIONS__:
+    showMySubscriptions(pageToken, pageIndex)
 elif action == __ACTION_SHOW_SUBSCRIPTIONS__:
     showSubscriptions(pageToken, pageIndex)
 elif action == __ACTION_BROWSE_CHANNELS__:
