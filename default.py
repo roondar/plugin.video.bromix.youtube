@@ -2,8 +2,8 @@
 
 import os
 
-import pydevd
-pydevd.settrace('localhost', stdoutToServer=True, stderrToServer=True)
+#import pydevd
+#pydevd.settrace('localhost', stdoutToServer=True, stderrToServer=True)
 
 import bromixbmc
 __plugin__ = bromixbmc.Plugin()
@@ -37,7 +37,7 @@ from youtube import YouTubeClient
 This is a test token. This token will be generated and cached. The implementation of youtube should to that. So we can reuse the implementation without storing routines of
 the addon.
 """
-__CACHEDTESTTOKEN__ = 'ya29.UABZuLG5kss3c1MAAAC-6JUHqxImr7Ma2CVWMhrxokwOVt4gyCpFnZUFeIY90imwWLJEoCpuqM3Y7Z-NYurrguS5iHK4wlf6UiuBZ1QWIGZSrQzGLRbQvIAcL51EGQ9koSKoueh8bhrYNP_mAu8'
+__CACHEDTESTTOKEN__ = 'ya29.UABVx3IUzlJiWVMAAAD4d5AmkoQcEw1vjx0PeHnDDQNRr5oZWBJxLocyZNJnHz1jryRIEQjFKDmJUq23D5P5Q4IMSV1pYO3vBlCZm-v3gSnpzkLEJ9Hh_YNZb9zcSkbrdjPiv03nIv8zI5DrRWc'
 
 __client__ = YouTubeClient(username = __plugin__.getSettingAsString('username'),
                            password = __plugin__.getSettingAsString('password'),
@@ -170,6 +170,7 @@ def _listResult(jsonData, nextPageParams={}, pageIndex=1):
                 description = snippet.get('description', '')
                 thumbnailImage = _getBestThumbnailImage(item)
                 contentDetails = item.get('contentDetails', {})
+                
                 upload = contentDetails.get('upload', {})
                 videoId = upload.get('videoId', None)
                 if videoId!=None and title!=None:

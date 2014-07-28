@@ -145,7 +145,8 @@ class YouTubeClient(object):
         return publishedAt
     
     def getSubscriptions(self, mine=None, nextPageToken=None):
-        params = {'part': 'snippet'}
+        params = {'part': 'snippet',
+                  'maxResults': self._MaxResult}
         
         if mine!=None and mine==True:
             params['access_token'] = self._CachedToken
