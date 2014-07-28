@@ -2,8 +2,8 @@
 
 import os
 
-#import pydevd
-#pydevd.settrace('localhost', stdoutToServer=True, stderrToServer=True)
+import pydevd
+pydevd.settrace('localhost', stdoutToServer=True, stderrToServer=True)
 
 import bromixbmc
 __plugin__ = bromixbmc.Plugin()
@@ -37,7 +37,7 @@ from youtube import YouTubeClient
 This is a test token. This token will be generated and cached. The implementation of youtube should to that. So we can reuse the implementation without storing routines of
 the addon.
 """
-__CACHEDTESTTOKEN__ = 'ya29.UACLvDKXtHNtaVMAAACqLhDd5F8jEo6a3bDzj1DuAZBAVBUBnl35S0qUYjeHxTXsfh_sX5PEUFmR8c8PhxIfpmlqqgzHzKhjsMk6AcFi6BWbPY3mch-bBDMOv-zM3F3BRZCaf3ygPMRdMpI97Wo'
+__CACHEDTESTTOKEN__ = 'ya29.UABZuLG5kss3c1MAAAC-6JUHqxImr7Ma2CVWMhrxokwOVt4gyCpFnZUFeIY90imwWLJEoCpuqM3Y7Z-NYurrguS5iHK4wlf6UiuBZ1QWIGZSrQzGLRbQvIAcL51EGQ9koSKoueh8bhrYNP_mAu8'
 
 __client__ = YouTubeClient(username = __plugin__.getSettingAsString('username'),
                            password = __plugin__.getSettingAsString('password'),

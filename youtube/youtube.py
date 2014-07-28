@@ -139,6 +139,11 @@ class YouTubeClient(object):
                   'id': self._makeCommaSeparatedList(videoIds)}
         return self._executeApi('videos', params)
     
+    def _sortItems(self, item):
+        snippet = item.get('snippet', {})
+        publishedAt = snippet.get('publishedAt', '') 
+        return publishedAt
+    
     def getSubscriptions(self, mine=None, nextPageToken=None):
         params = {'part': 'snippet'}
         
@@ -205,7 +210,10 @@ class YouTubeClient(object):
         if nextPageToken!=None:
             params['pageToken'] = nextPageToken
         
-        return self._executeApi('activities', params)
+        jsonData = self._executeApi('activities', params)
+        sortedItems = sorted(jsonData.get('items', []), key=self._sortItems, reverse=True)
+        jsonData['items'] = sortedItems
+        return jsonData
     
     def getChannels(self, channelId=None, mine=None, nextPageToken=None):
         params = {'part': 'snippet, contentDetails'}
