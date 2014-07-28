@@ -1,3 +1,6 @@
+1.0.0~alpha9
+- FIX: removed debug
+
 1.0.0~alpha8
 - ADD: login tests
 
