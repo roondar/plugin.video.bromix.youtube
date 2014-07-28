@@ -28,7 +28,6 @@ __ACTION_SHOW_PLAYLIST__ = 'showPlaylist'
 __ACTION_SHOW_PLAYLISTS__ = 'showPlaylists'
 __ACTION_SHOW_CHANNEL__ = 'showChannel'
 __ACTION_SHOW_SUBSCRIPTIONS__ = 'showSubscriptions'
-__ACTION_SHOW_WATCHLATER__ = 'showWatchLater'
 __ACTION_PLAY__ = 'play'
 
 from youtube import YouTubeClient
@@ -37,8 +36,8 @@ from youtube import YouTubeClient
 This is a test token. This token will be generated and cached. The implementation of youtube should to that. So we can reuse the implementation without storing routines of
 the addon.
 """
-#__CACHEDTESTTOKEN__ = 'ya29.TwCGscExleVOMlMAAADwmCCr54hGDTeAODnrxuttdbp8uZD75HGM7NbPgyZU-DWdgrDHapbyyM33PdvgAd70F8ha9h4Vz57HobWlz5lY253WaPxBeIlojLlnDZid3LBDm3L1bBkxEsY7-gIq_D4'
-__CACHEDTESTTOKEN__ = 'ya29.TwBoJK-9EwXmc1MAAACIQw69uQjgS3jSzO_mgUlFwcHJhMLaT4_him0PadKBFNhekFmtMrTj5ovLMc9mhwDMa_NIwJf0akRN0cJGQ7UtLTrbOxNb6uZPrr5y_u-CLDQGFELdhvJP93xXlBUwYoE'
+__CACHEDTESTTOKEN__ = 'ya29.UAAjnyNQbE5nOFMAAAChvdo6_RXMf1AYQxhEVwNUEPE1RSfGmQqBBjqAqR4CYZqAsC5J9Nhro6Dbxj_0NvZN-DoyjuL0pNscWcwPl8WQ-a2vCQICWQzQiGdSvWzPVMFM7F8sWnVL-br3L-_lC3I'
+#__CACHEDTESTTOKEN__ = 'ya29.TwBoJK-9EwXmc1MAAACIQw69uQjgS3jSzO_mgUlFwcHJhMLaT4_him0PadKBFNhekFmtMrTj5ovLMc9mhwDMa_NIwJf0akRN0cJGQ7UtLTrbOxNb6uZPrr5y_u-CLDQGFELdhvJP93xXlBUwYoE'
 
 __client__ = YouTubeClient(username = __plugin__.getSettingAsString('username'),
                            password = __plugin__.getSettingAsString('password'),
@@ -53,8 +52,28 @@ def showIndex():
     __plugin__.addDirectory("[B]"+__plugin__.localize(30000)+"[/B]", params = params, thumbnailImage=__ICON_FALLBACK__, fanart=__FANART__)
     
     if __client__.hasLogin():
-        params = {'action': __ACTION_SHOW_WATCHLATER__}
-        __plugin__.addDirectory(__plugin__.localize(30005), params = params, thumbnailImage=__ICON_FALLBACK__, fanart=__FANART__)
+        jsonData = __client__.getChannels(mine=True)
+        items = jsonData.get('items', [])
+        if len(items)>0:
+            item = items[0]
+            contentDetails = item.get('contentDetails', {})
+            relatedPlaylists = contentDetails.get('relatedPlaylists', {})
+            
+            # History
+            playlistId = relatedPlaylists.get('watchHistory', None)
+            if playlistId!=None:
+                params = {'action': __ACTION_SHOW_PLAYLIST__,
+                          'id': playlistId,
+                          'mine': 'yes'}
+                __plugin__.addDirectory(__plugin__.localize(30006), params = params, thumbnailImage=__ICON_FALLBACK__, fanart=__FANART__)
+                
+            # Watch Later
+            playlistId = relatedPlaylists.get('watchLater', None)
+            if playlistId!=None:
+                params = {'action': __ACTION_SHOW_PLAYLIST__,
+                          'id': playlistId,
+                          'mine': 'yes'}
+                __plugin__.addDirectory(__plugin__.localize(30005), params = params, thumbnailImage=__ICON_FALLBACK__, fanart=__FANART__)
         
         params = {'action': __ACTION_SHOW_SUBSCRIPTIONS__}
         __plugin__.addDirectory(__plugin__.localize(30004), params = params, thumbnailImage=__ICON_FALLBACK__, fanart=__FANART__)
@@ -262,9 +281,7 @@ def showChannelCategory(_id, pageToken, pageIndex):
     
     __plugin__.endOfDirectory()
     
-def showPlaylist(playlistId, pageToken, pageIndex):
-    mine = bromixbmc.getParam('mine', 'no')=='yes'
-    
+def showPlaylist(playlistId, pageToken, pageIndex, mine=False):
     __plugin__.setContent('episodes')
     jsonData = __client__.getPlaylistItems(playlistId=playlistId, mine=mine, nextPageToken=pageToken)
     nextPageParams = {'action': __ACTION_SHOW_PLAYLIST__,
@@ -314,26 +331,6 @@ def showChannel(channelId, pageToken, pageIndex):
     
     __plugin__.endOfDirectory()
     
-def showWatchLater(pageToken, pageIndex):
-    jsonData = __client__.getChannels(mine=True)
-    items = jsonData.get('items', [])
-    if len(items)>0:
-        item = items[0]
-        contentDetails = item.get('contentDetails', {})
-        relatedPlaylists = contentDetails.get('relatedPlaylists', {})
-        playlistId = relatedPlaylists.get('watchLater', None)
-        
-        if playlistId!=None:
-            jsonData = __client__.getPlaylistItems(playlistId, mine=True, nextPageToken=pageToken)
-            nextPageParams = {'action': __ACTION_SHOW_PLAYLIST__,
-                              'id': playlistId,
-                              'mine': 'yes'}
-            _listResult(jsonData, nextPageParams=nextPageParams, pageIndex=pageIndex)
-            pass
-        pass
-    
-    __plugin__.endOfDirectory()
-    
 def showSubscriptions(pageToken, pageIndex):
     jsonData = __client__.getSubscriptions(mine=True, nextPageToken=pageToken)
     nextPageParams = {'action': __ACTION_SHOW_SUBSCRIPTIONS__}
@@ -353,13 +350,12 @@ _id = bromixbmc.getParam('id')
 query = bromixbmc.getParam('query')
 pageToken = bromixbmc.getParam('pageToken')
 pageIndex = int(bromixbmc.getParam('pageIndex', '1'))
+mine = bromixbmc.getParam('mine', 'no')=='yes'
 
 if action == __ACTION_SEARCH__:
     search(query, pageToken, pageIndex)
 elif action == __ACTION_SHOW_SUBSCRIPTIONS__:
     showSubscriptions(pageToken, pageIndex)
-elif action == __ACTION_SHOW_WATCHLATER__:
-    showWatchLater(pageToken, pageIndex)
 elif action == __ACTION_BROWSE_CHANNELS__:
     browseChannels();
 elif action == __ACTION_SHOW_CHANNEL__ and _id!=None:
@@ -367,7 +363,7 @@ elif action == __ACTION_SHOW_CHANNEL__ and _id!=None:
 elif action == __ACTION_SHOW_CHANNEL_CATEGORY__ and _id!=None:
     showChannelCategory(_id, pageToken, pageIndex)
 elif action == __ACTION_SHOW_PLAYLIST__ and _id!=None:
-    showPlaylist(_id, pageToken, pageIndex)
+    showPlaylist(_id, pageToken=pageToken, pageIndex=pageIndex, mine=mine)
 elif action == __ACTION_SHOW_PLAYLISTS__ and _id!=None:
     showPlaylists(_id, pageToken, pageIndex)
 elif action == __ACTION_PLAY__:
