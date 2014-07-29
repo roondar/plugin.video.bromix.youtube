@@ -1,38 +1,38 @@
-1.0.0~alpha11
+1.0.0~alpha11 (2014-07-XX)
 - FIX: if username or password is missing reset the whole token logik 
 
-1.0.0~alpha10
+1.0.0~alpha10 (2014-07-29)
 - FIX: improved performance on decoding signatures for some videos 
 - ADD: support for custom-created playlists
 - FIX: sort own subscriptions
 - ADD: enable/disable video, channel and/or playlist search
 
-1.0.0~alpha9
+1.0.0~alpha9 (2014-07-28)
 - FIX: removed debug
 
-1.0.0~alpha8
+1.0.0~alpha8 (2014-07-28)
 - ADD: login tests
 
-1.0.0~alpha7
+1.0.0~alpha7 (2014-07-27)
 - FIX: added support from freemake.com to decode signatures of some videos
 
-1.0.0~alpha6
+1.0.0~alpha6 (2014-07-27)
 - added support of playlists of a channel (first page only)
 - optimized some major routines for easier support of all youtube's content 
 
-1.0.0~alpha5
+1.0.0~alpha5 (2014-07-27)
 - version bump for tests
 
-1.0.0~alpha4
+1.0.0~alpha4 (2014-07-26)
 - added runtime for each video (crazy hack)
 - disabled debug
 
-1.0.0~alpha3
+1.0.0~alpha3 (2014-07-26)
 - little fixes regarding youtube channels
 
-1.0.0~alpha2
+1.0.0~alpha2 (2014-07-26)
 - added youtube channels and search
 - added playback
 
-1.0.0~alpha
+1.0.0~alpha (2014-07-26)
 - initial version for tests
