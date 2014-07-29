@@ -80,6 +80,11 @@ def showIndex():
                           'id': playlistId,
                           'mine': 'yes'}
                 __plugin__.addDirectory(__plugin__.localize(30005), params = params, thumbnailImage=__ICON_FALLBACK__, fanart=__FANART__)
+                
+            # own playlists
+            params = {'action': __ACTION_SHOW_PLAYLISTS__,
+                      'mine': 'yes'}
+            __plugin__.addDirectory(__plugin__.localize(30003), params = params, thumbnailImage=__ICON_FALLBACK__, fanart=__FANART__)
         
         params = {'action': __ACTION_SHOW_SUBSCRIPTIONS__}
         __plugin__.addDirectory(__plugin__.localize(30004), params = params, thumbnailImage=__ICON_FALLBACK__, fanart=__FANART__)
@@ -113,7 +118,7 @@ def _getBestThumbnailImage(jsonData):
     
     return ''
     
-def _listResult(jsonData, nextPageParams={}, pageIndex=1):
+def _listResult(jsonData, nextPageParams={}, pageIndex=1, mine=False):
     items = jsonData.get('items', None)
     if items!=None:
         nextPageToken = jsonData.get('nextPageToken', None)
@@ -243,6 +248,10 @@ def _listResult(jsonData, nextPageParams={}, pageIndex=1):
                 thumbnailImage = _getBestThumbnailImage(item)
                 params = {'action': __ACTION_SHOW_PLAYLIST__,
                           'id': playlistId}
+                
+                if mine==True:
+                    params['mine'] = 'yes'
+
                 __plugin__.addDirectory(name=title, params=params, thumbnailImage=thumbnailImage, fanart=__FANART__,)
             elif kind=='youtube#playlistItem' and snippet!=None:
                 title = snippet.get('title')
@@ -339,11 +348,13 @@ def showPlaylist(playlistId, pageToken, pageIndex, mine=False):
     
     __plugin__.endOfDirectory()
     
-def showPlaylists(channelId, pageToken, pageIndex):
-    jsonData = __client__.getPlaylists(channelId, pageToken)
+def showPlaylists(channelId, pageToken, pageIndex, mine=False):
+    jsonData = __client__.getPlaylists(channelId=channelId, mine=mine, nextPageToken=pageToken)
     nextPageParams = {'action': __ACTION_SHOW_PLAYLISTS__,
                       'id': _id}
-    _listResult(jsonData, nextPageParams=nextPageParams, pageIndex=pageIndex)
+    if mine==True:
+        nextPageParams['mine'] = 'yes'
+    _listResult(jsonData, nextPageParams=nextPageParams, pageIndex=pageIndex, mine=mine)
     
     __plugin__.endOfDirectory()
     
@@ -418,8 +429,8 @@ elif action == __ACTION_SHOW_CHANNEL_CATEGORY__ and _id!=None:
     showChannelCategory(_id, pageToken, pageIndex)
 elif action == __ACTION_SHOW_PLAYLIST__ and _id!=None:
     showPlaylist(_id, pageToken=pageToken, pageIndex=pageIndex, mine=mine)
-elif action == __ACTION_SHOW_PLAYLISTS__ and _id!=None:
-    showPlaylists(_id, pageToken, pageIndex)
+elif action == __ACTION_SHOW_PLAYLISTS__ and (_id!=None or mine==True):
+    showPlaylists(_id, pageToken=pageToken, pageIndex=pageIndex, mine=mine)
 elif action == __ACTION_PLAY__:
     play(_id)
 else:
@@ -427,6 +438,6 @@ else:
     
 if __SETTING__ACCESS_TOKEN__ != __client__.AccessToken:
     __SETTING__ACCESS_TOKEN__ = __client__.AccessToken
-    if __SETTING__ACCESS_TOKEN__!=None or len(__SETTING__ACCESS_TOKEN__)>0:
+    if __SETTING__ACCESS_TOKEN__!=None and len(__SETTING__ACCESS_TOKEN__)>0:
         __plugin__.setSettingAsFloat('oauth2_access_token_expires_at', __client__.AccessTokenExpiresAt)
         __plugin__.setSettingAsString('oauth2_access_token', __SETTING__ACCESS_TOKEN__)

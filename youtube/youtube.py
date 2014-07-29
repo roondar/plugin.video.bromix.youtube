@@ -199,12 +199,17 @@ class YouTubeClient(object):
 
         return self._executeApi('channels', params)
     
-    def getPlaylists(self, channelId, nextPageToken=None):
+    def getPlaylists(self, channelId=None, mine=None, nextPageToken=None):
         params = {'part': 'snippet',
-                  'channelId': channelId,
                   'maxResults': self._MaxResult}
         if nextPageToken!=None:
             params['pageToken'] = nextPageToken
+            
+        if channelId!=None:
+            params['channelId'] = channelId
+        elif mine!=None and mine==True:
+            params['access_token'] = self.AccessToken
+            params['mine'] = 'true'
 
         return self._executeApi('playlists', params)
     
