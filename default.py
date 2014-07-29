@@ -2,8 +2,8 @@
 
 import os
 
-import pydevd
-pydevd.settrace('localhost', stdoutToServer=True, stderrToServer=True)
+#import pydevd
+#pydevd.settrace('localhost', stdoutToServer=True, stderrToServer=True)
 
 import bromixbmc
 __plugin__ = bromixbmc.Plugin()
@@ -287,6 +287,7 @@ def _listResult(jsonData, nextPageParams={}, pageIndex=1, mine=False):
     pass
     
 def search(query=None, pageToken=None, pageIndex=1):
+    __plugin__.setContent('episodes')
     success = False
     
     nextPageParams = {}
@@ -388,6 +389,7 @@ def showChannel(channelId, pageToken, pageIndex):
     __plugin__.endOfDirectory()
     
 def showMySubscriptions(pageToken, pageIndex):
+    __plugin__.setContent('episodes')
     jsonData = __client__.getActivities(home=True, nextPageToken=pageToken)
     nextPageParams = {'action': __ACTION_SHOW_MYSUBSCRIPTIONS__}
     _listResult(jsonData, nextPageParams=nextPageParams, pageIndex=pageIndex)
