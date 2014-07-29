@@ -2,11 +2,10 @@
 
 import os
 
-#import pydevd
-#pydevd.settrace('localhost', stdoutToServer=True, stderrToServer=True)
+import pydevd
+pydevd.settrace('localhost', stdoutToServer=True, stderrToServer=True)
 
 import bromixbmc
-from bromixbmc.plugin import __SORT_METHOD_LABEL__
 __plugin__ = bromixbmc.Plugin()
 
 # icons and images
@@ -402,9 +401,9 @@ def showSubscriptions(pageToken, pageIndex):
     
 def play(videoId):
     quality = __plugin__.getSettingAsInt('videoQuality', mapping={0:576, 1:720, 2:1080})
-    stream = __client__.getBestFittingVideoStream(videoId=videoId, size=quality)
+    stream = __client__.getBestFittingVideoStreamInfo(videoId=videoId, size=quality)
     if stream!=None:
-        url = stream.get('url', None)
+        url = stream.getUrl()
         if url!=None:
             __plugin__.setResolvedUrl(url)
 

@@ -9,6 +9,52 @@ import time
 
 __YOUTUBE_API_KEY__ = 'AIzaSyA8eiZmM1FaDVjRy-df2KTyQ_vz_yYM39w'
 
+class YTVideoStreamInfo():
+    def __init__(self, url, width, height, videoType, signature=None):
+        self._url = url
+        self._signature = signature
+        self._width = width
+        self._height = height
+        self._videoType = videoType
+        pass
+    
+    def _getDecodeSignature(self, signature):
+        result = ''
+        try:
+            url = 'http://www.freemake.com/SignatureDecoder/decoder.php?text=%s' % (signature)
+            request = urllib2.Request(url) 
+            request.add_header('Accept', 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8')
+            request.add_header('Accept-Language', 'en-US;q=0.6,en;q=0.4')
+            request.add_header('User-Agent', 'Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/32.0.1700.107 Safari/537.36')
+            request.add_header('Host', 'www.freemake.com')
+            
+            content = urllib2.urlopen(request)
+            result = content.read()
+        except:
+            # do nothing
+            pass
+        
+        return result
+    
+    def getUrl(self):
+        if self._signature!=None:
+            signature = self._getDecodeSignature(self._signature)
+            if signature!=None and len(signature)>0:
+                self._signature=None
+                
+                self._url = self._url+'&signature='+signature
+                pass
+            pass
+        
+        return self._url
+    
+    def getSize(self):
+        return [self._width, self._height]
+    
+    def getType(self):
+        return self._videoType
+    pass
+
 class YouTubeClient(object):
     def __init__(self, username=None, password=None, language='en-US', maxResult=5, cachedToken=None, accessTokenExpiresAt=-1):
         self._opener = urllib2.build_opener()
@@ -283,33 +329,16 @@ class YouTubeClient(object):
 
         return self._executeApi('search', params)
     
-    def _getDecodedSignature(self, signature):
-        result = ''
-        try:
-            url = 'http://www.freemake.com/SignatureDecoder/decoder.php?text=%s' % (signature)
-            request = urllib2.Request(url) 
-            request.add_header('Accept', 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8')
-            request.add_header('Accept-Language', 'en-US;q=0.6,en;q=0.4')
-            request.add_header('User-Agent', 'Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/32.0.1700.107 Safari/537.36')
-            request.add_header('Host', 'www.freemake.com')
-            
-            content = urllib2.urlopen(request)
-            result = content.read()
-        except:
-            # do nothing
-            pass
+    def getVideoStreamInfos(self, videoId):
+        result = []
         
-        return result
-    
-    def getVideoStreams(self, videoId):
-        result = {}
-    
         opener = urllib2.build_opener()
         url = 'https://www.youtube.com/watch?v=%s' % (videoId)
         content = opener.open(url)
         
         html = content.read()
         
+        sizeMap = {}
         # first find the format list and create a map of the resolutions
         fmtListMatch = re.compile('.+\"fmt_list\": \"(.+?)\".+').findall(html)
         if fmtListMatch!=None and len(fmtListMatch)>0 and len(fmtListMatch[0])>=1:
@@ -322,7 +351,7 @@ class YouTubeClient(object):
                 try:
                     attr = value.split('|')
                     sizes = attr[1].split('x')
-                    result[attr[0]] =  {'width': int(sizes[0]), 'height': int(sizes[1])}
+                    sizeMap[attr[0]] =  {'width': int(sizes[0]), 'height': int(sizes[1])}
                 except:
                     # do nothing
                     pass
@@ -343,19 +372,18 @@ class YouTubeClient(object):
                     
                     signature = None
                     if attr.get('s', None)!=None:
-                        signature = self._getDecodedSignature(attr.get('s', None))
+                        signature = attr.get('s', None)
                     elif attr.get('sig', None)!=None:
                         signature = attr.get('sig', '')
-                        
-                    if signature!=None and len(signature)>0:
                         url = url + '&signature='
                         url = url + signature
-                        
                     
-                    id = attr['itag']
-                    type = attr['type'].split(';')[0]
-                    result[id]['url'] = url
-                    result[id]['type'] = type
+                    itag = attr['itag']
+                    videoType = attr['type'].split(';')[0]
+                    
+                    size = sizeMap[itag]
+                    videoInfo = YTVideoStreamInfo(url, size.get('width', '0'), size.get('height', 0), videoType, signature)
+                    result.append(videoInfo)
                 except:
                     # do nothing
                     pass
@@ -397,20 +425,18 @@ class YouTubeClient(object):
                 
         return result
     
-    def getBestFittingVideoStream(self, videoId=None, videoStreams=None, size=720):
+    def getBestFittingVideoStreamInfo(self, videoId=None, videoInfos=None, size=720):
         if videoId!=None:
-            videoStreams = self.getVideoStreams(videoId)
-    
+            videoInfos = self.getVideoStreamInfos(videoId)
+        
         result = None
         lastSize = 0
-        for key in videoStreams:
-            stream = videoStreams[key]
-            
-            currentSize = stream['height']
+        for videoInfo in videoInfos:
+            currentSize = videoInfo.getSize()[1]
             
             if currentSize>=lastSize and currentSize<=size:
                 lastSize = currentSize
-                result = stream
+                result = videoInfo
             pass
             
         return result
