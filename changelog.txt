@@ -1,4 +1,5 @@
 1.0.0~alpha10
+- FIX: improved performance on decoding signatures for some videos 
 - ADD: support for custom-created playlists
 - FIX: sort own subscriptions
 - ADD: enable/disable video, channel and/or playlist search
