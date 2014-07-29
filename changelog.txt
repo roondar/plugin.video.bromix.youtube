@@ -1,3 +1,6 @@
+1.0.0~alpha11
+- FIX: if username or password is missing reset the whole token logik 
+
 1.0.0~alpha10
 - FIX: improved performance on decoding signatures for some videos 
 - ADD: support for custom-created playlists
