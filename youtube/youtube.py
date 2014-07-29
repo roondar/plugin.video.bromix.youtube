@@ -75,7 +75,10 @@ class YouTubeClient(object):
         pass
     
     def hasLogin(self):
-        return self._Username!=None and len(self._Username)>0 and self._Password!=None and len(self._Password)>0
+        if not self._hasValidToken():
+            self._updateToken()
+            
+        return self.AccessToken!=None
     
     def getUserToken(self):
         params = {'device_country': self._RegionCode.lower(),
@@ -139,11 +142,17 @@ class YouTubeClient(object):
         authData = self.getUserToken()
         self.AccessToken = authData.get('Auth', None)
         self.AccessTokenExpiresAt = authData.get('Expiry', None)
+        
+    def _hasValidToken(self):
+        isExpired = self.AccessTokenExpiresAt < time.time()
+        if (self.AccessToken==None or len(self.AccessToken)==0 or isExpired) and (self._Username!=None and self._Password!=None and len(self._Username)>0 and len(self._Password)>0):
+            return False
+        
+        return True
     
     def _executeApi(self, command, params={}, tries=1):
         if 'access_token' in params:
-            isExpired = self.AccessTokenExpiresAt < time.time()
-            if (self.AccessToken==None or len(self.AccessToken)==0 or isExpired) and (self._Username!=None and self._Password!=None and len(self._Username)>0 and len(self._Password)>0):
+            if not self._hasValidToken():
                 self._updateToken()
                 params['access_token'] = self.AccessToken
         

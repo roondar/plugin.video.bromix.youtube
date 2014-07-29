@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 
 import os
+import hashlib
 
 #import pydevd
 #pydevd.settrace('localhost', stdoutToServer=True, stderrToServer=True)
@@ -34,13 +35,21 @@ __ACTION_PLAY__ = 'play'
 __SETTING_SEARCH_VIDEOS__ = __plugin__.getSettingAsBool('searchVideos')
 __SETTING_SEARCH_CHANNELS__ = __plugin__.getSettingAsBool('searchChannels')
 __SETTING_SEARCH_PLAYLISTS__ = __plugin__.getSettingAsBool('searchPlaylists')
+
 __SETTING_ACCESS_USERNAME__ = __plugin__.getSettingAsString('username', '')
 __SETTING_ACCESS_PASSWORD__ = __plugin__.getSettingAsString('password', '')
 
-# reset all token informations
-if len(__SETTING_ACCESS_USERNAME__)==0 or len(__SETTING_ACCESS_PASSWORD__)==0:
+# login test
+oldHash = __plugin__.getSettingAsString('oauth2_access_hash', '')
+m = hashlib.md5()
+m.update(__SETTING_ACCESS_USERNAME__+__SETTING_ACCESS_PASSWORD__)
+currentHash = m.hexdigest()
+if oldHash!=currentHash:
     __plugin__.setSettingAsFloat('oauth2_access_token_expires_at', -1)
     __plugin__.setSettingAsString('oauth2_access_token', '')
+    
+    __plugin__.setSettingAsString('oauth2_access_hash', currentHash)
+    pass
 
 __SETTING_ACCESS_TOKEN__ = __plugin__.getSettingAsString('oauth2_access_token', None)
 __SETTING_ACCESS_TOKEN_EXPIRES_AT__ = __plugin__.getSettingAsFloat('oauth2_access_token_expires_at', -1)
