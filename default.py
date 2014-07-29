@@ -6,6 +6,7 @@ import os
 #pydevd.settrace('localhost', stdoutToServer=True, stderrToServer=True)
 
 import bromixbmc
+from bromixbmc.plugin import __SORT_METHOD_LABEL__
 __plugin__ = bromixbmc.Plugin()
 
 # icons and images

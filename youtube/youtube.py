@@ -170,8 +170,9 @@ class YouTubeClient(object):
         publishedAt = snippet.get('publishedAt', '') 
         return publishedAt
     
-    def getSubscriptions(self, mine=None, nextPageToken=None):
+    def getSubscriptions(self, mine=None, order='alphabetical', nextPageToken=None):
         params = {'part': 'snippet',
+                  'order': order,
                   'maxResults': self._MaxResult}
         
         if mine!=None and mine==True:
