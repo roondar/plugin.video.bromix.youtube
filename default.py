@@ -31,6 +31,9 @@ __ACTION_SHOW_CHANNEL__ = 'showChannel'
 __ACTION_SHOW_SUBSCRIPTIONS__ = 'showSubscriptions'
 __ACTION_PLAY__ = 'play'
 
+__SETTING__SEARCH_VIDEOS__ = __plugin__.getSettingAsBool('searchVideos')
+__SETTING__SEARCH_CHANNELS__ = __plugin__.getSettingAsBool('searchChannels')
+__SETTING__SEARCH_PLAYLISTS__ = __plugin__.getSettingAsBool('searchPlaylists')
 __SETTING__ACCESS_TOKEN__ = __plugin__.getSettingAsString('oauth2_access_token', None)
 __SETTING__ACCESS_TOKEN_EXPIRES_AT__ = __plugin__.getSettingAsFloat('oauth2_access_token_expires_at', -1)
 
@@ -205,12 +208,19 @@ def _listResult(jsonData, nextPageParams={}, pageIndex=1):
                                       'id': channelId}
                             __plugin__.addDirectory(name="[B]"+title+"[/B]", params=params, thumbnailImage=thumbnailImage, fanart=__FANART__)
                             pass
+                    elif kind=='youtube#playlist':
+                        playlistId = _id.get('playlistId', None)
+                        if title!=None and playlistId!=None:
+                            params = {'action': __ACTION_SHOW_PLAYLIST__,
+                                      'id': playlistId}
+                            __plugin__.addDirectory(name="[B]"+title+"[/B]", params=params, thumbnailImage=thumbnailImage, fanart=__FANART__)
+                        pass
                     elif kind=='youtube#video':
-                        _id = _id.get('videoId', '')
+                        videoId = _id.get('videoId', '')
                         params = {'action': __ACTION_PLAY__,
-                                  'id': _id}
+                                  'id': videoId}
                         
-                        videoInfo = videoInfos.get(_id, {})
+                        videoInfo = videoInfos.get(videoId, {})
                         infoLabels = {'plot': description,
                                       'duration': videoInfo.get('duration', '1')}
                         __plugin__.addVideoLink(name=title, params=params, thumbnailImage=thumbnailImage, fanart=__FANART__, infoLabels=infoLabels)
@@ -275,7 +285,12 @@ def search(query=None, pageToken=None, pageIndex=1):
     if query!=None and pageToken!=None:
         nextPageParams = {'query': query,
                           'action': __ACTION_SEARCH__}
-        jsonData = __client__.search(query, pageToken)
+        jsonData = __client__.search(text=query,
+                                     searchVideos=__SETTING__SEARCH_VIDEOS__,
+                                     searchChannels=__SETTING__SEARCH_CHANNELS__,
+                                     searchPlaylists=__SETTING__SEARCH_PLAYLISTS__,
+                                     nextPageToken=pageToken
+                                     )
         success = True
     else:
         keyboard = bromixbmc.Keyboard(__plugin__.localize(30000))
@@ -285,7 +300,12 @@ def search(query=None, pageToken=None, pageIndex=1):
             search_string = keyboard.getText().replace(" ", "+")
             nextPageParams = {'query': search_string,
                               'action': __ACTION_SEARCH__}
-            jsonData = __client__.search(search_string)
+            jsonData = __client__.search(text=search_string,
+                                         searchVideos=__SETTING__SEARCH_VIDEOS__,
+                                         searchChannels=__SETTING__SEARCH_CHANNELS__,
+                                         searchPlaylists=__SETTING__SEARCH_PLAYLISTS__,
+                                         nextPageToken=pageToken
+                                         )
             pass
         pass
     
