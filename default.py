@@ -31,17 +31,25 @@ __ACTION_SHOW_CHANNEL__ = 'showChannel'
 __ACTION_SHOW_SUBSCRIPTIONS__ = 'showSubscriptions'
 __ACTION_PLAY__ = 'play'
 
-__SETTING__SEARCH_VIDEOS__ = __plugin__.getSettingAsBool('searchVideos')
-__SETTING__SEARCH_CHANNELS__ = __plugin__.getSettingAsBool('searchChannels')
-__SETTING__SEARCH_PLAYLISTS__ = __plugin__.getSettingAsBool('searchPlaylists')
-__SETTING__ACCESS_TOKEN__ = __plugin__.getSettingAsString('oauth2_access_token', None)
-__SETTING__ACCESS_TOKEN_EXPIRES_AT__ = __plugin__.getSettingAsFloat('oauth2_access_token_expires_at', -1)
+__SETTING_SEARCH_VIDEOS__ = __plugin__.getSettingAsBool('searchVideos')
+__SETTING_SEARCH_CHANNELS__ = __plugin__.getSettingAsBool('searchChannels')
+__SETTING_SEARCH_PLAYLISTS__ = __plugin__.getSettingAsBool('searchPlaylists')
+__SETTING_ACCESS_USERNAME__ = __plugin__.getSettingAsString('username', '')
+__SETTING_ACCESS_PASSWORD__ = __plugin__.getSettingAsString('password', '')
+
+# reset all token informations
+if len(__SETTING_ACCESS_USERNAME__)==0 or len(__SETTING_ACCESS_PASSWORD__)==0:
+    __plugin__.setSettingAsFloat('oauth2_access_token_expires_at', -1)
+    __plugin__.setSettingAsString('oauth2_access_token', '')
+
+__SETTING_ACCESS_TOKEN__ = __plugin__.getSettingAsString('oauth2_access_token', None)
+__SETTING_ACCESS_TOKEN_EXPIRES_AT__ = __plugin__.getSettingAsFloat('oauth2_access_token_expires_at', -1)
 
 from youtube import YouTubeClient
-__client__ = YouTubeClient(username = __plugin__.getSettingAsString('username'),
-                           password = __plugin__.getSettingAsString('password'),
-                           cachedToken = __SETTING__ACCESS_TOKEN__,
-                           accessTokenExpiresAt = __SETTING__ACCESS_TOKEN_EXPIRES_AT__,
+__client__ = YouTubeClient(username = __SETTING_ACCESS_USERNAME__,
+                           password = __SETTING_ACCESS_PASSWORD__,
+                           cachedToken = __SETTING_ACCESS_TOKEN__,
+                           accessTokenExpiresAt = __SETTING_ACCESS_TOKEN_EXPIRES_AT__,
                            language = bromixbmc.getLanguageId(),
                            maxResult = __SETTING_RESULTPERPAGE__
                            );
@@ -296,9 +304,9 @@ def search(query=None, pageToken=None, pageIndex=1):
         nextPageParams = {'query': query,
                           'action': __ACTION_SEARCH__}
         jsonData = __client__.search(text=query,
-                                     searchVideos=__SETTING__SEARCH_VIDEOS__,
-                                     searchChannels=__SETTING__SEARCH_CHANNELS__,
-                                     searchPlaylists=__SETTING__SEARCH_PLAYLISTS__,
+                                     searchVideos=__SETTING_SEARCH_VIDEOS__,
+                                     searchChannels=__SETTING_SEARCH_CHANNELS__,
+                                     searchPlaylists=__SETTING_SEARCH_PLAYLISTS__,
                                      nextPageToken=pageToken
                                      )
         success = True
@@ -311,9 +319,9 @@ def search(query=None, pageToken=None, pageIndex=1):
             nextPageParams = {'query': search_string,
                               'action': __ACTION_SEARCH__}
             jsonData = __client__.search(text=search_string,
-                                         searchVideos=__SETTING__SEARCH_VIDEOS__,
-                                         searchChannels=__SETTING__SEARCH_CHANNELS__,
-                                         searchPlaylists=__SETTING__SEARCH_PLAYLISTS__,
+                                         searchVideos=__SETTING_SEARCH_VIDEOS__,
+                                         searchChannels=__SETTING_SEARCH_CHANNELS__,
+                                         searchPlaylists=__SETTING_SEARCH_PLAYLISTS__,
                                          nextPageToken=pageToken
                                          )
             pass
@@ -437,8 +445,9 @@ elif action == __ACTION_PLAY__:
 else:
     showIndex()
     
-if __SETTING__ACCESS_TOKEN__ != __client__.AccessToken:
-    __SETTING__ACCESS_TOKEN__ = __client__.AccessToken
-    if __SETTING__ACCESS_TOKEN__!=None and len(__SETTING__ACCESS_TOKEN__)>0:
+# token and expiration date
+if __SETTING_ACCESS_TOKEN__ != __client__.AccessToken:
+    __SETTING_ACCESS_TOKEN__ = __client__.AccessToken
+    if __SETTING_ACCESS_TOKEN__!=None and len(__SETTING_ACCESS_TOKEN__)>0:
         __plugin__.setSettingAsFloat('oauth2_access_token_expires_at', __client__.AccessTokenExpiresAt)
-        __plugin__.setSettingAsString('oauth2_access_token', __SETTING__ACCESS_TOKEN__)
+        __plugin__.setSettingAsString('oauth2_access_token', __SETTING_ACCESS_TOKEN__)
