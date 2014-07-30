@@ -338,8 +338,9 @@ class YouTubeClient(object):
 
         return self._executeApi('search', params)
     
-    def getVideoStreamInfos(self, videoId):
+    def _getVideoStreamInfosPerPageView(self, videoId):
         result = []
+        sizeMap = {}
         
         opener = urllib2.build_opener()
         url = 'https://www.youtube.com/watch?v=%s' % (videoId)
@@ -347,8 +348,6 @@ class YouTubeClient(object):
         
         html = content.read()
         
-        sizeMap = {}
-        # first find the format list and create a map of the resolutions
         fmtListMatch = re.compile('.+\"fmt_list\": \"(.+?)\".+').findall(html)
         if fmtListMatch!=None and len(fmtListMatch)>0 and len(fmtListMatch[0])>=1:
             valueString = fmtListMatch[0]
@@ -431,7 +430,63 @@ class YouTubeClient(object):
                     # do nothing
                     pass
                     """
+        return result
+    
+    def getVideoStreamInfos(self, videoId):
+        result = self._getVideoStreamInfosPerPageView(videoId)
+        if len(result)>0:
+            return result
+        
+        #fallback
+        opener = urllib2.build_opener()
+        #url = ' https://www.youtube.com/get_video_info?video_id=%s&hl=en&gl=US&ptk=vevo&el=detailpage' % (videoId)
+        url = ' https://www.youtube.com/get_video_info?video_id=%s&hl=en&gl=US&el=detailpage' % (videoId)
+        content = opener.open(url)
+        
+        html = content.read()
+        sizeMap = {}
+        
+        attr = dict(urlparse.parse_qsl( html ) )
+    
+        # first find the format list and create a map of the resolutions
+        fmt_list = attr.get('fmt_list', None)
+        if fmt_list!=None:
+            fmt_list = fmt_list.split(',')
+            for fmt in fmt_list:
+                values = fmt.split('/')
+                if len(values)>=5:
+                    sizes = values[1].split('x')
+                    sizeMap[values[0]] = sizes
+                    pass
+                pass
+            pass
+        
+        url_encoded_fmt_stream_map = attr.get('url_encoded_fmt_stream_map', None)
+        if url_encoded_fmt_stream_map!=None:
+            values = url_encoded_fmt_stream_map.split(',')
+            for value in values:
+                attr = dict(urlparse.parse_qsl( value ) )
                 
+                url = attr.get('url', None)
+                url = urllib.unquote(url)
+                
+                signature = None
+                if attr.get('s', None)!=None:
+                    signature = attr.get('s', None)
+                elif attr.get('sig', None)!=None:
+                    signature = attr.get('sig', '')
+                    url = url + '&signature='
+                    url = url + signature
+                    
+                videoType = attr['type'].split(';')[0]
+                    
+                itag = attr['itag']
+                size = sizeMap[itag]
+                videoInfo = YTVideoStreamInfo(url, int(size[0]), int(size[1]), videoType, signature)
+                result.append(videoInfo)
+                pass
+            pass
+        
         return result
     
     def getBestFittingVideoStreamInfo(self, videoId=None, videoInfos=None, size=720):
