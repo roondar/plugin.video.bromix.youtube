@@ -1,5 +1,5 @@
 1.0.0~alpha11 (2014-07-XX)
-- FIX: if username or password is missing reset the whole token logik 
+- FIX: if username or password is missing reset the whole token logic 
 
 1.0.0~alpha10 (2014-07-29)
 - FIX: improved performance on decoding signatures for some videos 
