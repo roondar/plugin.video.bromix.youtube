@@ -1,4 +1,5 @@
 1.0.0~alpha11 (2014-07-XX)
+- FIX: added a fallback for videos that require a login (works very fast?!?!)
 - FIX: if username or password is missing reset the whole token logic 
 
 1.0.0~alpha10 (2014-07-29)
