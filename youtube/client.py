@@ -4,7 +4,6 @@ import urllib
 import urllib2
 import json
 import re
-import urlparse
 import time
 
 __YOUTUBE_API_KEY__ = 'AIzaSyA8eiZmM1FaDVjRy-df2KTyQ_vz_yYM39w'
