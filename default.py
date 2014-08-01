@@ -54,6 +54,7 @@ if oldHash!=currentHash:
 __SETTING_ACCESS_TOKEN__ = __plugin__.getSettingAsString('oauth2_access_token', None)
 __SETTING_ACCESS_TOKEN_EXPIRES_AT__ = __plugin__.getSettingAsFloat('oauth2_access_token_expires_at', -1)
 
+import youtube.video
 from youtube import YouTubeClient
 __client__ = YouTubeClient(username = __SETTING_ACCESS_USERNAME__,
                            password = __SETTING_ACCESS_PASSWORD__,
@@ -420,7 +421,7 @@ def showSubscriptions(pageToken, pageIndex):
     
 def play(videoId):
     quality = __plugin__.getSettingAsInt('videoQuality', mapping={0:576, 1:720, 2:1080})
-    stream = __client__.getBestFittingVideoStreamInfo(videoId=videoId, size=quality)
+    stream = youtube.video.getBestFittingVideoStreamInfo(videoId=videoId, size=quality)
     if stream!=None:
         url = stream.getUrl()
         if url!=None:
