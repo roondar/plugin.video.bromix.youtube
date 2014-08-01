@@ -7,6 +7,7 @@
 	    <setting type="sep" />
 		<setting id="showFanart" type="bool" label="30500" default="true"/>
 		<setting id="showPlaylists" type="bool" label="30511" default="true"/>
+		<setting id="showUploadInfo" type="bool" label="30520" default="true"/>
 		<setting type="sep" />
 		<setting id="resultPerPage" type="enum" label="30510" values="5|10|15|20|25|30|35|40|45|50" default="9" />
 	</category>

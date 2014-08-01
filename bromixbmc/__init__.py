@@ -61,6 +61,28 @@ def getFormatDateShort(year, month, day):
     date_format = date_format.replace('%Y', year)
     return date_format
 
+def getFormatTime(hour, minute, seconds=None):
+    time_format = xbmc.getRegion('time')
+    _hour = hour
+    if len(_hour)==1:
+        _hour='0'+_hour
+        
+    _min = minute
+    if len(_min)==1:
+        _min='0'+_min
+    
+    _sec = seconds
+    if _sec==None:
+        _sec='00'
+    if len(_sec)==1:
+        _sec='0'+_sec
+        
+    time_format = time_format.replace('%H', _hour)
+    time_format = time_format.replace('%M', _min)
+    time_format = time_format.replace('%S', _sec)
+        
+    return time_format
+
 def executebuiltin(function):
     xbmc.executebuiltin(function)
 

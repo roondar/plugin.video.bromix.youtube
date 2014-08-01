@@ -1,4 +1,5 @@
 1.0.0~alpha12 (2014-08-01)
+- ADD: Show 'Published on' and 'Channel' in the description of a video (can be disabled via setting)
 - ADD: support for 3D videos (can be disabled via setting)
 - Accelerated resolving of video URLs (almost 2x as fast) 
 
