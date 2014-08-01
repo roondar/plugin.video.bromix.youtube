@@ -420,8 +420,9 @@ def showSubscriptions(pageToken, pageIndex):
     __plugin__.endOfDirectory()
     
 def play(videoId):
+    allow3D = __plugin__.getSettingAsBool('allow3D', False)
     quality = __plugin__.getSettingAsInt('videoQuality', mapping={0:576, 1:720, 2:1080})
-    stream = youtube.video.getBestFittingVideoStreamInfo(videoId=videoId, size=quality)
+    stream = youtube.video.getBestFittingVideoStreamInfo(videoId=videoId, size=quality, allow3D=allow3D)
     if stream!=None:
         url = stream.getUrl()
         if url!=None:

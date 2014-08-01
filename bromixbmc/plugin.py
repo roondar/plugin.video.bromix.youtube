@@ -105,8 +105,13 @@ class Plugin(object):
     def setSettingAsFloat(self, name, value):
         self._addon.setSetting(name, str(value))
     
-    def getSettingAsBool(self, name):
-        return self._addon.getSetting(name)=="true"
+    def getSettingAsBool(self, name, default=False):
+        try:
+            return self._addon.getSetting(name)=="true"
+        except:
+            # do nothing
+            pass
+        return default
     
     def getSettingAsInt(self, name, default=-1, mapping=None):
         try:

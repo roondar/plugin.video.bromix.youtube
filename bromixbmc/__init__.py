@@ -1,4 +1,7 @@
 """
+Version 2.1.0 (2014.07.28)
+- CHG: plugin.getSettingAsBool(name, default)
+
 Version 2.0.9 (2014.07.28)
 - ADD: plugin.getSettingAsFloat(name, default)
 - ADD: plugin.setSettingAsFloat(name, value)

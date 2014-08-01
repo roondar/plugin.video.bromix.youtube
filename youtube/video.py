@@ -5,12 +5,47 @@ import urllib2
 import urlparse
 import re
 
+__ITAG_MAP__ = {'5': {'format': 'FLV', 'width': 320, 'height': 240, '3D': False},
+                '17': {'format': '3GP', 'width': 176, 'height': 144, '3D': False},
+                '18': {'format': 'MP4', 'width': 480, 'height': 360, '3D': False},
+                '22': {'format': 'MP4', 'width': 1280, 'height': 720, '3D': False},
+                '34': {'format': 'FLV', 'width': 480, 'height': 360, '3D': False},
+                '35': {'format': 'FLV', 'width': 640, 'height': 480, '3D': False},
+                '36': {'format': '3GP', 'width': 320, 'height': 240, '3D': False},
+                '37': {'format': 'MP4', 'width': 1920, 'height': 1080, '3D': False},
+                '38': {'format': 'MP4', 'width': 2048, 'height': 1080, '3D': False},
+                '43': {'format': 'WEB', 'width': 480, 'height': 360, '3D': False},
+                '44': {'format': 'WEB', 'width': 640, 'height': 480, '3D': False},
+                '45': {'format': 'WEB', 'width': 1280, 'height': 720, '3D': False},
+                '46': {'format': 'WEB', 'width': 1920, 'height': 1080, '3D': False},
+                '82': {'format': 'MP4', 'width': 480, 'height': 360, '3D': True},
+                '83': {'format': 'MP4', 'width': 640, 'height': 480, '3D': True},
+                '84': {'format': 'MP4', 'width': 1280, 'height': 720, '3D': True},
+                '85': {'format': 'MP4', 'width': 1920, 'height': 1080, '3D': True},
+                '100': {'format': 'WEB', 'width': 480, 'height': 360, '3D': True},
+                '101': {'format': 'WEB', 'width': 640, 'height': 480, '3D': True},
+                '102': {'format': 'WEB', 'width': 1280, 'height': 720, '3D': True},
+                '133': {'format': 'MP4', 'width': 320, 'height': 240, '3D': False, 'VO': True},
+                '134': {'format': 'MP4', 'width': 480, 'height': 360, '3D': False, 'VO': True},
+                '135': {'format': 'MP4', 'width': 640, 'height': 480, '3D': False, 'VO': True},
+                '136': {'format': 'MP4', 'width': 1280, 'height': 720, '3D': False, 'VO': True},
+                '137': {'format': 'MP4', 'width': 1920, 'height': 1080, '3D': False, 'VO': True},
+                '160': {'format': 'MP4', 'width': 256, 'height': 144, '3D': False, 'VO': True},
+                '242': {'format': 'WEB', 'width': 320, 'height': 240, '3D': False, 'VOX': True},
+                '243': {'format': 'WEB', 'width': 480, 'height': 360, '3D': False, 'VOX': True},
+                '244': {'format': 'WEB', 'width': 640, 'height': 480, '3D': False, 'VOX': True},
+                '245': {'format': 'WEB', 'width': 640, 'height': 480, '3D': False, 'VOX': True},
+                '246': {'format': 'WEB', 'width': 640, 'height': 480, '3D': False, 'VOX': True},
+                '247': {'format': 'WEB', 'width': 1280, 'height': 720, '3D': False, 'VOX': True},
+                '248': {'format': 'WEB', 'width': 1920, 'height': 1080, '3D': False, 'VOX': True},
+                '264': {'format': 'MP4', 'width': 1920, 'height': 1080, '3D': False, 'VOX': True}
+                }
+
 class YTVideoStreamInfo():
-    def __init__(self, url, width, height, videoType, signature=None):
+    def __init__(self, url, itag, videoType, signature=None):
         self._url = url
         self._signature = signature
-        self._width = width
-        self._height = height
+        self._itag = itag
         self._videoType = videoType
         pass
     
@@ -45,15 +80,20 @@ class YTVideoStreamInfo():
         return self._url
     
     def getSize(self):
-        return [self._width, self._height]
+        width = self._itag.get('width', 0)
+        height = self._itag.get('height', 0)
+        return [width, height]
     
     def getType(self):
         return self._videoType
+    
+    def is3D(self):
+        return self._itag.get('3D', False)
     pass
 
 def _getVideoStreamInfosPerPageView(videoId):
     result = []
-    sizeMap = {}
+    itagMap = {}
     
     opener = urllib2.build_opener()
     url = 'https://www.youtube.com/watch?v=%s' % (videoId)
@@ -86,12 +126,16 @@ def _getVideoStreamInfosPerPageView(videoId):
             try:
                 attr = value.split('|')
                 sizes = attr[1].split('x')
-                sizeMap[attr[0]] =  {'width': int(sizes[0]), 'height': int(sizes[1])}
+                itagMap[attr[0]] =  {'width': int(sizes[0]),
+                                     'height': int(sizes[1]),
+                                     '3D': False}
             except:
                 # do nothing
                 pass
             pass
         pass
+    
+    itagMap.update(__ITAG_MAP__)
     
     streamsMatch = re.compile('.+\"url_encoded_fmt_stream_map\": \"(.+?)\".+').findall(html)
     if streamsMatch!=None and len(streamsMatch)>0 and len(streamsMatch[0])>=1:
@@ -116,8 +160,8 @@ def _getVideoStreamInfosPerPageView(videoId):
                 itag = attr['itag']
                 videoType = attr['type'].split(';')[0]
                 
-                size = sizeMap[itag]
-                videoInfo = YTVideoStreamInfo(url, size.get('width', '0'), size.get('height', 0), videoType, signature)
+                itag = itagMap[itag]
+                videoInfo = YTVideoStreamInfo(url, itag, videoType, signature)
                 result.append(videoInfo)
             except:
                 # do nothing
@@ -171,7 +215,7 @@ def getVideoStreamInfos(videoId):
     content = opener.open(url)
     
     html = content.read()
-    sizeMap = {}
+    itagMap = {}
     
     attr = dict(urlparse.parse_qsl( html ) )
 
@@ -182,47 +226,66 @@ def getVideoStreamInfos(videoId):
         for fmt in fmt_list:
             values = fmt.split('/')
             if len(values)>=5:
-                sizes = values[1].split('x')
-                sizeMap[values[0]] = sizes
+                try:
+                    sizes = values[1].split('x')
+                    itagMap[values[0]] = {'width': int(sizes[0]),
+                                          'height': int(sizes[1]),
+                                          '3D': False
+                                          }
+                except:
+                    #do nothing
+                    pass
+                
                 pass
             pass
         pass
+    
+    itagMap.update(__ITAG_MAP__)
     
     url_encoded_fmt_stream_map = attr.get('url_encoded_fmt_stream_map', None)
     if url_encoded_fmt_stream_map!=None:
         values = url_encoded_fmt_stream_map.split(',')
         for value in values:
-            attr = dict(urlparse.parse_qsl( value ) )
             
-            url = attr.get('url', None)
-            url = urllib.unquote(url)
-            
-            signature = None
-            if attr.get('s', None)!=None:
-                signature = attr.get('s', None)
-            elif attr.get('sig', None)!=None:
-                signature = attr.get('sig', '')
-                url = url + '&signature='
-                url = url + signature
+            try:
+                attr = dict(urlparse.parse_qsl( value ) )
                 
-            videoType = attr['type'].split(';')[0]
+                url = attr.get('url', None)
+                url = urllib.unquote(url)
                 
-            itag = attr['itag']
-            size = sizeMap[itag]
-            videoInfo = YTVideoStreamInfo(url, int(size[0]), int(size[1]), videoType, signature)
-            result.append(videoInfo)
+                signature = None
+                if attr.get('s', None)!=None:
+                    signature = attr.get('s', None)
+                elif attr.get('sig', None)!=None:
+                    signature = attr.get('sig', '')
+                    url = url + '&signature='
+                    url = url + signature
+                    
+                videoType = attr['type'].split(';')[0]
+                    
+                itag = attr['itag']
+                itag = itagMap[itag]
+                videoInfo = YTVideoStreamInfo(url, itag, videoType, signature)
+                result.append(videoInfo)
+            except:
+                # do nothing
+                pass
             pass
         pass
     
     return result
 
-def getBestFittingVideoStreamInfo(videoId=None, videoInfos=None, size=720):
+def getBestFittingVideoStreamInfo(videoId=None, videoInfos=None, size=720, allow3D=False):
     if videoId!=None:
         videoInfos = getVideoStreamInfos(videoId)
     
     result = None
     lastSize = 0
     for videoInfo in videoInfos:
+        # skip the one with 3D support
+        if not allow3D and videoInfo.is3D():
+            continue
+        
         currentSize = videoInfo.getSize()[1]
         
         if currentSize>=lastSize and currentSize<=size:
