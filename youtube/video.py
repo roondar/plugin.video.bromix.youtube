@@ -61,6 +61,20 @@ def _getVideoStreamInfosPerPageView(videoId):
     
     html = content.read()
     
+    """
+    This will almost double the speed for the regular expressions, because we only must match
+    a small portion of the whole html. And only if we find positions, we cut down the html.
+    
+    """
+    pos = html.find('ytplayer.config')
+    if pos:
+        html2 = html[pos:]
+        pos = html2.find('</script>')
+        if pos:
+            html = html2[:pos]
+            pass
+        pass
+    
     fmtListMatch = re.compile('.+\"fmt_list\": \"(.+?)\".+').findall(html)
     if fmtListMatch!=None and len(fmtListMatch)>0 and len(fmtListMatch[0])>=1:
         valueString = fmtListMatch[0]
