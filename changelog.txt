@@ -1,5 +1,6 @@
 1.0.0~alpha14 (2014-08-XX)
 - ADD: Fanart for channels. Only if you select a channel directly.
+- optimized some of the addon code
 
 1.0.0~alpha13 (2014-08-02)
 - FIX: improved token and login validation
