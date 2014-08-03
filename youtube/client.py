@@ -244,9 +244,12 @@ class YouTubeClient(object):
         return self._executeApi('playlistItems', params)
     
     def getActivities(self, channelId=None, home=None, mine=None, nextPageToken=None):
+        #publishedAfter = time.strftime("%Y-%m-%dT%H:%M:%S.000Z", time.gmtime())
+        
         params = {'part': 'snippet,contentDetails',
                   'maxResults': self._MaxResult,
-                  'regionCode': self._RegionCode
+                  #'regionCode': self._RegionCode,
+                  #'publishedAfter': publishedAfter
                   }
         
         if channelId!=None:
