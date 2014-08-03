@@ -453,9 +453,13 @@ def showChannel(channelId, pageToken, pageIndex, mine=False):
         playlistId = relatedPlaylists.get('uploads', None)
         
         if playlistId!=None:
-            jsonData = __client__.getPlaylistItems(playlistId, pageToken)
+            jsonData = __client__.getPlaylistItems(playlistId=playlistId, mine=mine, nextPageToken=pageToken)
             nextPageParams = {'action': __ACTION_SHOW_PLAYLIST__,
                               'id': playlistId}
+            
+            if mine==True:
+                nextPageParams['mine'] = 'yes'
+            
             _listResult(jsonData, nextPageParams=nextPageParams, pageIndex=pageIndex, fanart=fanart)
             pass
         pass
