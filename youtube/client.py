@@ -48,7 +48,8 @@ class YouTubeClient(object):
                   #'google_play_services_version': '5084034',
                   #'accountType' : 'HOSTED_OR_GOOGLE',
                   'Email': self._Username,
-                  'service': 'oauth2:https://www.googleapis.com/auth/youtube https://www.googleapis.com/auth/plus.me https://www.googleapis.com/auth/emeraldsea.mobileapps.doritos.cookie https://www.googleapis.com/auth/plus.stream.read https://www.googleapis.com/auth/plus.stream.write https://www.googleapis.com/auth/plus.pages.manage',
+                  #'service': 'oauth2:https://www.googleapis.com/auth/youtube https://www.googleapis.com/auth/plus.me https://www.googleapis.com/auth/emeraldsea.mobileapps.doritos.cookie https://www.googleapis.com/auth/plus.stream.read https://www.googleapis.com/auth/plus.stream.write https://www.googleapis.com/auth/plus.pages.manage',
+                  'service': 'oauth2:https://www.googleapis.com/auth/youtube https://www.googleapis.com/auth/youtube.readonly https://www.googleapis.com/auth/youtube.upload',
                   'source': 'android',
                   #'androidId': '3b7ee32203b0465cb586551ee989b5ae',
                   'app': 'com.google.android.youtube',
@@ -125,8 +126,9 @@ class YouTubeClient(object):
                 content = requests.get(url, verify=False)
                 return json.loads(content.text)
             elif method=='POST':
-                headers = {'content-type': 'application/json'}
-                content = requests.post(url, data=json.dumps(jsonData), headers=headers)
+                headers = {'content-type': 'application/json',
+                           'Authorization': 'Bearer %s' % (self.AccessToken)}
+                content = requests.post(url, data=json.dumps(jsonData), headers=headers, verify=False)
                 pass
         except:
             if tries>=1:
@@ -247,13 +249,20 @@ class YouTubeClient(object):
 
         return self._executeApi('playlistItems', params)
     
-    """
     def addPlayListItem(self, playlistId, videoId):
-        params = {'part': 'snippet'}
+        params = {'part': 'snippet',
+                  'mine': 'true',
+                  'access_token': self.AccessToken}
         
-        result = self._executeApi('playlistItems', params)
+        jsonData = {'kind': 'youtube#playlistItem',
+                    'snippet':{'playlistId': playlistId,
+                               'resourceId': {'kind': 'youtube#video',
+                                              'videoId': videoId}
+                               }
+                    }
+        
+        result = self._executeApi('playlistItems', params=params, jsonData=jsonData, method='POST')
         pass
-    """
     
     def getActivities(self, channelId=None, home=None, mine=None, nextPageToken=None):
         #publishedAfter = time.strftime("%Y-%m-%dT%H:%M:%S.000Z", time.gmtime())

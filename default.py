@@ -532,6 +532,16 @@ def play(videoId):
         url = stream.getUrl()
         if url!=None:
             __plugin__.setResolvedUrl(url)
+            
+            if __client__.hasLogin:
+                playlistId = __YT_PLAYLISTS__.get('watchHistory', None)
+                if playlistId!=None:
+                    __client__.addPlayListItem(playlistId, videoId)
+                    pass
+                pass
+            pass
+        pass
+    pass
 
 action = bromixbmc.getParam('action')
 _id = bromixbmc.getParam('id')
