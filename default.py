@@ -32,6 +32,7 @@ __ACTION_SHOW_CHANNEL__ = 'showChannel'
 __ACTION_SHOW_SUBSCRIPTIONS__ = 'showSubscriptions'
 __ACTION_PLAY__ = 'play'
 __ACTION_ADD_TO_PLAYLIST__ = 'addToPlaylist'
+__ACTION_REMOVE_FROM_PLAYLIST__ = 'removeFromPlaylist'
 
 """ CACHED YOUTUBE DATA """
 __YT_PLAYLISTS__ = {'likes': '', 'favorites': '', 'uploads': '', 'watchHistory': '', 'watchLater': ''}
@@ -215,7 +216,7 @@ def _getBestFanart(jsonData):
     
     return ''
 
-def _createContextMenuForVideo(videoId, isWatchLaterPlaylist=False):
+def _createContextMenuForVideo(videoId, playlistItemId=None, isMyPlaylist=False, isWatchLaterPlaylist=False):
     contextMenu = []
     
     # 'Watch Later'
@@ -225,8 +226,15 @@ def _createContextMenuForVideo(videoId, isWatchLaterPlaylist=False):
                          'id': videoId,
                          'playlistId': playlistId}
         contextRun = 'RunPlugin('+__plugin__.createUrl(contextParams)+')'
-        
         contextMenu.append( ("[B]"+__plugin__.localize(30005)+"[/B]", contextRun) )
+        pass
+        
+    if isMyPlaylist and playlistItemId!=None:
+        contextParams = {'action': __ACTION_REMOVE_FROM_PLAYLIST__,
+                         'id': playlistItemId}
+        contextRun = 'RunPlugin('+__plugin__.createUrl(contextParams)+')'
+        contextMenu.append( ("[B]"+__plugin__.localize(30012)+"[/B]", contextRun) )
+        pass
     
     return contextMenu
 
@@ -412,7 +420,10 @@ def _listResult(jsonData, nextPageParams={}, pageIndex=1, mine=False, fanart=__F
                     infoLabels = {'plot': uploadInfo+description,
                                   'duration': videoInfo.get('duration', '1')}
                     
-                    contextMenu = _createContextMenuForVideo(videoId=videoId, isWatchLaterPlaylist=isWatchLaterPlaylist)
+                    contextMenu = _createContextMenuForVideo(videoId=videoId,
+                                                             playlistItemId=item.get('id', None),
+                                                             isMyPlaylist=mine,
+                                                             isWatchLaterPlaylist=isWatchLaterPlaylist)
                     __plugin__.addVideoLink(name=title, params=params, thumbnailImage=thumbnailImage, fanart=fanart, infoLabels=infoLabels, contextMenu=contextMenu)
                     pass
                 pass
@@ -595,11 +606,16 @@ def play(videoId):
         pass
     pass
 
-def addToPlayList(videoId):
+def addToPlaylist(videoId):
     playlistId = bromixbmc.getParam('playlistId', None)
     if playlistId!=None:
         __client__.addPlayListItem(playlistId, videoId)
         pass
+    pass
+
+def removeFromPlaylist(playlistItemId):
+    __client__.removePlaylistItem(playlistItemId)
+    bromixbmc.executebuiltin("Container.Refresh");
     pass
 
 action = bromixbmc.getParam('action')
@@ -612,7 +628,9 @@ mine = bromixbmc.getParam('mine', 'no')=='yes'
 if action == __ACTION_SEARCH__:
     search(query, pageToken, pageIndex)
 elif action == __ACTION_ADD_TO_PLAYLIST__ and _id!=None:
-    addToPlayList(_id)
+    addToPlaylist(_id)
+elif action == __ACTION_REMOVE_FROM_PLAYLIST__ and _id!=None:
+    removeFromPlaylist(_id)
 elif action == __ACTION_SHOW_MYSUBSCRIPTIONS__:
     showMySubscriptions(pageToken, pageIndex)
 elif action == __ACTION_SHOW_SUBSCRIPTIONS__:

@@ -272,8 +272,8 @@ class YouTubeClient(object):
         result = self._executeApi('playlistItems', params=params, jsonData=jsonData, method='POST')
         pass
     
-    def removePlaylistItem(self, _id):
-        params = {'id': _id,
+    def removePlaylistItem(self, playlistItemId):
+        params = {'id': playlistItemId,
                   'access_token': self.AccessToken}
         
         result = self._executeApi('playlistItems', params=params, method='DELETE')
