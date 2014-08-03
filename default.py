@@ -135,8 +135,29 @@ def _getBestThumbnailImage(jsonData):
         pass
     
     return ''
+
+def _getBestFanart(jsonData):
+    if __SETTING_SHOW_FANART__:
+        brandingSettings = jsonData.get('brandingSettings', {})
+        image = brandingSettings.get('image', {})
+        
+        """
+        We only use 'medium' because the image should be 1280x720. Full HD (1920x1080) images would more space and time time show
+        """
+        #bannerList = ['bannerTvHighImageUrl', 'bannerTvMediumImageUrl', 'bannerTvLowImageUrl', 'bannerTvImageUrl']
+        bannerList = ['bannerTvMediumImageUrl', 'bannerTvLowImageUrl', 'bannerTvImageUrl']
+        for banner in bannerList:
+            fanart = image.get(banner, None)
+            if fanart!=None:
+                return fanart
+            pass
+        
+        # fallback
+        return __FANART__
     
-def _listResult(jsonData, nextPageParams={}, pageIndex=1, mine=False):
+    return ''
+    
+def _listResult(jsonData, nextPageParams={}, pageIndex=1, mine=False, fanart=__FANART__):
     items = jsonData.get('items', None)
     if items!=None:
         nextPageToken = jsonData.get('nextPageToken', None)
@@ -204,7 +225,7 @@ def _listResult(jsonData, nextPageParams={}, pageIndex=1, mine=False):
                 if title!=None and _id!=None:
                     params = {'action': __ACTION_SHOW_CHANNEL_CATEGORY__,
                               'id': _id}
-                    __plugin__.addDirectory(name=title, params=params, thumbnailImage=__ICON_FALLBACK__, fanart=__FANART__)
+                    __plugin__.addDirectory(name=title, params=params, thumbnailImage=__ICON_FALLBACK__, fanart=fanart)
                     pass
                 pass
             elif kind=='youtube#activity' and snippet!=None:
@@ -221,7 +242,7 @@ def _listResult(jsonData, nextPageParams={}, pageIndex=1, mine=False):
                                   'duration': videoInfo.get('duration', '1')}
                     params = {'action': __ACTION_PLAY__,
                               'id': videoId}
-                    __plugin__.addVideoLink(name=title, params=params, thumbnailImage=thumbnailImage, fanart=__FANART__, infoLabels=infoLabels)
+                    __plugin__.addVideoLink(name=title, params=params, thumbnailImage=thumbnailImage, fanart=fanart, infoLabels=infoLabels)
                     pass
                 pass
             elif kind=='youtube#subscription' and snippet!=None:
@@ -232,7 +253,7 @@ def _listResult(jsonData, nextPageParams={}, pageIndex=1, mine=False):
                 if channelId!=None and title!=None:
                     params = {'action': __ACTION_SHOW_CHANNEL__,
                               'id': channelId}
-                    __plugin__.addDirectory(name=title, params=params, thumbnailImage=thumbnailImage, fanart=__FANART__)
+                    __plugin__.addDirectory(name=title, params=params, thumbnailImage=thumbnailImage, fanart=fanart)
                     pass
                 pass
             elif kind=='youtube#searchResult' and snippet!=None:
@@ -248,14 +269,14 @@ def _listResult(jsonData, nextPageParams={}, pageIndex=1, mine=False):
                         if title!=None and channelId!=None:
                             params = {'action': __ACTION_SHOW_CHANNEL__,
                                       'id': channelId}
-                            __plugin__.addDirectory(name="[B]"+title+"[/B]", params=params, thumbnailImage=thumbnailImage, fanart=__FANART__)
+                            __plugin__.addDirectory(name="[B]"+title+"[/B]", params=params, thumbnailImage=thumbnailImage, fanart=fanart)
                             pass
                     elif kind=='youtube#playlist':
                         playlistId = _id.get('playlistId', None)
                         if title!=None and playlistId!=None:
                             params = {'action': __ACTION_SHOW_PLAYLIST__,
                                       'id': playlistId}
-                            __plugin__.addDirectory(name="[B]"+title+"[/B]", params=params, thumbnailImage=thumbnailImage, fanart=__FANART__)
+                            __plugin__.addDirectory(name="[B]"+title+"[/B]", params=params, thumbnailImage=thumbnailImage, fanart=fanart)
                         pass
                     elif kind=='youtube#video':
                         videoId = _id.get('videoId', '')
@@ -265,7 +286,7 @@ def _listResult(jsonData, nextPageParams={}, pageIndex=1, mine=False):
                         videoInfo = videoInfos.get(videoId, {})
                         infoLabels = {'plot': uploadInfo+description,
                                       'duration': videoInfo.get('duration', '1')}
-                        __plugin__.addVideoLink(name=title, params=params, thumbnailImage=thumbnailImage, fanart=__FANART__, infoLabels=infoLabels)
+                        __plugin__.addVideoLink(name=title, params=params, thumbnailImage=thumbnailImage, fanart=fanart, infoLabels=infoLabels)
                     pass
                 pass
             elif kind=='youtube#channel' and snippet!=None:
@@ -276,7 +297,7 @@ def _listResult(jsonData, nextPageParams={}, pageIndex=1, mine=False):
                     thumbnailImage = _getBestThumbnailImage(item)
                     params = {'action': __ACTION_SHOW_CHANNEL__,
                               'id': channelId}
-                    __plugin__.addDirectory(name="[B]"+title+"[/B]", params=params, thumbnailImage=thumbnailImage, fanart=__FANART__)
+                    __plugin__.addDirectory(name="[B]"+title+"[/B]", params=params, thumbnailImage=thumbnailImage, fanart=fanart)
                     pass
             elif kind=='youtube#playlist' and snippet!=None:
                 title = snippet.get('title')
@@ -288,7 +309,7 @@ def _listResult(jsonData, nextPageParams={}, pageIndex=1, mine=False):
                 if mine==True:
                     params['mine'] = 'yes'
 
-                __plugin__.addDirectory(name=title, params=params, thumbnailImage=thumbnailImage, fanart=__FANART__,)
+                __plugin__.addDirectory(name=title, params=params, thumbnailImage=thumbnailImage, fanart=fanart)
             elif kind=='youtube#playlistItem' and snippet!=None:
                 title = snippet.get('title')
                 description = snippet.get('description')
@@ -304,7 +325,7 @@ def _listResult(jsonData, nextPageParams={}, pageIndex=1, mine=False):
                     videoInfo = videoInfos.get(videoId, {})
                     infoLabels = {'plot': uploadInfo+description,
                                   'duration': videoInfo.get('duration', '1')}
-                    __plugin__.addVideoLink(name=title, params=params, thumbnailImage=thumbnailImage, fanart=__FANART__, infoLabels=infoLabels)
+                    __plugin__.addVideoLink(name=title, params=params, thumbnailImage=thumbnailImage, fanart=fanart, infoLabels=infoLabels)
                     pass
                 pass
             pass
@@ -318,7 +339,7 @@ def _listResult(jsonData, nextPageParams={}, pageIndex=1, mine=False):
             params = {'pageIndex': str(pageIndex+1),
                       'pageToken': nextPageToken}
             params.update(nextPageParams)
-            __plugin__.addDirectory(__plugin__.localize(30002)+' ('+str(pageIndex+1)+')', params=params, fanart=__FANART__)
+            __plugin__.addDirectory(__plugin__.localize(30002)+' ('+str(pageIndex+1)+')', params=params, fanart=fanart)
             pass
         pass
     pass
@@ -398,20 +419,22 @@ def showPlaylists(channelId, pageToken, pageIndex, mine=False):
 def showChannel(channelId, pageToken, pageIndex):
     __plugin__.setContent('episodes')
     
-    """
-    Show the playlists of a channel on the first page (only if the setting is true)
-    """
-    if __SETTING_SHOW_PLAYLISTS__:
-        params = {'action': __ACTION_SHOW_PLAYLISTS__,
-                  'id': channelId}
-        __plugin__.addDirectory(name="[B]"+__plugin__.localize(30003)+"[/B]", params=params, thumbnailImage=__ICON_FALLBACK__, fanart=__FANART__)
-        pass
-    
     jsonData = __client__.getChannels(channelId=channelId)
     items = jsonData.get('items', [])
     if len(items)>0:
         item = items[0]
         contentDetails = item.get('contentDetails', {})
+        fanart = _getBestFanart(item)
+        
+        """
+        Show the playlists of a channel on the first page (only if the setting is true)
+        """
+        if __SETTING_SHOW_PLAYLISTS__:
+            params = {'action': __ACTION_SHOW_PLAYLISTS__,
+                      'id': channelId}
+            __plugin__.addDirectory(name="[B]"+__plugin__.localize(30003)+"[/B]", params=params, thumbnailImage=__ICON_FALLBACK__, fanart=fanart)
+            pass
+        
         relatedPlaylists = contentDetails.get('relatedPlaylists', {})
         playlistId = relatedPlaylists.get('uploads', None)
         
@@ -419,7 +442,7 @@ def showChannel(channelId, pageToken, pageIndex):
             jsonData = __client__.getPlaylistItems(playlistId, pageToken)
             nextPageParams = {'action': __ACTION_SHOW_PLAYLIST__,
                               'id': playlistId}
-            _listResult(jsonData, nextPageParams=nextPageParams, pageIndex=pageIndex)
+            _listResult(jsonData, nextPageParams=nextPageParams, pageIndex=pageIndex, fanart=fanart)
             pass
         pass
     

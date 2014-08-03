@@ -270,7 +270,7 @@ class YouTubeClient(object):
         return jsonData
     
     def getChannels(self, channelId=None, mine=None, nextPageToken=None):
-        params = {'part': 'snippet, contentDetails'}
+        params = {'part': 'snippet,contentDetails,brandingSettings'}
         
         if channelId!=None:
             params['id'] = channelId
