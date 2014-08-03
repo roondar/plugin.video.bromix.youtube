@@ -5,6 +5,7 @@ import urllib2
 import json
 import re
 import time
+import requests
 
 __YOUTUBE_API_KEY__ = 'AIzaSyA8eiZmM1FaDVjRy-df2KTyQ_vz_yYM39w'
 
@@ -111,27 +112,29 @@ class YouTubeClient(object):
         
         return True
     
-    def _executeApi(self, command, params={}, tries=1):
+    def _executeApi(self, command, params={}, jsonData=None, tries=1, method='GET'):
         if 'access_token' in params:
             if not self._hasValidToken():
                 self._updateToken()
                 params['access_token'] = self.AccessToken
         
         url = self._createUrl(command=command, params=params)
-        content = None
+        
         try:
-            content = self._opener.open(url)
-        except urllib2.HTTPError, e:
-            if (e.code==401 or e.code==403) and tries>=1:
+            if method=='GET':
+                content = requests.get(url, verify=False)
+                return json.loads(content.text)
+            elif method=='POST':
+                headers = {'content-type': 'application/json'}
+                content = requests.post(url, data=json.dumps(jsonData), headers=headers)
+                pass
+        except:
+            if tries>=1:
                 tries = tries-1
-                self.AccessToken = None
-                return self._executeApi(command, params, tries)
-            pass
+                return self._executeApi(command, params, tries, method)
         
-        if content==None:
             return {}
-        
-        return json.load(content)
+        pass
     
     def _makeCommaSeparatedList(self, values=[]):
         result = ''

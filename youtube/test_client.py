@@ -15,10 +15,10 @@ if __name__ == "__main__":
     
     #hours = diff/1000 
     
-    __USERNAME__ = "YOUR_USERNAME"
-    __PASSWORD__ = "YOUR_PASSWORD"
+    __USERNAME__ = "a8240166@drdrb.net"#"YOUR_USERNAME"
+    __PASSWORD__ = "0012345678900" #"YOUR_PASSWORD"
     
     __client__ = YouTubeClient(username=__USERNAME__, password=__PASSWORD__, maxResult=25)
-    
+    __client__.hasLogin()
     
     pass
