@@ -245,7 +245,9 @@ class YouTubeClient(object):
     
     def getActivities(self, channelId=None, home=None, mine=None, nextPageToken=None):
         params = {'part': 'snippet,contentDetails',
-                  'maxResults': self._MaxResult}
+                  'maxResults': self._MaxResult,
+                  'regionCode': self._RegionCode
+                  }
         
         if channelId!=None:
             params['channelId'] = channelId

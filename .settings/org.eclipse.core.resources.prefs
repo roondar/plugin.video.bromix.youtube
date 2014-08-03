@@ -1,5 +1,6 @@
 eclipse.preferences.version=1
 encoding//youtube/client.py=utf-8
-encoding//youtube/main.py=utf-8
+encoding//youtube/test_client.py=utf-8
+encoding//youtube/test_video.py=utf-8
 encoding//youtube/video.py=utf-8
 encoding/default.py=utf-8
