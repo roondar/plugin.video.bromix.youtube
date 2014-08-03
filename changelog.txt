@@ -1,3 +1,8 @@
+1.0.0~alpha12 (2014-08-01)
+- ADD: Show 'Published on' and 'Channel' in the description of a video (can be disabled via setting)
+- ADD: support for 3D videos (can be disabled via setting)
+- Accelerated resolving of video URLs (almost 2x as fast) 
+
 1.0.0~alpha11 (2014-07-30)
 - FIX: added a fallback for videos that require a login (works very fast?!?!)
 - FIX: if username or password is missing reset the whole token logic 

@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 
 import os
+import re
 import hashlib
 
 #import pydevd
@@ -54,6 +55,7 @@ if oldHash!=currentHash:
 __SETTING_ACCESS_TOKEN__ = __plugin__.getSettingAsString('oauth2_access_token', None)
 __SETTING_ACCESS_TOKEN_EXPIRES_AT__ = __plugin__.getSettingAsFloat('oauth2_access_token_expires_at', -1)
 
+import youtube.video
 from youtube import YouTubeClient
 __client__ = YouTubeClient(username = __SETTING_ACCESS_USERNAME__,
                            password = __SETTING_ACCESS_PASSWORD__,
@@ -176,6 +178,24 @@ def _listResult(jsonData, nextPageParams={}, pageIndex=1, mine=False):
             kind = item.get('kind', '')
             snippet = item.get('snippet', None)
             
+            uploadInfo = ''
+            if __plugin__.getSettingAsBool('showUploadInfo', False):
+                channelTitle = snippet.get('channelTitle', None)
+                publishedAt = snippet.get('publishedAt', '')
+                match = re.compile('(\d+)-(\d+)-(\d+)T(\d+)\:(\d+)\:(\d+)\.(.+)').findall(publishedAt)
+                if match and len(match)>0 and len(match[0])>=7:
+                    uploadInfo = __plugin__.localize(30008)+': '
+                    uploadInfo = uploadInfo+bromixbmc.getFormatDateShort(match[0][0], match[0][1], match[0][2])
+                    uploadInfo = uploadInfo+' '+bromixbmc.getFormatTime(match[0][3], match[0][4], match[0][5])
+                    if channelTitle!=None:
+                        uploadInfo = uploadInfo+"[CR]"+__plugin__.localize(30009)+": "
+                        uploadInfo = uploadInfo+channelTitle
+                        pass
+                    
+                    uploadInfo = '[B]'+uploadInfo+"[/B][CR][CR]"
+                    pass
+                pass
+                
             # a special kind of youtube category
             if kind=='youtube#guideCategory' and snippet!=None:
                 _id = item.get('id', None)
@@ -197,7 +217,7 @@ def _listResult(jsonData, nextPageParams={}, pageIndex=1, mine=False):
                 videoId = upload.get('videoId', None)
                 if videoId!=None and title!=None:
                     videoInfo = videoInfos.get(videoId, {})
-                    infoLabels = {'plot': description,
+                    infoLabels = {'plot': uploadInfo+description,
                                   'duration': videoInfo.get('duration', '1')}
                     params = {'action': __ACTION_PLAY__,
                               'id': videoId}
@@ -243,7 +263,7 @@ def _listResult(jsonData, nextPageParams={}, pageIndex=1, mine=False):
                                   'id': videoId}
                         
                         videoInfo = videoInfos.get(videoId, {})
-                        infoLabels = {'plot': description,
+                        infoLabels = {'plot': uploadInfo+description,
                                       'duration': videoInfo.get('duration', '1')}
                         __plugin__.addVideoLink(name=title, params=params, thumbnailImage=thumbnailImage, fanart=__FANART__, infoLabels=infoLabels)
                     pass
@@ -282,7 +302,7 @@ def _listResult(jsonData, nextPageParams={}, pageIndex=1, mine=False):
                               'id': videoId}
                     
                     videoInfo = videoInfos.get(videoId, {})
-                    infoLabels = {'plot': description,
+                    infoLabels = {'plot': uploadInfo+description,
                                   'duration': videoInfo.get('duration', '1')}
                     __plugin__.addVideoLink(name=title, params=params, thumbnailImage=thumbnailImage, fanart=__FANART__, infoLabels=infoLabels)
                     pass
@@ -419,8 +439,9 @@ def showSubscriptions(pageToken, pageIndex):
     __plugin__.endOfDirectory()
     
 def play(videoId):
+    allow3D = __plugin__.getSettingAsBool('allow3D', False)
     quality = __plugin__.getSettingAsInt('videoQuality', mapping={0:576, 1:720, 2:1080})
-    stream = __client__.getBestFittingVideoStreamInfo(videoId=videoId, size=quality)
+    stream = youtube.video.getBestFittingVideoStreamInfo(videoId=videoId, size=quality, allow3D=allow3D)
     if stream!=None:
         url = stream.getUrl()
         if url!=None:

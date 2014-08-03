@@ -9,6 +9,8 @@
 	<string id="30005">Watch Later</string>
 	<string id="30006">History</string>
 	<string id="30007">My Subscriptions</string>
+	<string id="30008">Published on</string>
+	<string id="30009">Channel</string>
 	
 	<!-- Settings -->
 	<string id="30500">Show Fanart</string>
@@ -25,4 +27,7 @@
 	<string id="30515">Videos</string>
 	<string id="30516">Channels</string>
 	<string id="30517">Playlists</string>
+	<string id="30518">Playback</string>
+	<string id="30519">Allow 3D</string>
+	<string id="30520">Show upload info in the description</string>
 </strings>

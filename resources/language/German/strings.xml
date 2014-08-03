@@ -9,6 +9,8 @@
 	<string id="30005">Später ansehen</string>
 	<string id="30006">Verlauf</string>
 	<string id="30007">Meine Abos</string>
+	<string id="30008">Veröffentlicht am</string>
+	<string id="30009">Kanal</string>
 	
 	<!-- Settings -->
 	<string id="30500">Fanart anzeigen</string>
@@ -25,4 +27,7 @@
 	<string id="30515">Videos</string>
 	<string id="30516">Kanäle</string>
 	<string id="30517">Playlisten</string>
+	<string id="30518">Wiedergabe</string>
+	<string id="30519">3D zulassen</string>
+	<string id="30520">Upload-Info in der Beschreibung anzeigen</string>
 </strings>
