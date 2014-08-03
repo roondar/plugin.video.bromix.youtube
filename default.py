@@ -8,7 +8,6 @@ import hashlib
 #pydevd.settrace('localhost', stdoutToServer=True, stderrToServer=True)
 
 import bromixbmc
-from __builtin__ import min
 __plugin__ = bromixbmc.Plugin()
 
 # icons and images
@@ -20,7 +19,6 @@ __ICON_SEARCH__ = os.path.join(__plugin__.getPath(), "resources/media/search.png
 __SETTING_SHOW_FANART__ = __plugin__.getSettingAsBool('showFanart')
 if not __SETTING_SHOW_FANART__:
     __FANART__ = ''
-__SETTING_RESULTPERPAGE__ = __plugin__.getSettingAsInt('resultPerPage', mapping={0:5, 1:10, 2:15, 3:20, 4:25, 5:30, 6:35, 7:40, 8:45, 9:50})
 __SETTING_SHOW_PLAYLISTS__ = __plugin__.getSettingAsBool('showPlaylists')
 
 #actions
@@ -34,37 +32,74 @@ __ACTION_SHOW_CHANNEL__ = 'showChannel'
 __ACTION_SHOW_SUBSCRIPTIONS__ = 'showSubscriptions'
 __ACTION_PLAY__ = 'play'
 
-__SETTING_SEARCH_VIDEOS__ = __plugin__.getSettingAsBool('searchVideos')
-__SETTING_SEARCH_CHANNELS__ = __plugin__.getSettingAsBool('searchChannels')
-__SETTING_SEARCH_PLAYLISTS__ = __plugin__.getSettingAsBool('searchPlaylists')
+__YT_PLAYLISTS__ = {'likes': '', 'favorites': '', 'uploads': '', 'watchHistory': '', 'watchLater': ''}
+__YT_CANNEL_ID__ = ''
 
-__SETTING_ACCESS_USERNAME__ = __plugin__.getSettingAsString('username', '')
-__SETTING_ACCESS_PASSWORD__ = __plugin__.getSettingAsString('password', '')
+"""
+Based on the username and password we create a hash to validate, that the login hasn't changed.
+If so, this will reset the data, so the login will start over for the new login data. This will
+resolve the problem if you change the login somewhere in between. 
+"""
+__ACCESS_USERNAME__ = __plugin__.getSettingAsString('username', '')
+__ACCESS_PASSWORD__ = __plugin__.getSettingAsString('password', '')
 
-# login test
 oldHash = __plugin__.getSettingAsString('oauth2_access_hash', '')
 m = hashlib.md5()
-m.update(__SETTING_ACCESS_USERNAME__+__SETTING_ACCESS_PASSWORD__)
+m.update(__ACCESS_USERNAME__+__ACCESS_PASSWORD__)
 currentHash = m.hexdigest()
 if oldHash!=currentHash:
+    """
+    The hash has changed to we reset all data to force a new token with the new login data.
+    I non login data is given, the client won't call any token based data.
+    """
     __plugin__.setSettingAsFloat('oauth2_access_token_expires_at', -1)
     __plugin__.setSettingAsString('oauth2_access_token', '')
     
     __plugin__.setSettingAsString('oauth2_access_hash', currentHash)
+    
+    # reset cached playlist ids
+    for key in __YT_PLAYLISTS__:
+        name = 'yt_playlist_%s' % (key)
+        __plugin__.setSettingAsString(name, '')
+    
+    # reset channel id
+    __plugin__.setSettingAsString('yt_channel_id', '')
     pass
 
-__SETTING_ACCESS_TOKEN__ = __plugin__.getSettingAsString('oauth2_access_token', None)
-__SETTING_ACCESS_TOKEN_EXPIRES_AT__ = __plugin__.getSettingAsFloat('oauth2_access_token_expires_at', -1)
+"""
+Load cached data
+"""
+__ACCESS_TOKEN__ = __plugin__.getSettingAsString('oauth2_access_token', None)
+__ACCESS_TOKEN_EXPIRES_AT__ = __plugin__.getSettingAsFloat('oauth2_access_token_expires_at', -1)
+__YT_CANNEL_ID__ = __plugin__.getSettingAsString('yt_channel_id', '')
 
 import youtube.video
 from youtube import YouTubeClient
-__client__ = YouTubeClient(username = __SETTING_ACCESS_USERNAME__,
-                           password = __SETTING_ACCESS_PASSWORD__,
-                           cachedToken = __SETTING_ACCESS_TOKEN__,
-                           accessTokenExpiresAt = __SETTING_ACCESS_TOKEN_EXPIRES_AT__,
+__client__ = YouTubeClient(username = __ACCESS_USERNAME__,
+                           password = __ACCESS_PASSWORD__,
+                           cachedToken = __ACCESS_TOKEN__,
+                           accessTokenExpiresAt = __ACCESS_TOKEN_EXPIRES_AT__,
                            language = bromixbmc.getLanguageId(),
-                           maxResult = __SETTING_RESULTPERPAGE__
+                           maxResult = __plugin__.getSettingAsInt('resultPerPage', default=5, mapping={0:5, 1:10, 2:15, 3:20, 4:25, 5:30, 6:35, 7:40, 8:45, 9:50})
                            );
+
+_renewPlaylistIds = False
+for key in __YT_PLAYLISTS__:
+    name = 'yt_playlist_%s' % (key)
+    __YT_PLAYLISTS__[key] = __plugin__.getSettingAsString(name, '')
+    if len(__YT_PLAYLISTS__[key])==0:
+        _renewPlaylistIds = True
+        break
+    pass
+
+if _renewPlaylistIds and __client__.hasLogin():
+    jsonData = __client__.getChannels(mine=True)
+    items = jsonData.get('items', [])
+    if len(items)>0:
+        item = items[0]
+        contentDetails = item.get('contentDetails', {})
+        relatedPlaylists = contentDetails.get('relatedPlaylists', {})
+    pass
 
 
 def showIndex():
@@ -86,7 +121,7 @@ def showIndex():
             
             # My Channel
             params = {'action': __ACTION_SHOW_CHANNEL__,
-                      'id': 'UCJuGqhmRY5riCWqFhxEfl9w',
+                      #'id': 'UCJuGqhmRY5riCWqFhxEfl9w',
                       'mine': 'yes'}
             __plugin__.addDirectory(__plugin__.localize(30010), params=params, thumbnailImage=__ICON_FALLBACK__, fanart=__FANART__)
             
@@ -355,15 +390,19 @@ def search(query=None, pageToken=None, pageIndex=1):
     __plugin__.setContent('episodes')
     success = False
     
+    searchVideos=__plugin__.getSettingAsBool('searchVideos'),
+    searchChannels=__plugin__.getSettingAsBool('searchChannels'),
+    searchPlaylists=__plugin__.getSettingAsBool('searchPlaylists'),
+    
     nextPageParams = {}
     jsonData = {}
     if query!=None and pageToken!=None:
         nextPageParams = {'query': query,
                           'action': __ACTION_SEARCH__}
         jsonData = __client__.search(text=query,
-                                     searchVideos=__SETTING_SEARCH_VIDEOS__,
-                                     searchChannels=__SETTING_SEARCH_CHANNELS__,
-                                     searchPlaylists=__SETTING_SEARCH_PLAYLISTS__,
+                                     searchVideos=searchVideos,
+                                     searchChannels=searchChannels,
+                                     searchPlaylists=searchPlaylists,
                                      nextPageToken=pageToken
                                      )
         success = True
@@ -376,9 +415,9 @@ def search(query=None, pageToken=None, pageIndex=1):
             nextPageParams = {'query': search_string,
                               'action': __ACTION_SEARCH__}
             jsonData = __client__.search(text=search_string,
-                                         searchVideos=__SETTING_SEARCH_VIDEOS__,
-                                         searchChannels=__SETTING_SEARCH_CHANNELS__,
-                                         searchPlaylists=__SETTING_SEARCH_PLAYLISTS__,
+                                         searchVideos=searchVideos,
+                                         searchChannels=searchChannels,
+                                         searchPlaylists=searchPlaylists,
                                          nextPageToken=pageToken
                                          )
             pass
@@ -517,8 +556,8 @@ else:
     showIndex()
     
 # token and expiration date
-if __SETTING_ACCESS_TOKEN__ != __client__.AccessToken:
-    __SETTING_ACCESS_TOKEN__ = __client__.AccessToken
-    if __SETTING_ACCESS_TOKEN__!=None and len(__SETTING_ACCESS_TOKEN__)>0:
+if __ACCESS_TOKEN__ != __client__.AccessToken:
+    __ACCESS_TOKEN__ = __client__.AccessToken
+    if __ACCESS_TOKEN__!=None and len(__ACCESS_TOKEN__)>0:
         __plugin__.setSettingAsFloat('oauth2_access_token_expires_at', __client__.AccessTokenExpiresAt)
-        __plugin__.setSettingAsString('oauth2_access_token', __SETTING_ACCESS_TOKEN__)
+        __plugin__.setSettingAsString('oauth2_access_token', __ACCESS_TOKEN__)
