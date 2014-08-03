@@ -1,4 +1,7 @@
 """
+Version 2.1.1 (2014.08.03)
+- ADD: plugin.getFormatTime(hour, minute, seconds)
+
 Version 2.1.0 (2014.07.28)
 - CHG: plugin.getSettingAsBool(name, default)
 
@@ -77,6 +80,7 @@ def getFormatTime(hour, minute, seconds=None):
     if len(_sec)==1:
         _sec='0'+_sec
         
+    time_format = '%H:%M'
     time_format = time_format.replace('%H', _hour)
     time_format = time_format.replace('%M', _min)
     time_format = time_format.replace('%S', _sec)
