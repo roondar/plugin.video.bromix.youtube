@@ -244,6 +244,14 @@ class YouTubeClient(object):
 
         return self._executeApi('playlistItems', params)
     
+    """
+    def addPlayListItem(self, playlistId, videoId):
+        params = {'part': 'snippet'}
+        
+        result = self._executeApi('playlistItems', params)
+        pass
+    """
+    
     def getActivities(self, channelId=None, home=None, mine=None, nextPageToken=None):
         #publishedAfter = time.strftime("%Y-%m-%dT%H:%M:%S.000Z", time.gmtime())
         
