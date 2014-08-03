@@ -31,6 +31,7 @@ __ACTION_SHOW_PLAYLISTS__ = 'showPlaylists'
 __ACTION_SHOW_CHANNEL__ = 'showChannel'
 __ACTION_SHOW_SUBSCRIPTIONS__ = 'showSubscriptions'
 __ACTION_PLAY__ = 'play'
+__ACTION_ADD_TO_PLAYLIST__ = 'addToPlaylist'
 
 """ CACHED YOUTUBE DATA """
 __YT_PLAYLISTS__ = {'likes': '', 'favorites': '', 'uploads': '', 'watchHistory': '', 'watchLater': ''}
@@ -213,7 +214,7 @@ def _getBestFanart(jsonData):
         return __FANART__
     
     return ''
-    
+
 def _listResult(jsonData, nextPageParams={}, pageIndex=1, mine=False, fanart=__FANART__):
     items = jsonData.get('items', None)
     if items!=None:
@@ -299,7 +300,16 @@ def _listResult(jsonData, nextPageParams={}, pageIndex=1, mine=False, fanart=__F
                                   'duration': videoInfo.get('duration', '1')}
                     params = {'action': __ACTION_PLAY__,
                               'id': videoId}
-                    __plugin__.addVideoLink(name=title, params=params, thumbnailImage=thumbnailImage, fanart=fanart, infoLabels=infoLabels)
+                    
+                    contextMenu = []
+                    playlistId = __YT_PLAYLISTS__.get('watchLater', None)
+                    if playlistId!=None:
+                        contextParams = {'action': __ACTION_ADD_TO_PLAYLIST__,
+                                         'id': videoId,
+                                         'playlistId': playlistId}
+                        contextRun = 'RunPlugin('+__plugin__.createUrl(contextParams)+')'
+                        contextMenu = [("[B]"+__plugin__.localize(30005)+"[/B]", contextRun)]
+                    __plugin__.addVideoLink(name=title, params=params, thumbnailImage=thumbnailImage, fanart=fanart, infoLabels=infoLabels, contextMenu=contextMenu)
                     pass
                 pass
             elif kind=='youtube#subscription' and snippet!=None:
@@ -573,6 +583,13 @@ def play(videoId):
         pass
     pass
 
+def addToPlayList(videoId):
+    playlistId = bromixbmc.getParam('playlistId', None)
+    if playlistId!=None:
+        __client__.addPlayListItem(playlistId, videoId)
+        pass
+    pass
+
 action = bromixbmc.getParam('action')
 _id = bromixbmc.getParam('id')
 query = bromixbmc.getParam('query')
@@ -582,6 +599,8 @@ mine = bromixbmc.getParam('mine', 'no')=='yes'
 
 if action == __ACTION_SEARCH__:
     search(query, pageToken, pageIndex)
+elif action == __ACTION_ADD_TO_PLAYLIST__ and _id!=None:
+    addToPlayList(_id)
 elif action == __ACTION_SHOW_MYSUBSCRIPTIONS__:
     showMySubscriptions(pageToken, pageIndex)
 elif action == __ACTION_SHOW_SUBSCRIPTIONS__:
