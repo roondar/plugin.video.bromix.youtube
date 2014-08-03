@@ -1,3 +1,6 @@
+1.0.0~alpha14 (2014-08-XX)
+- XXX: xxx
+
 1.0.0~alpha13 (2014-08-02)
 - FIX: improved token and login validation
 
