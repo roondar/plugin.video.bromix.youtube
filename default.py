@@ -152,6 +152,14 @@ def showIndex():
                   'mine': 'yes'}
         __plugin__.addDirectory(__plugin__.localize(30003), params = params, thumbnailImage=__ICON_FALLBACK__, fanart=__FANART__)
         
+        # Watch Later
+        playlistId = __YT_PLAYLISTS__.get('likes', None)
+        if playlistId!=None:
+            params = {'action': __ACTION_SHOW_PLAYLIST__,
+                      'id': playlistId,
+                      'mine': 'yes'}
+            __plugin__.addDirectory(__plugin__.localize(30011), params = params, thumbnailImage=__ICON_FALLBACK__, fanart=__FANART__)
+        
         params = {'action': __ACTION_SHOW_SUBSCRIPTIONS__}
         __plugin__.addDirectory(__plugin__.localize(30004), params = params, thumbnailImage=__ICON_FALLBACK__, fanart=__FANART__)
         pass
