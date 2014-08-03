@@ -16,6 +16,8 @@
 	<category label="30518">
 		<setting id="videoQuality" type="enum" label="30501" lvalues="30502|30503|30504" default="1" />
 		<setting id="allow3D" type="bool" label="30519" default="false" />
+		<setting type="sep" />
+		<setting id="enableHistory" type="bool" label="30521" default="false" />
 	</category>
 	
 	<!-- Search -->

@@ -533,7 +533,7 @@ def play(videoId):
         if url!=None:
             __plugin__.setResolvedUrl(url)
             
-            if __client__.hasLogin:
+            if __client__.hasLogin() and __plugin__.getSettingAsBool('enableHistory'):
                 playlistId = __YT_PLAYLISTS__.get('watchHistory', None)
                 if playlistId!=None:
                     __client__.addPlayListItem(playlistId, videoId)

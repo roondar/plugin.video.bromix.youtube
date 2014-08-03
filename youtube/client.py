@@ -118,16 +118,22 @@ class YouTubeClient(object):
             if not self._hasValidToken():
                 self._updateToken()
                 params['access_token'] = self.AccessToken
+                
+        headers = {'X-JavaScript-User-Agent': 'Google APIs Explorer',
+                   'Host': 'www.googleapis.com',
+                   'User-Agent': 'Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/37.0.2062.58 Safari/537.36'}
+        if 'access_token' in params:
+            headers['Authorization'] = 'Bearer %s' % (self.AccessToken)
+            del params['access_token']
         
         url = self._createUrl(command=command, params=params)
         
         try:
             if method=='GET':
-                content = requests.get(url, verify=False)
+                content = requests.get(url, headers=headers, verify=False)
                 return json.loads(content.text)
             elif method=='POST':
-                headers = {'content-type': 'application/json',
-                           'Authorization': 'Bearer %s' % (self.AccessToken)}
+                headers['content-type'] = 'application/json'
                 content = requests.post(url, data=json.dumps(jsonData), headers=headers, verify=False)
                 pass
         except:
