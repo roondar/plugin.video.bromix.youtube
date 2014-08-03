@@ -8,6 +8,7 @@ import hashlib
 #pydevd.settrace('localhost', stdoutToServer=True, stderrToServer=True)
 
 import bromixbmc
+from _ast import Param
 __plugin__ = bromixbmc.Plugin()
 
 """ IMAGES """
@@ -370,20 +371,22 @@ def _listResult(jsonData, nextPageParams={}, pageIndex=1, mine=False, fanart=__F
                 title = snippet.get('title')
                 description = snippet.get('description')
                 
-                isWatchLaterPlaylist = False
-                playlistId = snippet.get('playlistId', None)
-                if playlistId!=None and playlistId == __YT_PLAYLISTS__.get('watchLater', None):
-                    isWatchLaterPlaylist = True
-                    pass
-                
                 thumbnailImage = _getBestThumbnailImage(item)
                 resourceId = snippet.get('resourceId', {})
                 videoId = resourceId.get('videoId', None)
                 if videoId!=None:
                     
+                    isWatchLaterPlaylist = False
+                    playlistId = snippet.get('playlistId', None)
+                    if playlistId!=None and playlistId == __YT_PLAYLISTS__.get('watchLater', None):
+                        isWatchLaterPlaylist = True
+                        pass
+                    
                     params = {'action': __ACTION_PLAY__,
-                              'id': videoId,
-                              'watchLaterItemId': item.get('id', '')}
+                              'id': videoId}
+                    
+                    if isWatchLaterPlaylist:
+                        params['watchLaterItemId'] = item.get('id', '')
                     
                     videoInfo = videoInfos.get(videoId, {})
                     infoLabels = {'plot': uploadInfo+description,
