@@ -215,6 +215,21 @@ def _getBestFanart(jsonData):
     
     return ''
 
+def _createContextMenuForVideo(videoId, isWatchLaterPlaylist=False):
+    contextMenu = []
+    
+    # 'Watch Later'
+    playlistId = __YT_PLAYLISTS__.get('watchLater', None)
+    if not isWatchLaterPlaylist and playlistId!=None and videoId!=None:
+        contextParams = {'action': __ACTION_ADD_TO_PLAYLIST__,
+                         'id': videoId,
+                         'playlistId': playlistId}
+        contextRun = 'RunPlugin('+__plugin__.createUrl(contextParams)+')'
+        
+        contextMenu.append( ("[B]"+__plugin__.localize(30005)+"[/B]", contextRun) )
+    
+    return contextMenu
+
 def _listResult(jsonData, nextPageParams={}, pageIndex=1, mine=False, fanart=__FANART__):
     items = jsonData.get('items', None)
     if items!=None:
@@ -301,14 +316,7 @@ def _listResult(jsonData, nextPageParams={}, pageIndex=1, mine=False, fanart=__F
                     params = {'action': __ACTION_PLAY__,
                               'id': videoId}
                     
-                    contextMenu = []
-                    playlistId = __YT_PLAYLISTS__.get('watchLater', None)
-                    if playlistId!=None:
-                        contextParams = {'action': __ACTION_ADD_TO_PLAYLIST__,
-                                         'id': videoId,
-                                         'playlistId': playlistId}
-                        contextRun = 'RunPlugin('+__plugin__.createUrl(contextParams)+')'
-                        contextMenu = [("[B]"+__plugin__.localize(30005)+"[/B]", contextRun)]
+                    contextMenu = _createContextMenuForVideo(videoId=videoId)
                     __plugin__.addVideoLink(name=title, params=params, thumbnailImage=thumbnailImage, fanart=fanart, infoLabels=infoLabels, contextMenu=contextMenu)
                     pass
                 pass
@@ -353,7 +361,9 @@ def _listResult(jsonData, nextPageParams={}, pageIndex=1, mine=False, fanart=__F
                         videoInfo = videoInfos.get(videoId, {})
                         infoLabels = {'plot': uploadInfo+description,
                                       'duration': videoInfo.get('duration', '1')}
-                        __plugin__.addVideoLink(name=title, params=params, thumbnailImage=thumbnailImage, fanart=fanart, infoLabels=infoLabels)
+                        
+                        contextMenu = _createContextMenuForVideo(videoId=videoId)
+                        __plugin__.addVideoLink(name=title, params=params, thumbnailImage=thumbnailImage, fanart=fanart, infoLabels=infoLabels, contextMenu=contextMenu)
                     pass
                 pass
             elif kind=='youtube#channel' and snippet!=None:
@@ -401,7 +411,9 @@ def _listResult(jsonData, nextPageParams={}, pageIndex=1, mine=False, fanart=__F
                     videoInfo = videoInfos.get(videoId, {})
                     infoLabels = {'plot': uploadInfo+description,
                                   'duration': videoInfo.get('duration', '1')}
-                    __plugin__.addVideoLink(name=title, params=params, thumbnailImage=thumbnailImage, fanart=fanart, infoLabels=infoLabels)
+                    
+                    contextMenu = _createContextMenuForVideo(videoId=videoId, isWatchLaterPlaylist=isWatchLaterPlaylist)
+                    __plugin__.addVideoLink(name=title, params=params, thumbnailImage=thumbnailImage, fanart=fanart, infoLabels=infoLabels, contextMenu=contextMenu)
                     pass
                 pass
             pass
@@ -482,7 +494,7 @@ def showPlaylist(playlistId, pageToken, pageIndex, mine=False):
     if mine==True:
         nextPageParams['mine'] = 'yes'
         
-    _listResult(jsonData, nextPageParams=nextPageParams, pageIndex=pageIndex)
+    _listResult(jsonData, nextPageParams=nextPageParams, pageIndex=pageIndex, mine=mine)
     
     __plugin__.endOfDirectory()
     
