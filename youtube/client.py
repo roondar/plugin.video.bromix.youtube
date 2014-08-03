@@ -249,7 +249,7 @@ class YouTubeClient(object):
         params = {'part': 'snippet,contentDetails',
                   'maxResults': self._MaxResult,
                   #'regionCode': self._RegionCode,
-                  #'publishedAfter': publishedAfter
+                  #'publishedBefore': publishedAfter
                   }
         
         if channelId!=None:
