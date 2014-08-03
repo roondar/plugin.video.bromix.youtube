@@ -8,6 +8,7 @@ import hashlib
 #pydevd.settrace('localhost', stdoutToServer=True, stderrToServer=True)
 
 import bromixbmc
+from __builtin__ import min
 __plugin__ = bromixbmc.Plugin()
 
 # icons and images
@@ -82,6 +83,12 @@ def showIndex():
             item = items[0]
             contentDetails = item.get('contentDetails', {})
             relatedPlaylists = contentDetails.get('relatedPlaylists', {})
+            
+            # My Channel
+            params = {'action': __ACTION_SHOW_CHANNEL__,
+                      'id': 'UCJuGqhmRY5riCWqFhxEfl9w',
+                      'mine': 'yes'}
+            __plugin__.addDirectory(__plugin__.localize(30010), params=params, thumbnailImage=__ICON_FALLBACK__, fanart=__FANART__)
             
             # History
             playlistId = relatedPlaylists.get('watchHistory', None)
@@ -416,7 +423,7 @@ def showPlaylists(channelId, pageToken, pageIndex, mine=False):
     
     __plugin__.endOfDirectory()
     
-def showChannel(channelId, pageToken, pageIndex):
+def showChannel(channelId, pageToken, pageIndex, mine=False):
     __plugin__.setContent('episodes')
     
     jsonData = __client__.getChannels(channelId=channelId)
@@ -430,8 +437,15 @@ def showChannel(channelId, pageToken, pageIndex):
         Show the playlists of a channel on the first page (only if the setting is true)
         """
         if __SETTING_SHOW_PLAYLISTS__:
+            # default for all public playlists
             params = {'action': __ACTION_SHOW_PLAYLISTS__,
                       'id': channelId}
+            
+            # this is for the own playlist, so we can also see the private playlists 
+            if mine==True: 
+                params = {'action': __ACTION_SHOW_PLAYLISTS__,
+                          'mine': 'yes'}
+            
             __plugin__.addDirectory(name="[B]"+__plugin__.localize(30003)+"[/B]", params=params, thumbnailImage=__ICON_FALLBACK__, fanart=fanart)
             pass
         
@@ -485,8 +499,8 @@ elif action == __ACTION_SHOW_SUBSCRIPTIONS__:
     showSubscriptions(pageToken, pageIndex)
 elif action == __ACTION_BROWSE_CHANNELS__:
     browseChannels();
-elif action == __ACTION_SHOW_CHANNEL__ and _id!=None:
-    showChannel(_id, pageToken, pageIndex)
+elif action == __ACTION_SHOW_CHANNEL__ and (_id!=None or mine==True):
+    showChannel(_id, pageToken, pageIndex, mine=mine)
 elif action == __ACTION_SHOW_CHANNEL_CATEGORY__ and _id!=None:
     showChannelCategory(_id, pageToken, pageIndex)
 elif action == __ACTION_SHOW_PLAYLIST__ and _id!=None:
