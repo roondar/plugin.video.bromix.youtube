@@ -396,9 +396,9 @@ def search(query=None, pageToken=None, pageIndex=1):
     __plugin__.setContent('episodes')
     success = False
     
-    searchVideos=__plugin__.getSettingAsBool('searchVideos'),
-    searchChannels=__plugin__.getSettingAsBool('searchChannels'),
-    searchPlaylists=__plugin__.getSettingAsBool('searchPlaylists'),
+    searchVideos=__plugin__.getSettingAsBool('searchVideos')
+    searchChannels=__plugin__.getSettingAsBool('searchChannels')
+    searchPlaylists=__plugin__.getSettingAsBool('searchPlaylists')
     
     nextPageParams = {}
     jsonData = {}
