@@ -135,6 +135,8 @@ class YouTubeClient(object):
             elif method=='POST':
                 headers['content-type'] = 'application/json'
                 content = requests.post(url, data=json.dumps(jsonData), headers=headers, verify=False)
+            elif method=='DELETE':
+                content = requests.delete(url, headers=headers, verify=False)
                 pass
         except:
             if tries>=1:
@@ -268,6 +270,13 @@ class YouTubeClient(object):
                     }
         
         result = self._executeApi('playlistItems', params=params, jsonData=jsonData, method='POST')
+        pass
+    
+    def removePlaylistItem(self, _id):
+        params = {'id': _id,
+                  'access_token': self.AccessToken}
+        
+        result = self._executeApi('playlistItems', params=params, method='DELETE')
         pass
     
     def getActivities(self, channelId=None, home=None, mine=None, nextPageToken=None):

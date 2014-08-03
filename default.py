@@ -370,13 +370,20 @@ def _listResult(jsonData, nextPageParams={}, pageIndex=1, mine=False, fanart=__F
                 title = snippet.get('title')
                 description = snippet.get('description')
                 
+                isWatchLaterPlaylist = False
+                playlistId = snippet.get('playlistId', None)
+                if playlistId!=None and playlistId == __YT_PLAYLISTS__.get('watchLater', None):
+                    isWatchLaterPlaylist = True
+                    pass
+                
                 thumbnailImage = _getBestThumbnailImage(item)
                 resourceId = snippet.get('resourceId', {})
                 videoId = resourceId.get('videoId', None)
                 if videoId!=None:
                     
                     params = {'action': __ACTION_PLAY__,
-                              'id': videoId}
+                              'id': videoId,
+                              'watchLaterItemId': item.get('id', '')}
                     
                     videoInfo = videoInfos.get(videoId, {})
                     infoLabels = {'plot': uploadInfo+description,
@@ -541,10 +548,22 @@ def play(videoId):
         if url!=None:
             __plugin__.setResolvedUrl(url)
             
-            if __client__.hasLogin() and __plugin__.getSettingAsBool('enableHistory'):
-                playlistId = __YT_PLAYLISTS__.get('watchHistory', None)
-                if playlistId!=None:
-                    __client__.addPlayListItem(playlistId, videoId)
+            if __client__.hasLogin():
+                # try to add the video to the history
+                if __plugin__.getSettingAsBool('enableHistory'):
+                    playlistId = __YT_PLAYLISTS__.get('watchHistory', None)
+                    if playlistId!=None:
+                        __client__.addPlayListItem(playlistId, videoId)
+                        pass
+                    pass
+                
+                # remove the video from the 'Watch Later' playlist
+                if __plugin__.getSettingAsBool('automaticWatchLater'):
+                    watchLaterItemId = bromixbmc.getParam('watchLaterItemId', None)
+                    if watchLaterItemId!=None:
+                        __client__.removePlaylistItem(watchLaterItemId)
+                        bromixbmc.executebuiltin("Container.Refresh");
+                        pass
                     pass
                 pass
             pass
