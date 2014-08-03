@@ -10,18 +10,17 @@ import hashlib
 import bromixbmc
 __plugin__ = bromixbmc.Plugin()
 
-# icons and images
+""" IMAGES """
 __FANART__ = os.path.join(__plugin__.getPath(), "fanart.jpg")
 __ICON_FALLBACK__ = os.path.join(__plugin__.getPath(), "resources/media/fallback_icon.png")
 __ICON_SEARCH__ = os.path.join(__plugin__.getPath(), "resources/media/search.png")
 
-# settings
+""" GLOBAL SETTINGS """
 __SETTING_SHOW_FANART__ = __plugin__.getSettingAsBool('showFanart')
 if not __SETTING_SHOW_FANART__:
     __FANART__ = ''
-__SETTING_SHOW_PLAYLISTS__ = __plugin__.getSettingAsBool('showPlaylists')
 
-#actions
+""" ACTIONS """
 __ACTION_SEARCH__ = 'search'
 __ACTION_BROWSE_CHANNELS__ = 'browseChannels'
 __ACTION_SHOW_CHANNEL_CATEGORY__ = 'showChannelCategory'
@@ -32,6 +31,7 @@ __ACTION_SHOW_CHANNEL__ = 'showChannel'
 __ACTION_SHOW_SUBSCRIPTIONS__ = 'showSubscriptions'
 __ACTION_PLAY__ = 'play'
 
+""" CACHED YOUTUBE DATA """
 __YT_PLAYLISTS__ = {'likes': '', 'favorites': '', 'uploads': '', 'watchHistory': '', 'watchLater': ''}
 __YT_CANNEL_ID__ = ''
 
@@ -66,39 +66,51 @@ if oldHash!=currentHash:
     __plugin__.setSettingAsString('yt_channel_id', '')
     pass
 
-"""
-Load cached data
-"""
-__ACCESS_TOKEN__ = __plugin__.getSettingAsString('oauth2_access_token', None)
-__ACCESS_TOKEN_EXPIRES_AT__ = __plugin__.getSettingAsFloat('oauth2_access_token_expires_at', -1)
 __YT_CANNEL_ID__ = __plugin__.getSettingAsString('yt_channel_id', '')
 
 import youtube.video
 from youtube import YouTubeClient
 __client__ = YouTubeClient(username = __ACCESS_USERNAME__,
                            password = __ACCESS_PASSWORD__,
-                           cachedToken = __ACCESS_TOKEN__,
-                           accessTokenExpiresAt = __ACCESS_TOKEN_EXPIRES_AT__,
+                           cachedToken = __plugin__.getSettingAsString('oauth2_access_token', None),
+                           accessTokenExpiresAt = __plugin__.getSettingAsFloat('oauth2_access_token_expires_at', -1),
                            language = bromixbmc.getLanguageId(),
                            maxResult = __plugin__.getSettingAsInt('resultPerPage', default=5, mapping={0:5, 1:10, 2:15, 3:20, 4:25, 5:30, 6:35, 7:40, 8:45, 9:50})
                            );
 
-_renewPlaylistIds = False
+_INT_UPDATE_YOUTUBE_DATA_ = False
 for key in __YT_PLAYLISTS__:
     name = 'yt_playlist_%s' % (key)
     __YT_PLAYLISTS__[key] = __plugin__.getSettingAsString(name, '')
     if len(__YT_PLAYLISTS__[key])==0:
-        _renewPlaylistIds = True
+        _INT_UPDATE_YOUTUBE_DATA_ = True
         break
     pass
 
-if _renewPlaylistIds and __client__.hasLogin():
+if (_INT_UPDATE_YOUTUBE_DATA_ or len(__YT_CANNEL_ID__)==0 )and __client__.hasLogin():
     jsonData = __client__.getChannels(mine=True)
     items = jsonData.get('items', [])
     if len(items)>0:
         item = items[0]
+        
+        # get the own channel id
+        __YT_CANNEL_ID__ = item.get('id', '')
+        __plugin__.setSettingAsString('yt_channel_id', __YT_CANNEL_ID__)
+        
+        # try to get all ids of the playlists
         contentDetails = item.get('contentDetails', {})
         relatedPlaylists = contentDetails.get('relatedPlaylists', {})
+        for key in relatedPlaylists:
+            playlistId = relatedPlaylists.get(key, None)
+            if playlistId!=None:
+                __YT_PLAYLISTS__[key] = playlistId
+                pass
+            pass
+        
+        for key in __YT_CANNEL_ID__:
+            name = 'yt_playlist_%s' % (key)
+            __plugin__.setSettingAsString(name, __YT_PLAYLISTS__.get(key, ''))
+            pass
     pass
 
 
@@ -475,7 +487,7 @@ def showChannel(channelId, pageToken, pageIndex, mine=False):
         """
         Show the playlists of a channel on the first page (only if the setting is true)
         """
-        if __SETTING_SHOW_PLAYLISTS__:
+        if __plugin__.getSettingAsBool('showPlaylists'):
             # default for all public playlists
             params = {'action': __ACTION_SHOW_PLAYLISTS__,
                       'id': channelId}
@@ -556,8 +568,7 @@ else:
     showIndex()
     
 # token and expiration date
-if __ACCESS_TOKEN__ != __client__.AccessToken:
-    __ACCESS_TOKEN__ = __client__.AccessToken
-    if __ACCESS_TOKEN__!=None and len(__ACCESS_TOKEN__)>0:
+if __plugin__.getSettingAsString('oauth2_access_token', '') != __client__.AccessToken:
+    if __client__.AccessToken!=None and len(__client__.AccessToken)>0:
         __plugin__.setSettingAsFloat('oauth2_access_token_expires_at', __client__.AccessTokenExpiresAt)
-        __plugin__.setSettingAsString('oauth2_access_token', __ACCESS_TOKEN__)
+        __plugin__.setSettingAsString('oauth2_access_token', __client__.AccessToken)
