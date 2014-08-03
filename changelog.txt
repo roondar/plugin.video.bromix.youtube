@@ -1,4 +1,4 @@
-1.0.0~alpha14 (2014-08-XX)
+1.0.0~alpha14 (2014-08-03)
 - ADD: 'Remove' via context menu for playlists
 - ADD: 'Watch Later' via context menu to add a video to the 'Watch Later' playlist
 - ADD: Automatic remove from the 'Watch Later' playlists (optional via settings - default = true)
