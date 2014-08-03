@@ -1,3 +1,6 @@
+1.0.0~alpha13 (2014-08-02)
+- FIX: improved token and login validation
+
 1.0.0~alpha12 (2014-08-01)
 - ADD: Show 'Published on' and 'Channel' in the description of a video (can be disabled via setting)
 - ADD: support for 3D videos (can be disabled via setting)

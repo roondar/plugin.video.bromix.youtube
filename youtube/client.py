@@ -34,6 +34,12 @@ class YouTubeClient(object):
         return self.AccessToken!=None
     
     def getUserToken(self):
+        if self._Username==None or len(self._Username)==0:
+            return {}
+        
+        if self._Password==None or len(self._Password)==0:
+            return {}
+        
         params = {'device_country': self._RegionCode.lower(),
                   'operatorCountry': self._RegionCode.lower(),
                   'lang': self._HL.replace('-', '_'),
@@ -98,8 +104,10 @@ class YouTubeClient(object):
         
     def _hasValidToken(self):
         isExpired = self.AccessTokenExpiresAt < time.time()
-        if (self.AccessToken==None or len(self.AccessToken)==0 or isExpired) and (self._Username!=None and self._Password!=None and len(self._Username)>0 and len(self._Password)>0):
+        if (self.AccessToken==None or len(self.AccessToken)==0 or isExpired):
             return False
+        
+        # and (self._Username!=None and self._Password!=None and len(self._Username)>0 and len(self._Password)>0):
         
         return True
     
