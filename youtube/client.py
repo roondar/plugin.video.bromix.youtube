@@ -179,6 +179,7 @@ class YouTubeClient(object):
     def getVideos(self, videoIds=[]):
         params = {'part': 'contentDetails',
                   'id': self._makeCommaSeparatedList(videoIds)}
+        #'access_token': self.AccessToken}
         return self._executeApi('videos', params)
     
     def _sortItems(self, item):

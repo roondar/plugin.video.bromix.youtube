@@ -210,8 +210,8 @@ def getVideoStreamInfos(videoId):
     
     #fallback
     opener = urllib2.build_opener()
-    #url = ' https://www.youtube.com/get_video_info?video_id=%s&hl=en&gl=US&ptk=vevo&el=detailpage' % (videoId)
-    url = ' https://www.youtube.com/get_video_info?video_id=%s&hl=en&gl=US&el=detailpage' % (videoId)
+    #url = 'https://www.youtube.com/get_video_info?video_id=%s&hl=en&gl=US&ptk=vevo&el=detailpage' % (videoId)
+    url = 'https://www.youtube.com/get_video_info?video_id=%s&hl=en&gl=US&el=detailpage' % (videoId)
     content = opener.open(url)
     
     html = content.read()
