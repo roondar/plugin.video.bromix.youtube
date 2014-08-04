@@ -1,5 +1,5 @@
 1.0.0~alpha15 (2014-08-04)
-- FIX:
+- FIX: moved (only) for the subscribtions to V2 to see new uploaded videos
 
 1.0.0~alpha14 (2014-08-03)
 - ADD: 'Remove' via context menu for playlists
