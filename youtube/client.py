@@ -87,7 +87,7 @@ class YouTubeClient(object):
         
         return result
     
-    def _createUrl(self, command, params={}):
+    def _createUrlV3(self, command, params={}):
         url = 'https://www.googleapis.com/youtube/v3/%s' % (command)
         
         _params = {}
@@ -126,7 +126,7 @@ class YouTubeClient(object):
             headers['Authorization'] = 'Bearer %s' % (self.AccessToken)
             del params['access_token']
         
-        url = self._createUrl(command=command, params=params)
+        url = self._createUrlV3(command=command, params=params)
         
         try:
             if method=='GET':
@@ -190,7 +190,7 @@ class YouTubeClient(object):
         return result
     
     def getVideos(self, videoIds=[]):
-        params = {'part': 'contentDetails',
+        params = {'part': 'snippet,contentDetails',
                   'id': self._makeCommaSeparatedList(videoIds)}
         #'access_token': self.AccessToken}
         return self._executeApiV3('videos', params)
@@ -339,3 +339,46 @@ class YouTubeClient(object):
             params['pageToken'] = nextPageToken
 
         return self._executeApiV3('search', params)
+    
+    def _createUrlV2(self, url, params={}):
+        url = 'https://gdata.youtube.com/%s' % (url)
+        
+        _params = {}
+        _params.update(params)
+        
+        if _params!=None and len(_params)>0:
+            return url + '?' + urllib.urlencode(_params)
+        
+        return url
+    
+    def _executeApiV2(self, url, params={}, tries=1, method='GET'):
+        if 'access_token' in params:
+            if not self._hasValidToken():
+                self._updateToken()
+                params['access_token'] = self.AccessToken
+                
+        headers = {'Host': 'gdata.youtube.com',
+                   'X-GData-Key': 'key=%s' % (__YOUTUBE_API_KEY__),
+                   'GData-Version': '2',
+                   'User-Agent': 'Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/37.0.2062.58 Safari/537.36'}
+        if 'access_token' in params:
+            headers['Authorization'] = 'Bearer %s' % (self.AccessToken)
+            del params['access_token']
+        
+        url = self._createUrlV2(url=url, params=params)
+        
+        try:
+            if method=='GET':
+                content = requests.get(url, headers=headers, verify=False)
+                return content.text
+        except:
+            if tries>=1:
+                tries = tries-1
+                return self._executeApiV3(url, params, tries, method)
+        
+            return ''
+        pass
+    
+    def getNewSubscriptionVideosV2(self):
+        params = {'access_token': self.AccessToken}
+        return self._executeApiV2('/feeds/api/users/default/newsubscriptionvideos', params=params)

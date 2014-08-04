@@ -4,11 +4,15 @@ import os
 import re
 import hashlib
 
+try:
+    from xml.etree import ElementTree as ET
+except ImportError:
+    import xml.etree.ElementTree as ET
+
 #import pydevd
 #pydevd.settrace('localhost', stdoutToServer=True, stderrToServer=True)
 
 import bromixbmc
-from _ast import Param
 __plugin__ = bromixbmc.Plugin()
 
 """ IMAGES """
@@ -563,10 +567,85 @@ def showChannel(channelId, pageToken, pageIndex, mine=False):
     __plugin__.endOfDirectory()
     
 def showMySubscriptions(pageToken, pageIndex):
+    """
+    We have to use at this point V2 of the API.
+    V3 doesn't support any kind of new uploaded videos.
+    
+    NAMESPACES:
+    
+    xmlns=http://www.w3.org/2005/Atom
+    xmlns:media=http://search.yahoo.com/mrss/
+    xmlns:openSearch=http://a9.com/-/spec/opensearch/1.1/
+    xmlns:gd=http://schemas.google.com/g/2005
+    xmlns:gml=http://www.opengis.net/gml
+    xmlns:yt=http://gdata.youtube.com/schemas/2007
+    xmlns:georss=http://www.georss.org/georss
+    """
     __plugin__.setContent('episodes')
-    jsonData = __client__.getActivities(home=True, nextPageToken=pageToken)
-    nextPageParams = {'action': __ACTION_SHOW_MYSUBSCRIPTIONS__}
-    _listResult(jsonData, nextPageParams=nextPageParams, pageIndex=pageIndex)
+    
+    try:
+        xmlData = __client__.getNewSubscriptionVideosV2()
+        xmlData = xmlData.encode('utf-8')
+        
+        root = ET.fromstring(xmlData)
+        
+        entries = root.findall('{http://www.w3.org/2005/Atom}entry')
+        for entry in entries:
+            try:
+                title = unicode(entry.find('{http://www.w3.org/2005/Atom}title').text)
+                mediaGroup = entry.find('{http://search.yahoo.com/mrss/}group')
+                if mediaGroup!=None:
+                    videoId = unicode(mediaGroup.find('{http://gdata.youtube.com/schemas/2007}videoid').text)
+                    
+                    minutes = '1'
+                    duration = mediaGroup.find('{http://gdata.youtube.com/schemas/2007}duration')
+                    if duration!=None:
+                        minutes = int(duration.get('seconds'))/60
+                        if minutes==0:
+                            minutes = '1'
+                        else:
+                            minutes = str(minutes) 
+                        pass
+                    
+                    thumbnailImage = None
+                    thumbnails = mediaGroup.findall('{http://search.yahoo.com/mrss/}thumbnail')
+                    for thumbnail in thumbnails:
+                        url = thumbnail.get('url')
+                        name = thumbnail.get('{http://gdata.youtube.com/schemas/2007}name')
+                        if name=='sddefault':
+                            thumbnailImage = url
+                            break
+                        elif name=='hqdefault' and thumbnailImage==None:
+                            thumbnailImage = url
+                        elif name=='mqdefault' and thumbnailImage==None:
+                            thumbnailImage = url
+                        pass
+                    
+                    plot = bromixbmc.stripHtmlFromText(unicode(mediaGroup.find('{http://search.yahoo.com/mrss/}description').text))
+                    infoLabels = {'duration': minutes,
+                                  'plot': plot}
+                    
+                    params = {'action': __ACTION_PLAY__,
+                              'id': videoId}
+                    
+                    contextMenu = _createContextMenuForVideo(videoId)
+                    
+                    __plugin__.addVideoLink(name=title, params=params, thumbnailImage=thumbnailImage, fanart=__FANART__, infoLabels=infoLabels, contextMenu=contextMenu)
+                    pass
+                pass
+            except:
+                # do nothing
+                pass
+            pass
+        
+        """
+        nextPageParams = {'action': __ACTION_SHOW_MYSUBSCRIPTIONS__}
+        _listResult(jsonData, nextPageParams=nextPageParams, pageIndex=pageIndex)
+        """
+    except:
+        # do nothing
+        pass
+    
     __plugin__.endOfDirectory()
     
 def showSubscriptions(pageToken, pageIndex):
