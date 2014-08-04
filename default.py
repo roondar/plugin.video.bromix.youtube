@@ -253,11 +253,32 @@ def _listVideo(title, videoId,
                isMyPlaylist=False,
                isWatchLaterPlaylist=False):
     
+    plot2 = ''
+    if __plugin__.getSettingAsBool('showUploadInfo', False):
+        if channelName!=None:
+            plot2 = '[B]'+__plugin__.localize(30009)+': '+channelName+'[/B][CR]'
+            pass
+        
+        try:
+            if publishedAt!=None:
+                match = re.compile('(\d+)-(\d+)-(\d+)T(\d+)\:(\d+)\:(\d+)\.(.+)').findall(publishedAt)
+                if match and len(match)>0 and len(match[0])>=7:
+                    plot2 = plot2+'[B]'+__plugin__.localize(30008)+': '+bromixbmc.getFormatDateShort(match[0][0], match[0][1], match[0][2])+' '+bromixbmc.getFormatTime(match[0][3], match[0][4], match[0][5])+'[/B][CR][CR]'
+                    pass
+                pass
+            pass
+        except:
+            if publishedAt==None:
+                publishedAt=''
+            __plugin__.logError("Failed to set the published date for video '%s' publishedAt='%s'" % (videoId, publishedAt))
+            pass
+    plot2 = plot2+plot
+    
     params = {'action': __ACTION_PLAY__,
               'id': videoId}
     
     infoLabels = {'duration': duration,
-                  'plot': plot}
+                  'plot': plot2}
     
     contextMenu = _createContextMenuForVideo(videoId, playlistItemId, isMyPlaylist, isWatchLaterPlaylist)
     
@@ -618,10 +639,11 @@ def showMySubscriptions(pageToken, pageIndex):
         for entry in entries:
             try:
                 channelName = ''
-                author = entry.find('author')
+                author = entry.find('{http://www.w3.org/2005/Atom}author')
                 if author!=None:
-                    channelName = unicode(author.find('name').text)
+                    channelName = unicode(author.find('{http://www.w3.org/2005/Atom}name').text)
                     pass
+                publishedAt = unicode(entry.find('{http://www.w3.org/2005/Atom}published').text)
                 title = unicode(entry.find('{http://www.w3.org/2005/Atom}title').text)
                 mediaGroup = entry.find('{http://search.yahoo.com/mrss/}group')
                 if mediaGroup!=None:
@@ -652,19 +674,18 @@ def showMySubscriptions(pageToken, pageIndex):
                         pass
                     
                     plot = bromixbmc.stripHtmlFromText(unicode(mediaGroup.find('{http://search.yahoo.com/mrss/}description').text))
-                    infoLabels = {'duration': minutes,
-                                  'plot': plot}
                     
-                    params = {'action': __ACTION_PLAY__,
-                              'id': videoId}
-                    
-                    contextMenu = _createContextMenuForVideo(videoId)
-                    
-                    __plugin__.addVideoLink(name=title, params=params, thumbnailImage=thumbnailImage, fanart=__FANART__, infoLabels=infoLabels, contextMenu=contextMenu)
+                    _listVideo(title=title,
+                               videoId=videoId,
+                               duration=minutes,
+                               plot=plot,
+                               thumbnailImage=thumbnailImage,
+                               publishedAt=publishedAt,
+                               channelName=channelName)
                     pass
                 pass
             except:
-                # do nothing
+                __plugin__.logError('Failed to add new uploaded video')
                 pass
             pass
         
