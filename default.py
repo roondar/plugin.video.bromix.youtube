@@ -592,6 +592,11 @@ def showMySubscriptions(pageToken, pageIndex):
         entries = root.findall('{http://www.w3.org/2005/Atom}entry')
         for entry in entries:
             try:
+                channelName = ''
+                author = entry.find('author')
+                if author!=None:
+                    channelName = unicode(author.find('name').text)
+                    pass
                 title = unicode(entry.find('{http://www.w3.org/2005/Atom}title').text)
                 mediaGroup = entry.find('{http://search.yahoo.com/mrss/}group')
                 if mediaGroup!=None:
