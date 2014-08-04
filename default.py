@@ -242,6 +242,28 @@ def _createContextMenuForVideo(videoId, playlistItemId=None, isMyPlaylist=False,
     
     return contextMenu
 
+def _listVideo(title, videoId,
+               duration='1',
+               plot='',
+               thumbnailImage=__ICON_FALLBACK__,
+               fanart=__FANART__,
+               publishedAt=None,
+               channelName=None,
+               playlistItemId=None,
+               isMyPlaylist=False,
+               isWatchLaterPlaylist=False):
+    
+    params = {'action': __ACTION_PLAY__,
+              'id': videoId}
+    
+    infoLabels = {'duration': duration,
+                  'plot': plot}
+    
+    contextMenu = _createContextMenuForVideo(videoId, playlistItemId, isMyPlaylist, isWatchLaterPlaylist)
+    
+    __plugin__.addVideoLink(name=title, params=params, thumbnailImage=thumbnailImage, fanart=fanart, infoLabels=infoLabels, contextMenu=contextMenu)
+    pass
+
 def _listResult(jsonData, nextPageParams={}, pageIndex=1, mine=False, fanart=__FANART__):
     items = jsonData.get('items', None)
     if items!=None:
@@ -590,6 +612,9 @@ def showMySubscriptions(pageToken, pageIndex):
         root = ET.fromstring(xmlData)
         
         entries = root.findall('{http://www.w3.org/2005/Atom}entry')
+        if len(entries)==0:
+            bromixbmc.logDebug('No new uploaded videos found')
+            
         for entry in entries:
             try:
                 channelName = ''
@@ -648,7 +673,7 @@ def showMySubscriptions(pageToken, pageIndex):
         _listResult(jsonData, nextPageParams=nextPageParams, pageIndex=pageIndex)
         """
     except:
-        # do nothing
+        bromixbmc.logDebug('Failed to load new uploaded videos')
         pass
     
     __plugin__.endOfDirectory()
