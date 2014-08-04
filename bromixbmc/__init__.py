@@ -1,4 +1,7 @@
 """
+Version 2.1.2 (2014.08.04)
+- ADD: logDebug, logWarning, logInfo and logError
+
 Version 2.1.1 (2014.08.03)
 - ADD: plugin.getFormatTime(hour, minute, seconds)
 
@@ -56,6 +59,22 @@ import xbmc
 
 from plugin import Plugin
 from keyboard import Keyboard
+
+def logDebug(text):
+    xbmc.log(msg=text, level=xbmc.LOGDEBUG)
+    pass
+
+def logInfo(text):
+    xbmc.log(msg=text, level=xbmc.LOGINFO)
+    pass
+
+def logWarning(text):
+    xbmc.log(msg=text, level=xbmc.LOGWARNING)
+    pass
+
+def logError(text):
+    xbmc.log(msg=text, level=xbmc.LOGERROR)
+    pass
 
 def getFormatDateShort(year, month, day):
     date_format = xbmc.getRegion('dateshort')

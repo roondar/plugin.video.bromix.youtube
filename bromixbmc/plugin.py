@@ -69,6 +69,25 @@ class Plugin(object):
             
         self._favs_file = os.path.join(self._addon_data_path, "favs.dat")
         
+    def _formatLogText(self, text):
+        return '%s (%s): %s' % (self._addon_id, self._name, text)
+        
+    def logDebug(self, text):
+        xbmc.log(msg=self._formatLogText(text), level=xbmc.LOGDEBUG)
+        pass
+
+    def logInfo(self, text):
+        xbmc.log(msg=self._formatLogText(text), level=xbmc.LOGINFO)
+        pass
+    
+    def logWarning(self, text):
+        xbmc.log(msg=self._formatLogText(text), level=xbmc.LOGWARNING)
+        pass
+    
+    def logError(self, text):
+        xbmc.log(msg=self._formatLogText(text), level=xbmc.LOGERROR)
+        pass
+        
     def createUrl(self, params={}):
         if params and len(params)>0:
             return self._addon_uri + '?' + urllib.urlencode(params)

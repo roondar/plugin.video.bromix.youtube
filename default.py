@@ -4,11 +4,15 @@ import os
 import re
 import hashlib
 
+try:
+    from xml.etree import ElementTree as ET
+except ImportError:
+    import xml.etree.ElementTree as ET
+
 #import pydevd
 #pydevd.settrace('localhost', stdoutToServer=True, stderrToServer=True)
 
 import bromixbmc
-from _ast import Param
 __plugin__ = bromixbmc.Plugin()
 
 """ IMAGES """
@@ -237,6 +241,49 @@ def _createContextMenuForVideo(videoId, playlistItemId=None, isMyPlaylist=False,
         pass
     
     return contextMenu
+
+def _listVideo(title, videoId,
+               duration='1',
+               plot='',
+               thumbnailImage=__ICON_FALLBACK__,
+               fanart=__FANART__,
+               publishedAt=None,
+               channelName=None,
+               playlistItemId=None,
+               isMyPlaylist=False,
+               isWatchLaterPlaylist=False):
+    
+    plot2 = ''
+    if __plugin__.getSettingAsBool('showUploadInfo', False):
+        if channelName!=None:
+            plot2 = '[B]'+__plugin__.localize(30009)+': '+channelName+'[/B][CR]'
+            pass
+        
+        try:
+            if publishedAt!=None:
+                match = re.compile('(\d+)-(\d+)-(\d+)T(\d+)\:(\d+)\:(\d+)\.(.+)').findall(publishedAt)
+                if match and len(match)>0 and len(match[0])>=7:
+                    plot2 = plot2+'[B]'+__plugin__.localize(30008)+': '+bromixbmc.getFormatDateShort(match[0][0], match[0][1], match[0][2])+' '+bromixbmc.getFormatTime(match[0][3], match[0][4], match[0][5])+'[/B][CR][CR]'
+                    pass
+                pass
+            pass
+        except:
+            if publishedAt==None:
+                publishedAt=''
+            __plugin__.logError("Failed to set the published date for video '%s' publishedAt='%s'" % (videoId, publishedAt))
+            pass
+    plot2 = plot2+plot
+    
+    params = {'action': __ACTION_PLAY__,
+              'id': videoId}
+    
+    infoLabels = {'duration': duration,
+                  'plot': plot2}
+    
+    contextMenu = _createContextMenuForVideo(videoId, playlistItemId, isMyPlaylist, isWatchLaterPlaylist)
+    
+    __plugin__.addVideoLink(name=title, params=params, thumbnailImage=thumbnailImage, fanart=fanart, infoLabels=infoLabels, contextMenu=contextMenu)
+    pass
 
 def _listResult(jsonData, nextPageParams={}, pageIndex=1, mine=False, fanart=__FANART__):
     items = jsonData.get('items', None)
@@ -563,10 +610,93 @@ def showChannel(channelId, pageToken, pageIndex, mine=False):
     __plugin__.endOfDirectory()
     
 def showMySubscriptions(pageToken, pageIndex):
+    """
+    We have to use at this point V2 of the API.
+    V3 doesn't support any kind of new uploaded videos.
+    
+    NAMESPACES:
+    
+    xmlns=http://www.w3.org/2005/Atom
+    xmlns:media=http://search.yahoo.com/mrss/
+    xmlns:openSearch=http://a9.com/-/spec/opensearch/1.1/
+    xmlns:gd=http://schemas.google.com/g/2005
+    xmlns:gml=http://www.opengis.net/gml
+    xmlns:yt=http://gdata.youtube.com/schemas/2007
+    xmlns:georss=http://www.georss.org/georss
+    """
     __plugin__.setContent('episodes')
-    jsonData = __client__.getActivities(home=True, nextPageToken=pageToken)
-    nextPageParams = {'action': __ACTION_SHOW_MYSUBSCRIPTIONS__}
-    _listResult(jsonData, nextPageParams=nextPageParams, pageIndex=pageIndex)
+    
+    try:
+        xmlData = __client__.getNewSubscriptionVideosV2()
+        xmlData = xmlData.encode('utf-8')
+        
+        root = ET.fromstring(xmlData)
+        
+        entries = root.findall('{http://www.w3.org/2005/Atom}entry')
+        if len(entries)==0:
+            bromixbmc.logDebug('No new uploaded videos found')
+            
+        for entry in entries:
+            try:
+                channelName = ''
+                author = entry.find('{http://www.w3.org/2005/Atom}author')
+                if author!=None:
+                    channelName = unicode(author.find('{http://www.w3.org/2005/Atom}name').text)
+                    pass
+                publishedAt = unicode(entry.find('{http://www.w3.org/2005/Atom}published').text)
+                title = unicode(entry.find('{http://www.w3.org/2005/Atom}title').text)
+                mediaGroup = entry.find('{http://search.yahoo.com/mrss/}group')
+                if mediaGroup!=None:
+                    videoId = unicode(mediaGroup.find('{http://gdata.youtube.com/schemas/2007}videoid').text)
+                    
+                    minutes = '1'
+                    duration = mediaGroup.find('{http://gdata.youtube.com/schemas/2007}duration')
+                    if duration!=None:
+                        minutes = int(duration.get('seconds'))/60
+                        if minutes==0:
+                            minutes = '1'
+                        else:
+                            minutes = str(minutes) 
+                        pass
+                    
+                    thumbnailImage = None
+                    thumbnails = mediaGroup.findall('{http://search.yahoo.com/mrss/}thumbnail')
+                    for thumbnail in thumbnails:
+                        url = thumbnail.get('url')
+                        name = thumbnail.get('{http://gdata.youtube.com/schemas/2007}name')
+                        if name=='sddefault':
+                            thumbnailImage = url
+                            break
+                        elif name=='hqdefault' and thumbnailImage==None:
+                            thumbnailImage = url
+                        elif name=='mqdefault' and thumbnailImage==None:
+                            thumbnailImage = url
+                        pass
+                    
+                    plot = bromixbmc.stripHtmlFromText(unicode(mediaGroup.find('{http://search.yahoo.com/mrss/}description').text))
+                    
+                    _listVideo(title=title,
+                               videoId=videoId,
+                               duration=minutes,
+                               plot=plot,
+                               thumbnailImage=thumbnailImage,
+                               publishedAt=publishedAt,
+                               channelName=channelName)
+                    pass
+                pass
+            except:
+                __plugin__.logError('Failed to add new uploaded video')
+                pass
+            pass
+        
+        """
+        nextPageParams = {'action': __ACTION_SHOW_MYSUBSCRIPTIONS__}
+        _listResult(jsonData, nextPageParams=nextPageParams, pageIndex=pageIndex)
+        """
+    except:
+        bromixbmc.logDebug('Failed to load new uploaded videos')
+        pass
+    
     __plugin__.endOfDirectory()
     
 def showSubscriptions(pageToken, pageIndex):
