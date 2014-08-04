@@ -113,7 +113,7 @@ class YouTubeClient(object):
         
         return True
     
-    def _executeApi(self, command, params={}, jsonData=None, tries=1, method='GET'):
+    def _executeApiV3(self, command, params={}, jsonData=None, tries=1, method='GET'):
         if 'access_token' in params:
             if not self._hasValidToken():
                 self._updateToken()
@@ -141,7 +141,7 @@ class YouTubeClient(object):
         except:
             if tries>=1:
                 tries = tries-1
-                return self._executeApi(command, params, tries, method)
+                return self._executeApiV3(command, params, tries, method)
         
             return {}
         pass
@@ -193,7 +193,7 @@ class YouTubeClient(object):
         params = {'part': 'contentDetails',
                   'id': self._makeCommaSeparatedList(videoIds)}
         #'access_token': self.AccessToken}
-        return self._executeApi('videos', params)
+        return self._executeApiV3('videos', params)
     
     def _sortItems(self, item):
         snippet = item.get('snippet', {})
@@ -212,13 +212,13 @@ class YouTubeClient(object):
         if nextPageToken!=None:
             params['pageToken'] = nextPageToken
         
-        return self._executeApi('subscriptions', params)
+        return self._executeApiV3('subscriptions', params)
     
     def getGuideCategories(self):
         params = {'part': 'snippet',
                   'regionCode': self._RegionCode,
                   'hl': self._HL}
-        return self._executeApi('guideCategories', params)
+        return self._executeApiV3('guideCategories', params)
     
     def getChannelCategory(self, categoryId, nextPageToken=None):
         params = {'part': 'snippet,contentDetails',
@@ -227,7 +227,7 @@ class YouTubeClient(object):
         if nextPageToken!=None:
             params['pageToken'] = nextPageToken
 
-        return self._executeApi('channels', params)
+        return self._executeApiV3('channels', params)
     
     def getPlaylists(self, channelId=None, mine=None, nextPageToken=None):
         params = {'part': 'snippet',
@@ -241,7 +241,7 @@ class YouTubeClient(object):
             params['access_token'] = self.AccessToken
             params['mine'] = 'true'
 
-        return self._executeApi('playlists', params)
+        return self._executeApiV3('playlists', params)
     
     def getPlaylistItems(self, playlistId, mine=False, nextPageToken=None):
         params = {'part': 'snippet',
@@ -255,7 +255,7 @@ class YouTubeClient(object):
         if nextPageToken!=None:
             params['pageToken'] = nextPageToken
 
-        return self._executeApi('playlistItems', params)
+        return self._executeApiV3('playlistItems', params)
     
     def addPlayListItem(self, playlistId, videoId):
         params = {'part': 'snippet',
@@ -269,14 +269,14 @@ class YouTubeClient(object):
                                }
                     }
         
-        result = self._executeApi('playlistItems', params=params, jsonData=jsonData, method='POST')
+        result = self._executeApiV3('playlistItems', params=params, jsonData=jsonData, method='POST')
         pass
     
     def removePlaylistItem(self, playlistItemId):
         params = {'id': playlistItemId,
                   'access_token': self.AccessToken}
         
-        result = self._executeApi('playlistItems', params=params, method='DELETE')
+        result = self._executeApiV3('playlistItems', params=params, method='DELETE')
         pass
     
     def getActivities(self, channelId=None, home=None, mine=None, nextPageToken=None):
@@ -300,7 +300,7 @@ class YouTubeClient(object):
         if nextPageToken!=None:
             params['pageToken'] = nextPageToken
         
-        jsonData = self._executeApi('activities', params)
+        jsonData = self._executeApiV3('activities', params)
         sortedItems = sorted(jsonData.get('items', []), key=self._sortItems, reverse=True)
         jsonData['items'] = sortedItems
         return jsonData
@@ -318,7 +318,7 @@ class YouTubeClient(object):
         if nextPageToken!=None:
             params['pageToken'] = nextPageToken
 
-        return self._executeApi('channels', params)
+        return self._executeApiV3('channels', params)
     
     def search(self, text, searchVideos=None, searchChannels=None, searchPlaylists=None, nextPageToken=None):
         params = {'q': text,
@@ -338,4 +338,4 @@ class YouTubeClient(object):
         if nextPageToken!=None:
             params['pageToken'] = nextPageToken
 
-        return self._executeApi('search', params)
+        return self._executeApiV3('search', params)
