@@ -59,6 +59,7 @@ import xbmc
 
 from plugin import Plugin
 from keyboard import Keyboard
+from search_history import SeachHistory
 
 def logDebug(text):
     xbmc.log(msg=text, level=xbmc.LOGDEBUG)

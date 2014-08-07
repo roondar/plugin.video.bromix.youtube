@@ -1,3 +1,6 @@
+1.0.0~alpha16 (2014-08-XX)
+- ADD: Search history
+
 1.0.0~alpha15 (2014-08-04)
 - FIX: moved (only) for the subscribtions to V2 to see new uploaded videos
 

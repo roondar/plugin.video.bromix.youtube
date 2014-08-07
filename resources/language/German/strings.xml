@@ -14,6 +14,7 @@
 	<string id="30010">Mein Kanal</string>
 	<string id="30011">Videos mit positiven Bewertungen</string>
 	<string id="30012">Entfernen</string>
+	<string id="30013">Neue Suche...</string>
 	
 	<!-- Settings -->
 	<string id="30500">Fanart anzeigen</string>
@@ -27,12 +28,13 @@
 	<string id="30512">Benutzername</string>
 	<string id="30513">Passwort</string>
 	<string id="30514">Allgemein</string>
-	<string id="30515">Videos</string>
-	<string id="30516">Kanäle</string>
-	<string id="30517">Playlisten</string>
+	<string id="30515">Suche nach Videos</string>
+	<string id="30516">Suche nach Kanälen</string>
+	<string id="30517">Suche nach Playlisten</string>
 	<string id="30518">Wiedergabe</string>
 	<string id="30519">3D zulassen</string>
 	<string id="30520">Upload-Info in der Beschreibung anzeigen</string>
 	<string id="30521">Verlauf (experimental)</string>
-	<string id="30522">Automatisches Entfernen aus dem 'Verlauf'</string>
+	<string id="30522">Automatisches Entfernen aus 'Später ansehen'</string>
+	<string id="30523">Größe der Suchhistorie</string>
 </strings>

@@ -321,17 +321,17 @@ class YouTubeClient(object):
 
         return self._executeApiV3('channels', params)
     
-    def search(self, text, searchVideos=None, searchChannels=None, searchPlaylists=None, nextPageToken=None):
+    def search(self, text, searchForVideos=None, searchForChannels=None, searchForPlaylists=None, nextPageToken=None):
         params = {'q': text,
                   'part': 'snippet',
                   'maxResults': self._MaxResult}
         
         types = []
-        if searchVideos!=None and searchVideos==True:
+        if searchForVideos!=None and searchForVideos==True:
             types.append('video')
-        if searchChannels!=None and searchChannels==True:
+        if searchForChannels!=None and searchForChannels==True:
             types.append('channel')
-        if searchPlaylists!=None and searchPlaylists==True:
+        if searchForPlaylists!=None and searchForPlaylists==True:
             types.append('playlist')
         if len(types)>0:
             params['type'] = self._makeCommaSeparatedList(types)

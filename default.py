@@ -26,6 +26,7 @@ if not __SETTING_SHOW_FANART__:
     __FANART__ = ''
 
 """ ACTIONS """
+__ACTION_SHOW_SEARCH_INDEX__ = 'showSearchIndex'
 __ACTION_SEARCH__ = 'search'
 __ACTION_BROWSE_CHANNELS__ = 'browseChannels'
 __ACTION_SHOW_CHANNEL_CATEGORY__ = 'showChannelCategory'
@@ -127,7 +128,7 @@ def showIndex():
         __plugin__.addDirectory("[B]"+__plugin__.localize(30007)+"[/B]", params = params, thumbnailImage=__ICON_FALLBACK__, fanart=__FANART__)
         pass
         
-    params = {'action': __ACTION_SEARCH__}
+    params = {'action': __ACTION_SHOW_SEARCH_INDEX__}
     __plugin__.addDirectory("[B]"+__plugin__.localize(30000)+"[/B]", params = params, thumbnailImage=__ICON_FALLBACK__, fanart=__FANART__)
     
     if __client__.hasLogin():
@@ -489,24 +490,51 @@ def _listResult(jsonData, nextPageParams={}, pageIndex=1, mine=False, fanart=__F
             pass
         pass
     pass
+
+def showSearchIndex():
+    params = {'action': __ACTION_SEARCH__}
+    __plugin__.addDirectory(name='[B]'+__plugin__.localize(30013)+'[/B]', params=params, thumbnailImage=__ICON_FALLBACK__, fanart=__FANART__)
+    
+    searchHistory = bromixbmc.SeachHistory(__plugin__)
+    items = searchHistory.getSearchItems()
+    for item in items:
+        params = {'action': __ACTION_SEARCH__,
+                  'query': item}
+        __plugin__.addDirectory(name=item, params=params, thumbnailImage=__ICON_FALLBACK__, fanart=__FANART__)
+        pass
+    
+    __plugin__.endOfDirectory()
+    pass
     
 def search(query=None, pageToken=None, pageIndex=1):
     __plugin__.setContent('episodes')
     success = False
     
-    searchVideos=__plugin__.getSettingAsBool('searchVideos')
-    searchChannels=__plugin__.getSettingAsBool('searchChannels')
-    searchPlaylists=__plugin__.getSettingAsBool('searchPlaylists')
+    searchFindVideos=__plugin__.getSettingAsBool('search.find.videos')
+    searchFindChannels=__plugin__.getSettingAsBool('search.find.channels')
+    searchFindPlaylists=__plugin__.getSettingAsBool('search.find.playlists')
     
     nextPageParams = {}
     jsonData = {}
-    if query!=None and pageToken!=None:
+    if query!=None and len(query)>0:
+        if pageToken==None:
+            """
+            If we have no page token -> this must be the first direct search!!! :)
+            Update the order of the history to move the new search to the top.
+            """
+            size = __plugin__.getSettingAsInt('search.history.size', default=5, mapping={0:0, 1:10, 2:20, 3:30, 4:40, 5:50})
+            searchHistory = bromixbmc.SeachHistory(__plugin__, size)
+            searchHistory.updateSearchItem(query)
+            bromixbmc.executebuiltin("Container.Refresh");
+            pass
+        
+        
         nextPageParams = {'query': query,
                           'action': __ACTION_SEARCH__}
         jsonData = __client__.search(text=query,
-                                     searchVideos=searchVideos,
-                                     searchChannels=searchChannels,
-                                     searchPlaylists=searchPlaylists,
+                                     searchForVideos=searchFindVideos,
+                                     searchForChannels=searchFindChannels,
+                                     searchForPlaylists=searchFindPlaylists,
                                      nextPageToken=pageToken
                                      )
         success = True
@@ -515,13 +543,22 @@ def search(query=None, pageToken=None, pageIndex=1):
         if keyboard.doModal():
             success = True
             
-            search_string = keyboard.getText().replace(" ", "+")
-            nextPageParams = {'query': search_string,
+            search = keyboard.getText()
+            
+            """
+            Update the search history
+            """
+            size = __plugin__.getSettingAsInt('search.history.size', default=5, mapping={0:0, 1:10, 2:20, 3:30, 4:40, 5:50})
+            searchHistory = bromixbmc.SeachHistory(__plugin__, size)
+            searchHistory.updateSearchItem(search)
+            bromixbmc.executebuiltin("Container.Refresh");
+            
+            nextPageParams = {'query': search,
                               'action': __ACTION_SEARCH__}
-            jsonData = __client__.search(text=search_string,
-                                         searchVideos=searchVideos,
-                                         searchChannels=searchChannels,
-                                         searchPlaylists=searchPlaylists,
+            jsonData = __client__.search(text=search,
+                                         searchForVideos=searchFindVideos,
+                                         searchForChannels=searchFindChannels,
+                                         searchForPlaylists=searchFindPlaylists,
                                          nextPageToken=pageToken
                                          )
             pass
@@ -750,12 +787,14 @@ def removeFromPlaylist(playlistItemId):
 
 action = bromixbmc.getParam('action')
 _id = bromixbmc.getParam('id')
-query = bromixbmc.getParam('query')
+query = bromixbmc.getParam('query', '')
 pageToken = bromixbmc.getParam('pageToken')
 pageIndex = int(bromixbmc.getParam('pageIndex', '1'))
 mine = bromixbmc.getParam('mine', 'no')=='yes'
 
-if action == __ACTION_SEARCH__:
+if action == __ACTION_SHOW_SEARCH_INDEX__:
+    showSearchIndex()
+elif action == __ACTION_SEARCH__:
     search(query, pageToken, pageIndex)
 elif action == __ACTION_ADD_TO_PLAYLIST__ and _id!=None:
     addToPlaylist(_id)

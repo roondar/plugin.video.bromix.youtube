@@ -19,6 +19,6 @@ if __name__ == "__main__":
     __PASSWORD__ = "0012345678900" #"YOUR_PASSWORD"
     
     __client__ = YouTubeClient(username=__USERNAME__, password=__PASSWORD__, maxResult=25)
-    __client__.hasLogin()
+    hasLogin = __client__.hasLogin()
     
     pass
