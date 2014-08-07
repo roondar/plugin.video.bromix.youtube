@@ -133,40 +133,54 @@ def showIndex():
     
     if __client__.hasLogin():
         # My Channel
-        if __YT_CANNEL_ID__!=None and len(__YT_CANNEL_ID__)>0:
-            params = {'action': __ACTION_SHOW_CHANNEL__,
-                      'id': __YT_CANNEL_ID__,
-                      'mine': 'yes'}
-            __plugin__.addDirectory(__plugin__.localize(30010), params=params, thumbnailImage=__ICON_FALLBACK__, fanart=__FANART__)
+        if __plugin__.getSettingAsBool('menu.root.my_channel.show', True):
+            if __YT_CANNEL_ID__!=None and len(__YT_CANNEL_ID__)>0:
+                params = {'action': __ACTION_SHOW_CHANNEL__,
+                          'id': __YT_CANNEL_ID__,
+                          'mine': 'yes'}
+                __plugin__.addDirectory(__plugin__.localize(30010), params=params, thumbnailImage=__ICON_FALLBACK__, fanart=__FANART__)
+                pass
+            pass
         
         # History
-        playlistId = __YT_PLAYLISTS__.get('watchHistory', None)
-        if playlistId!=None:
-            params = {'action': __ACTION_SHOW_PLAYLIST__,
-                      'id': playlistId,
-                      'mine': 'yes'}
-            __plugin__.addDirectory(__plugin__.localize(30006), params = params, thumbnailImage=__ICON_FALLBACK__, fanart=__FANART__)
+        if __plugin__.getSettingAsBool('menu.root.history.show', True):
+            playlistId = __YT_PLAYLISTS__.get('watchHistory', None)
+            if playlistId!=None:
+                params = {'action': __ACTION_SHOW_PLAYLIST__,
+                          'id': playlistId,
+                          'mine': 'yes'}
+                __plugin__.addDirectory(__plugin__.localize(30006), params = params, thumbnailImage=__ICON_FALLBACK__, fanart=__FANART__)
+                pass
+            pass
             
         # Watch Later
-        playlistId = __YT_PLAYLISTS__.get('watchLater', None)
-        if playlistId!=None:
-            params = {'action': __ACTION_SHOW_PLAYLIST__,
-                      'id': playlistId,
-                      'mine': 'yes'}
-            __plugin__.addDirectory(__plugin__.localize(30005), params = params, thumbnailImage=__ICON_FALLBACK__, fanart=__FANART__)
+        if __plugin__.getSettingAsBool('menu.root.watch_later.show', True):
+            playlistId = __YT_PLAYLISTS__.get('watchLater', None)
+            if playlistId!=None:
+                params = {'action': __ACTION_SHOW_PLAYLIST__,
+                          'id': playlistId,
+                          'mine': 'yes'}
+                __plugin__.addDirectory(__plugin__.localize(30005), params = params, thumbnailImage=__ICON_FALLBACK__, fanart=__FANART__)
+                pass
+            pass
             
         # own playlists
-        params = {'action': __ACTION_SHOW_PLAYLISTS__,
-                  'mine': 'yes'}
-        __plugin__.addDirectory(__plugin__.localize(30003), params = params, thumbnailImage=__ICON_FALLBACK__, fanart=__FANART__)
+        if __plugin__.getSettingAsBool('menu.root.playlists.show', True):
+            params = {'action': __ACTION_SHOW_PLAYLISTS__,
+                      'mine': 'yes'}
+            __plugin__.addDirectory(__plugin__.localize(30003), params = params, thumbnailImage=__ICON_FALLBACK__, fanart=__FANART__)
+            pass
         
         # Watch Later
-        playlistId = __YT_PLAYLISTS__.get('likes', None)
-        if playlistId!=None:
-            params = {'action': __ACTION_SHOW_PLAYLIST__,
-                      'id': playlistId,
-                      'mine': 'yes'}
-            __plugin__.addDirectory(__plugin__.localize(30011), params = params, thumbnailImage=__ICON_FALLBACK__, fanart=__FANART__)
+        if __plugin__.getSettingAsBool('menu.root.liked_videos.show', True):
+            playlistId = __YT_PLAYLISTS__.get('likes', None)
+            if playlistId!=None:
+                params = {'action': __ACTION_SHOW_PLAYLIST__,
+                          'id': playlistId,
+                          'mine': 'yes'}
+                __plugin__.addDirectory(__plugin__.localize(30011), params = params, thumbnailImage=__ICON_FALLBACK__, fanart=__FANART__)
+                pass
+            pass
         
         params = {'action': __ACTION_SHOW_SUBSCRIPTIONS__}
         __plugin__.addDirectory(__plugin__.localize(30004), params = params, thumbnailImage=__ICON_FALLBACK__, fanart=__FANART__)
@@ -616,7 +630,7 @@ def showChannel(channelId, pageToken, pageIndex, mine=False):
         """
         Show the playlists of a channel on the first page (only if the setting is true)
         """
-        if __plugin__.getSettingAsBool('showPlaylists'):
+        if __plugin__.getSettingAsBool('menu.channel.playlists.show'):
             # default for all public playlists
             params = {'action': __ACTION_SHOW_PLAYLISTS__,
                       'id': channelId}
@@ -752,6 +766,7 @@ def play(videoId):
             __plugin__.setResolvedUrl(url)
             
             if __client__.hasLogin():
+                """
                 # try to add the video to the history
                 if __plugin__.getSettingAsBool('enableHistory'):
                     playlistId = __YT_PLAYLISTS__.get('watchHistory', None)
@@ -759,6 +774,7 @@ def play(videoId):
                         __client__.addPlayListItem(playlistId, videoId)
                         pass
                     pass
+                """
                 
                 # remove the video from the 'Watch Later' playlist
                 if __plugin__.getSettingAsBool('automaticWatchLater'):

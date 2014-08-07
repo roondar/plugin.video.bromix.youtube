@@ -24,7 +24,7 @@
 	<string id="30504">Full HD (1080p)</string>
 	
 	<string id="30510">Einträge pro Seite</string>
-	<string id="30511">Playlists anzeigen</string>
+	<string id="30511">'Playlists' eines Kanals anzeigen</string>
 	<string id="30512">Benutzername</string>
 	<string id="30513">Passwort</string>
 	<string id="30514">Allgemein</string>
@@ -34,7 +34,12 @@
 	<string id="30518">Wiedergabe</string>
 	<string id="30519">3D zulassen</string>
 	<string id="30520">Upload-Info in der Beschreibung anzeigen</string>
-	<string id="30521">Verlauf (experimental)</string>
+	<string id="30521">'Verlauf' anzeigen</string>
 	<string id="30522">Automatisches Entfernen aus 'Später ansehen'</string>
 	<string id="30523">Größe der Suchhistorie</string>
+	<string id="30524">Menüeinträge</string>
+	<string id="30525">'Mein Kanal' anzeigen</string>
+	<string id="30526">'Später ansehen' anzeigen</string>
+	<string id="30527">'Playlists' anzeigen</string>
+	<string id="30528">'Videos mit positiven Bewertungen' anzeigen</string>
 </strings>

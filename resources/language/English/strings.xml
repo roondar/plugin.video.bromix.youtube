@@ -24,7 +24,7 @@
 	<string id="30504">Full HD (1080p)</string>
 	
 	<string id="30510">Results per page</string>
-	<string id="30511">Show Playlists</string>
+	<string id="30511">Show 'Playlists' of channel</string>
 	<string id="30512">Username</string>
 	<string id="30513">Password</string>
 	<string id="30514">General</string>
@@ -34,7 +34,12 @@
 	<string id="30518">Playback</string>
 	<string id="30519">Allow 3D</string>
 	<string id="30520">Show upload info in the description</string>
-	<string id="30521">History (experimental)</string>
+	<string id="30521">Show 'History'</string>
 	<string id="30522">Automatic remove from 'Watch Later'</string>
 	<string id="30523">Size of the Search History</string>
+	<string id="30524">Menu items</string>
+	<string id="30525">Show 'My Channel'</string>
+	<string id="30526">Show 'Watch Later'</string>
+	<string id="30527">Show 'Playlists'</string>
+	<string id="30528">Show 'Liked Videos'</string>
 </strings>
