@@ -1,5 +1,7 @@
-1.0.0~alpha16 (2014-08-XX)
-- ADD: Search history
+1.0.0~alpha16 (2014-08-08)
+- FIX: provide 'Next Page' under 'My Subscriptions' if there are more results
+- ADD: Hide and show menu items via settings 
+- ADD: Search history (set the size via settings from 0-50 items)
 
 1.0.0~alpha15 (2014-08-04)
 - FIX: moved (only) for the subscribtions to V2 to see new uploaded videos
