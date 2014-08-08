@@ -380,6 +380,8 @@ class YouTubeClient(object):
             return ''
         pass
     
-    def getNewSubscriptionVideosV2(self):
-        params = {'access_token': self.AccessToken}
-        return self._executeApiV2('/feeds/api/users/default/newsubscriptionvideos', params=params)
+    def getNewSubscriptionVideosV2(self, page=1):
+        params = {'access_token': self.AccessToken,
+                  'start-index': str(page),
+                  'max-results': str(self._MaxResult)}
+        return self._executeApiV2('feeds/api/users/default/newsubscriptionvideos', params=params)
