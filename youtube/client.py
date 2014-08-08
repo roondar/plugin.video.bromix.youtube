@@ -7,8 +7,8 @@ import re
 import time
 import requests
 
-#__YOUTUBE_API_KEY__ = 'AIzaSyA8eiZmM1FaDVjRy-df2KTyQ_vz_yYM39w' #prim
-__YOUTUBE_API_KEY__ = 'AIzaSyAjbrAsTJS55zRnLb_P3Pf4-vAnMi125GI' #seco
+__YOUTUBE_API_KEY__ = 'AIzaSyA8eiZmM1FaDVjRy-df2KTyQ_vz_yYM39w' #prim
+#__YOUTUBE_API_KEY__ = 'AIzaSyAjbrAsTJS55zRnLb_P3Pf4-vAnMi125GI' #seco
 
 class YouTubeClient(object):
     def __init__(self, username=None, password=None, language='en-US', maxResult=5, cachedToken=None, accessTokenExpiresAt=-1):
