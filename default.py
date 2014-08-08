@@ -660,7 +660,7 @@ def showChannel(channelId, pageToken, pageIndex, mine=False):
     
     __plugin__.endOfDirectory()
     
-def showMySubscriptions(pageToken, pageIndex):
+def showMySubscriptions(pageIndex=1, startIndex=None):
     """
     We have to use at this point V2 of the API.
     V3 doesn't support any kind of new uploaded videos.
@@ -678,7 +678,7 @@ def showMySubscriptions(pageToken, pageIndex):
     __plugin__.setContent('episodes')
     
     try:
-        xmlData = __client__.getNewSubscriptionVideosV2()
+        xmlData = __client__.getNewSubscriptionVideosV2(startIndex=startIndex)
         xmlData = xmlData.encode('utf-8')
         
         root = ET.fromstring(xmlData)
@@ -686,7 +686,8 @@ def showMySubscriptions(pageToken, pageIndex):
         entries = root.findall('{http://www.w3.org/2005/Atom}entry')
         if len(entries)==0:
             bromixbmc.logDebug('No new uploaded videos found')
-            
+            pass
+        
         for entry in entries:
             try:
                 channelName = ''
@@ -740,10 +741,25 @@ def showMySubscriptions(pageToken, pageIndex):
                 pass
             pass
         
-        """
-        nextPageParams = {'action': __ACTION_SHOW_MYSUBSCRIPTIONS__}
-        _listResult(jsonData, nextPageParams=nextPageParams, pageIndex=pageIndex)
-        """
+        totalResults = 0
+        pageInfo = root.find('{http://a9.com/-/spec/opensearch/1.1/}totalResults')
+        if pageInfo!=None:
+            totalResults = int(pageInfo.text)
+            pass
+        
+        itemsPerPage = 0
+        pageInfo = None
+        pageInfo = root.find('{http://a9.com/-/spec/opensearch/1.1/}itemsPerPage')
+        if pageInfo!=None:
+            itemsPerPage = int(pageInfo.text)
+            pass
+        
+        if (startIndex+itemsPerPage)<totalResults:
+            params = {'action': __ACTION_SHOW_MYSUBSCRIPTIONS__,
+                      'pageIndex': str(pageIndex+1),
+                      'startIndex': str(startIndex+itemsPerPage)}
+            __plugin__.addDirectory(__plugin__.localize(30002)+' ('+str(pageIndex+1)+')', params=params, fanart=__FANART__)
+            pass
     except:
         bromixbmc.logDebug('Failed to load new uploaded videos')
         pass
@@ -817,7 +833,8 @@ elif action == __ACTION_ADD_TO_PLAYLIST__ and _id!=None:
 elif action == __ACTION_REMOVE_FROM_PLAYLIST__ and _id!=None:
     removeFromPlaylist(_id)
 elif action == __ACTION_SHOW_MYSUBSCRIPTIONS__:
-    showMySubscriptions(pageToken, pageIndex)
+    startIndex = int(bromixbmc.getParam('startIndex', '1'))
+    showMySubscriptions(pageIndex=pageIndex, startIndex=startIndex)
 elif action == __ACTION_SHOW_SUBSCRIPTIONS__:
     showSubscriptions(pageToken, pageIndex)
 elif action == __ACTION_BROWSE_CHANNELS__:
