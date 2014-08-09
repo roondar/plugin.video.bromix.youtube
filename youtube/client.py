@@ -258,6 +258,13 @@ class YouTubeClient(object):
 
         return self._executeApiV3('playlistItems', params)
     
+    def removePlaylist(self, playlistId):
+        params = {'id': playlistId,
+                  'access_token': self.AccessToken}
+        
+        result = self._executeApiV3('playlists', params=params, method='DELETE')
+        pass
+    
     def addPlayListItem(self, playlistId, videoId):
         params = {'part': 'snippet',
                   'mine': 'true',

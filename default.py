@@ -38,6 +38,7 @@ __ACTION_SHOW_SUBSCRIPTIONS__ = 'showSubscriptions'
 __ACTION_PLAY__ = 'play'
 __ACTION_ADD_TO_PLAYLIST__ = 'addToPlaylist'
 __ACTION_REMOVE_FROM_PLAYLIST__ = 'removeFromPlaylist'
+__ACTION_REMOVE_PLAYLIST__ = 'removePlaylist'
 
 """ CACHED YOUTUBE DATA """
 __YT_PLAYLISTS__ = {'likes': '', 'favorites': '', 'uploads': '', 'watchHistory': '', 'watchLater': ''}
@@ -456,10 +457,18 @@ def _listResult(jsonData, nextPageParams={}, pageIndex=1, mine=False, fanart=__F
                 params = {'action': __ACTION_SHOW_PLAYLIST__,
                           'id': playlistId}
                 
+                contextMenu = None
                 if mine==True:
                     params['mine'] = 'yes'
+                    
+                    contextMenu= []
+                    contextParams = {'action': __ACTION_REMOVE_PLAYLIST__,
+                                     'id': playlistId}
+                    contextRun = 'RunPlugin('+__plugin__.createUrl(contextParams)+')'
+                    contextMenu.append( ("[B]"+__plugin__.localize(30012)+"[/B]", contextRun) )
+                    pass
 
-                __plugin__.addDirectory(name=title, params=params, thumbnailImage=thumbnailImage, fanart=fanart)
+                __plugin__.addDirectory(name=title, params=params, thumbnailImage=thumbnailImage, fanart=fanart, contextMenu=contextMenu)
             elif kind=='youtube#playlistItem' and snippet!=None:
                 title = snippet.get('title')
                 description = snippet.get('description')
@@ -783,16 +792,6 @@ def play(videoId):
             __plugin__.setResolvedUrl(url)
             
             if __client__.hasLogin():
-                """
-                # try to add the video to the history
-                if __plugin__.getSettingAsBool('enableHistory'):
-                    playlistId = __YT_PLAYLISTS__.get('watchHistory', None)
-                    if playlistId!=None:
-                        __client__.addPlayListItem(playlistId, videoId)
-                        pass
-                    pass
-                """
-                
                 # remove the video from the 'Watch Later' playlist
                 if __plugin__.getSettingAsBool('automaticWatchLater'):
                     watchLaterItemId = bromixbmc.getParam('watchLaterItemId', None)
@@ -811,6 +810,11 @@ def addToPlaylist(videoId):
     if playlistId!=None:
         __client__.addPlayListItem(playlistId, videoId)
         pass
+    pass
+
+def removePlaylist(playlistId):
+    __client__.removePlaylist(playlistId)
+    bromixbmc.executebuiltin("Container.Refresh");
     pass
 
 def removeFromPlaylist(playlistItemId):
@@ -850,6 +854,8 @@ elif action == __ACTION_SHOW_PLAYLISTS__ and (_id!=None or mine==True):
     showPlaylists(_id, pageToken=pageToken, pageIndex=pageIndex, mine=mine)
 elif action == __ACTION_PLAY__:
     play(_id)
+elif action == __ACTION_REMOVE_PLAYLIST__ and _id!=None:
+    removePlaylist(_id)
 else:
     showIndex()
     
