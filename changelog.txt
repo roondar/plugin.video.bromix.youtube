@@ -1,4 +1,4 @@
-1.0.0~alpha16 (2014-08-XX)
+1.0.0~alpha17 (2014-08-XX)
 - ADD: Full support for 'Like'
 - ADD: Remove own playlist via context menu
 - ADD: Show/Hide 'Browse Channels' via settings

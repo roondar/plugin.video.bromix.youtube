@@ -215,6 +215,26 @@ class YouTubeClient(object):
         
         return self._executeApiV3('subscriptions', params)
     
+    def addSubscription(self, channelId):
+        params = {'part': 'snippet',
+                  'access_token': self.AccessToken}
+        
+        jsonData = {'kind': 'youtube#subscription',
+                    'snippet':{'resourceId': {'kind': 'youtube#channel',
+                                              'channelId': channelId}
+                               }
+                    }
+        
+        result = self._executeApiV3('subscriptions', params=params, jsonData=jsonData, method='POST')
+        pass
+    
+    def removeSubscription(self, channelId):
+        params = {'id': channelId,
+                  'access_token': self.AccessToken}
+        
+        result = self._executeApiV3('subscriptions', params=params, method='DELETE')
+        pass
+    
     def getGuideCategories(self):
         params = {'part': 'snippet',
                   'regionCode': self._RegionCode,

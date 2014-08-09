@@ -35,6 +35,8 @@ __ACTION_SHOW_PLAYLIST__ = 'showPlaylist'
 __ACTION_SHOW_PLAYLISTS__ = 'showPlaylists'
 __ACTION_SHOW_CHANNEL__ = 'showChannel'
 __ACTION_SHOW_SUBSCRIPTIONS__ = 'showSubscriptions'
+__ACTION_ADD_SUBSCRIPTION__ = 'addSubscription'
+__ACTION_REMOVE_SUBSCRIPTION__ = 'removeSubscription'
 __ACTION_PLAY__ = 'play'
 __ACTION_ADD_TO_PLAYLIST__ = 'addToPlaylist'
 __ACTION_REMOVE_FROM_PLAYLIST__ = 'removeFromPlaylist'
@@ -408,13 +410,21 @@ def _listResult(jsonData, nextPageParams={}, pageIndex=1, mine=False, fanart=__F
                 pass
             elif kind=='youtube#subscription' and snippet!=None:
                 title = snippet.get('title', None)
+                subscriptionId = item.get('id', None)
                 thumbnailImage = _getBestThumbnailImage(item)
                 resourceId = snippet.get('resourceId', {})
                 channelId = resourceId.get('channelId', None)
                 if channelId!=None and title!=None:
                     params = {'action': __ACTION_SHOW_CHANNEL__,
                               'id': channelId}
-                    __plugin__.addDirectory(name=title, params=params, thumbnailImage=thumbnailImage, fanart=fanart)
+                    
+                    contextMenu = []
+                    contextParams = {'action': __ACTION_REMOVE_SUBSCRIPTION__,
+                                         'id': subscriptionId}
+                    contextRun = 'RunPlugin('+__plugin__.createUrl(contextParams)+')'
+                    contextMenu.append( ("[B]"+__plugin__.localize(30016)+"[/B]", contextRun) )
+                    
+                    __plugin__.addDirectory(name=title, params=params, thumbnailImage=thumbnailImage, fanart=fanart, contextMenu=contextMenu)
                     pass
                 pass
             elif kind=='youtube#searchResult' and snippet!=None:
@@ -430,7 +440,14 @@ def _listResult(jsonData, nextPageParams={}, pageIndex=1, mine=False, fanart=__F
                         if title!=None and channelId!=None:
                             params = {'action': __ACTION_SHOW_CHANNEL__,
                                       'id': channelId}
-                            __plugin__.addDirectory(name="[B]"+title+"[/B]", params=params, thumbnailImage=thumbnailImage, fanart=fanart)
+                            
+                            contextMenu = []
+                            contextParams = {'action': __ACTION_ADD_SUBSCRIPTION__,
+                                             'id': channelId}
+                            contextRun = 'RunPlugin('+__plugin__.createUrl(contextParams)+')'
+                            contextMenu.append( ("[B]"+__plugin__.localize(30015)+"[/B]", contextRun) )
+                            
+                            __plugin__.addDirectory(name="[B]"+title+"[/B]", params=params, thumbnailImage=thumbnailImage, fanart=fanart, contextMenu=contextMenu)
                             pass
                     elif kind=='youtube#playlist':
                         playlistId = _id.get('playlistId', None)
@@ -460,7 +477,14 @@ def _listResult(jsonData, nextPageParams={}, pageIndex=1, mine=False, fanart=__F
                     thumbnailImage = _getBestThumbnailImage(item)
                     params = {'action': __ACTION_SHOW_CHANNEL__,
                               'id': channelId}
-                    __plugin__.addDirectory(name="[B]"+title+"[/B]", params=params, thumbnailImage=thumbnailImage, fanart=fanart)
+                    
+                    contextMenu = []
+                    contextParams = {'action': __ACTION_ADD_SUBSCRIPTION__,
+                                     'id': channelId}
+                    contextRun = 'RunPlugin('+__plugin__.createUrl(contextParams)+')'
+                    contextMenu.append( ("[B]"+__plugin__.localize(30015)+"[/B]", contextRun) )
+                    
+                    __plugin__.addDirectory(name="[B]"+title+"[/B]", params=params, thumbnailImage=thumbnailImage, fanart=fanart, contextMenu=contextMenu)
                     pass
             elif kind=='youtube#playlist' and snippet!=None:
                 title = snippet.get('title')
@@ -786,9 +810,19 @@ def showMySubscriptions(pageIndex=1, startIndex=None):
     
 def showSubscriptions(pageToken, pageIndex):
     jsonData = __client__.getSubscriptions(mine=True, nextPageToken=pageToken)
-    nextPageParams = {'action': __ACTION_SHOW_SUBSCRIPTIONS__}
-    _listResult(jsonData, nextPageParams=nextPageParams, pageIndex=pageIndex)
+    nextPageParams = {'action': __ACTION_SHOW_SUBSCRIPTIONS__,
+                      'mine': 'yes'}
+    _listResult(jsonData, nextPageParams=nextPageParams, pageIndex=pageIndex, mine=True)
     __plugin__.endOfDirectory()
+    
+def addSubscription(channelId):
+    __client__.addSubscription(channelId)
+    pass
+
+def removeSubscription(channelId):
+    __client__.removeSubscription(channelId)
+    bromixbmc.executebuiltin("Container.Refresh");
+    pass
     
 def play(videoId):
     allow3D = __plugin__.getSettingAsBool('allow3D', False)
@@ -864,6 +898,10 @@ elif action == __ACTION_PLAY__:
     play(_id)
 elif action == __ACTION_REMOVE_PLAYLIST__ and _id!=None:
     removePlaylist(_id)
+elif action == __ACTION_ADD_SUBSCRIPTION__ and _id!=None:
+    addSubscription(_id)
+elif action == __ACTION_REMOVE_SUBSCRIPTION__ and _id!=None:
+    removeSubscription(_id)
 else:
     showIndex()
     
