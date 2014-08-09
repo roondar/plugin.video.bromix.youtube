@@ -1,5 +1,6 @@
 1.0.0~alpha16 (2014-08-XX)
 - ADD: Show/Hide 'Browse Channels' via settings
+- FIX: Don't update search history before showing the search result
 
 1.0.0~alpha16 (2014-08-08)
 - FIX: provide 'Next Page' under 'My Subscriptions' if there are more results
