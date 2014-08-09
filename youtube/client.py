@@ -168,6 +168,8 @@ class YouTubeClient(object):
         videos = videos.get('items', [])
         for video in videos:
             _id = video.get('id', None)
+            
+            result[_id] = {}
             contentDetails = video.get('contentDetails', {})
             duration = contentDetails.get('duration', None)
             if id!=None and duration!=None:
@@ -184,7 +186,13 @@ class YouTubeClient(object):
                     pass
                 
                 duration = str(minutes)
-                result[_id] = {'duration': duration}
+                result[_id]['duration'] = duration
+                pass
+            
+            snippet = video.get('snippet', None)
+            if snippet!=None:
+                result[_id]['channel_name'] = snippet.get('channelTitle', '')
+                result[_id]['plot'] = snippet.get('description', '')
                 pass
             pass
         

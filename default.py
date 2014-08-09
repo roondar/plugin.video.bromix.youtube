@@ -360,7 +360,6 @@ def _listResult(jsonData, nextPageParams={}, pageIndex=1, mine=False, fanart=__F
             kind = item.get('kind', '')
             snippet = item.get('snippet', None)
             publishedAt = snippet.get('publishedAt', '')
-            channelName = snippet.get('channelTitle', '')
             
             # a special kind of youtube category
             if kind=='youtube#guideCategory' and snippet!=None:
@@ -390,7 +389,7 @@ def _listResult(jsonData, nextPageParams={}, pageIndex=1, mine=False, fanart=__F
                                thumbnailImage=thumbnailImage,
                                fanart=fanart,
                                publishedAt=publishedAt,
-                               channelName=channelName)
+                               channelName=videoInfo.get('channel_name', ''))
                     pass
                 pass
             elif kind=='youtube#subscription' and snippet!=None:
@@ -452,7 +451,7 @@ def _listResult(jsonData, nextPageParams={}, pageIndex=1, mine=False, fanart=__F
                                    thumbnailImage=thumbnailImage,
                                    fanart=fanart,
                                    publishedAt=publishedAt,
-                                   channelName=channelName)
+                                   channelName=videoInfo.get('channel_name', ''))
                     pass
                 pass
             elif kind=='youtube#channel' and snippet!=None:
@@ -517,7 +516,7 @@ def _listResult(jsonData, nextPageParams={}, pageIndex=1, mine=False, fanart=__F
                                thumbnailImage=thumbnailImage,
                                fanart=fanart,
                                publishedAt=publishedAt,
-                               channelName=channelName,
+                               channelName=videoInfo.get('channel_name', ''),
                                playlistItemId=item.get('id', None),
                                isMyPlaylist=mine,
                                playlistId=playlistId)
