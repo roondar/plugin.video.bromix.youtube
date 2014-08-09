@@ -193,6 +193,21 @@ class YouTubeClient(object):
             if snippet!=None:
                 result[_id]['channel_name'] = snippet.get('channelTitle', '')
                 result[_id]['plot'] = snippet.get('description', '')
+                
+                thumbnails = snippet.get('thumbnails', {})
+                #imageResList = ['maxres', 'standard', 'high', 'medium', 'default']
+                imageResList = ['high', 'medium', 'default']
+                for imageRes in imageResList:
+                    item = thumbnails.get(imageRes, None)
+                    if item!=None:
+                        width = item.get('width', None)
+                        height = item.get('height', None)
+                        
+                        url = item.get('url', None)
+                        if url!=None and (url.find('yt3.')>0 or imageRes=='medium' or (width!=None and height!=None)):
+                            result[_id]['thumbnailImage'] = url
+                            break
+                    pass
                 pass
             pass
         

@@ -375,7 +375,6 @@ def _listResult(jsonData, nextPageParams={}, pageIndex=1, mine=False, fanart=__F
             elif kind=='youtube#activity' and snippet!=None:
                 title = snippet.get('title', None)
                 description = snippet.get('description', '')
-                thumbnailImage = _getBestThumbnailImage(item)
                 contentDetails = item.get('contentDetails', {})
                 
                 upload = contentDetails.get('upload', {})
@@ -386,7 +385,7 @@ def _listResult(jsonData, nextPageParams={}, pageIndex=1, mine=False, fanart=__F
                                videoId=videoId,
                                duration=videoInfo.get('duration', '1'),
                                plot=description,
-                               thumbnailImage=thumbnailImage,
+                               thumbnailImage=videoInfo.get('thumbnailImage', __ICON_FALLBACK__),
                                fanart=fanart,
                                publishedAt=publishedAt,
                                channelName=videoInfo.get('channel_name', ''))
@@ -494,7 +493,6 @@ def _listResult(jsonData, nextPageParams={}, pageIndex=1, mine=False, fanart=__F
                 title = snippet.get('title')
                 description = snippet.get('description')
                 
-                thumbnailImage = _getBestThumbnailImage(item)
                 resourceId = snippet.get('resourceId', {})
                 videoId = resourceId.get('videoId', None)
                 if videoId!=None:
@@ -513,7 +511,7 @@ def _listResult(jsonData, nextPageParams={}, pageIndex=1, mine=False, fanart=__F
                                videoId=videoId,
                                duration=videoInfo.get('duration', '1'),
                                plot=description,
-                               thumbnailImage=thumbnailImage,
+                               thumbnailImage=videoInfo.get('thumbnailImage', __ICON_FALLBACK__),
                                fanart=fanart,
                                publishedAt=publishedAt,
                                channelName=videoInfo.get('channel_name', ''),
@@ -719,6 +717,22 @@ def showMySubscriptions(pageIndex=1, startIndex=None):
             bromixbmc.logDebug('No new uploaded videos found')
             pass
         
+        videoInfos = {}
+        videoIds = []
+        for entry in entries:
+            try:
+                mediaGroup = entry.find('{http://search.yahoo.com/mrss/}group')
+                if mediaGroup!=None:
+                    videoId = unicode(mediaGroup.find('{http://gdata.youtube.com/schemas/2007}videoid').text)
+                    videoIds.append(videoId)
+                    pass
+                pass
+            except:
+                # do nothing
+                pass
+            
+        videoInfos = __client__.getVideosInfo(videoIds)
+        
         for entry in entries:
             try:
                 channelName = ''
@@ -731,38 +745,13 @@ def showMySubscriptions(pageIndex=1, startIndex=None):
                 mediaGroup = entry.find('{http://search.yahoo.com/mrss/}group')
                 if mediaGroup!=None:
                     videoId = unicode(mediaGroup.find('{http://gdata.youtube.com/schemas/2007}videoid').text)
-                    
-                    minutes = '1'
-                    duration = mediaGroup.find('{http://gdata.youtube.com/schemas/2007}duration')
-                    if duration!=None:
-                        minutes = int(duration.get('seconds'))/60
-                        if minutes==0:
-                            minutes = '1'
-                        else:
-                            minutes = str(minutes) 
-                        pass
-                    
-                    thumbnailImage = None
-                    thumbnails = mediaGroup.findall('{http://search.yahoo.com/mrss/}thumbnail')
-                    for thumbnail in thumbnails:
-                        url = thumbnail.get('url')
-                        name = thumbnail.get('{http://gdata.youtube.com/schemas/2007}name')
-                        if name=='sddefault':
-                            thumbnailImage = url
-                            break
-                        elif name=='hqdefault' and thumbnailImage==None:
-                            thumbnailImage = url
-                        elif name=='mqdefault' and thumbnailImage==None:
-                            thumbnailImage = url
-                        pass
-                    
-                    plot = bromixbmc.stripHtmlFromText(unicode(mediaGroup.find('{http://search.yahoo.com/mrss/}description').text))
+                    videoInfo = videoInfos.get(videoId, {})
                     
                     _listVideo(title=title,
                                videoId=videoId,
-                               duration=minutes,
-                               plot=plot,
-                               thumbnailImage=thumbnailImage,
+                               duration=videoInfo.get('duration', '1'),
+                               plot=videoInfo.get('plot'),
+                               thumbnailImage=videoInfo.get('thumbnailImage', __ICON_FALLBACK__),
                                publishedAt=publishedAt,
                                channelName=channelName)
                     pass
