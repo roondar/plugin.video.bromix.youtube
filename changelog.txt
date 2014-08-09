@@ -3,6 +3,7 @@
 - ADD: Full support for 'Like'
 - ADD: Remove own playlist via context menu
 - ADD: Show/Hide 'Browse Channels' via settings
+- FIX: Using only thumbnails from API v3 - 'My Subscriptions' is using v2 and returning different thumbnails
 - FIX: Displaying false channel in video description
 - FIX: Don't update search history before showing the search result
 
