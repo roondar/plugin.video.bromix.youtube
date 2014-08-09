@@ -542,7 +542,6 @@ def search(query=None, pageToken=None, pageIndex=1):
             size = __plugin__.getSettingAsInt('search.history.size', default=5, mapping={0:0, 1:10, 2:20, 3:30, 4:40, 5:50})
             searchHistory = bromixbmc.SeachHistory(__plugin__, size)
             searchHistory.updateSearchItem(query)
-            bromixbmc.executebuiltin("Container.Refresh");
             pass
         
         
@@ -568,7 +567,6 @@ def search(query=None, pageToken=None, pageIndex=1):
             size = __plugin__.getSettingAsInt('search.history.size', default=5, mapping={0:0, 1:10, 2:20, 3:30, 4:40, 5:50})
             searchHistory = bromixbmc.SeachHistory(__plugin__, size)
             searchHistory.updateSearchItem(search)
-            bromixbmc.executebuiltin("Container.Refresh");
             
             nextPageParams = {'query': search,
                               'action': __ACTION_SEARCH__}
