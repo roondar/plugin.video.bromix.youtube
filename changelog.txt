@@ -1,4 +1,5 @@
 1.0.0~alpha16 (2014-08-XX)
+- ADD: Remove own playlist via context menu
 - ADD: Show/Hide 'Browse Channels' via settings
 - FIX: Don't update search history before showing the search result
 
