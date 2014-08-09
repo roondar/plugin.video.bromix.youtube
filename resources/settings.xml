@@ -35,6 +35,7 @@
 		<setting id="menu.root.watch_later.show" type="bool" label="30526" default="true" />
 		<setting id="menu.root.playlists.show" type="bool" label="30527" default="true" />
 		<setting id="menu.root.liked_videos.show" type="bool" label="30528" default="true" />
+		<setting id="menu.root.browse_channels.show" type="bool" label="30529" default="true" />
 		<setting type="sep" />
 		<setting id="menu.channel.playlists.show" type="bool" label="30511" default="true"/>
 	</category>

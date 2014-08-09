@@ -186,8 +186,11 @@ def showIndex():
         __plugin__.addDirectory(__plugin__.localize(30004), params = params, thumbnailImage=__ICON_FALLBACK__, fanart=__FANART__)
         pass
     
-    params = {'action': __ACTION_BROWSE_CHANNELS__}
-    __plugin__.addDirectory(__plugin__.localize(30001), params = params, thumbnailImage=__ICON_FALLBACK__, fanart=__FANART__)
+    # 'Browse Channels'
+    if __plugin__.getSettingAsBool('menu.root.browse_channels.show', True):
+        params = {'action': __ACTION_BROWSE_CHANNELS__}
+        __plugin__.addDirectory(__plugin__.localize(30001), params = params, thumbnailImage=__ICON_FALLBACK__, fanart=__FANART__)
+        pass
     
     __plugin__.endOfDirectory()
     
