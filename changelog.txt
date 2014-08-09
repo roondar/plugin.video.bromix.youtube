@@ -1,3 +1,6 @@
+1.0.0~alpha16 (2014-08-XX)
+- 
+
 1.0.0~alpha16 (2014-08-08)
 - FIX: provide 'Next Page' under 'My Subscriptions' if there are more results
 - ADD: Hide and show menu items via settings 
