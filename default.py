@@ -388,7 +388,7 @@ def _listResult(jsonData, nextPageParams={}, pageIndex=1, mine=False, fanart=__F
                                thumbnailImage=videoInfo.get('thumbnailImage', __ICON_FALLBACK__),
                                fanart=fanart,
                                publishedAt=publishedAt,
-                               channelName=videoInfo.get('channel_name', ''))
+                               channelName=videoInfo.get('channelName', ''))
                     pass
                 pass
             elif kind=='youtube#subscription' and snippet!=None:
@@ -450,7 +450,7 @@ def _listResult(jsonData, nextPageParams={}, pageIndex=1, mine=False, fanart=__F
                                    thumbnailImage=thumbnailImage,
                                    fanart=fanart,
                                    publishedAt=publishedAt,
-                                   channelName=videoInfo.get('channel_name', ''))
+                                   channelName=videoInfo.get('channelName', ''))
                     pass
                 pass
             elif kind=='youtube#channel' and snippet!=None:
@@ -514,7 +514,7 @@ def _listResult(jsonData, nextPageParams={}, pageIndex=1, mine=False, fanart=__F
                                thumbnailImage=videoInfo.get('thumbnailImage', __ICON_FALLBACK__),
                                fanart=fanart,
                                publishedAt=publishedAt,
-                               channelName=videoInfo.get('channel_name', ''),
+                               channelName=videoInfo.get('channelName', ''),
                                playlistItemId=item.get('id', None),
                                isMyPlaylist=mine,
                                playlistId=playlistId)

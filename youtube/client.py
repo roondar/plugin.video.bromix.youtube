@@ -191,7 +191,8 @@ class YouTubeClient(object):
             
             snippet = video.get('snippet', None)
             if snippet!=None:
-                result[_id]['channel_name'] = snippet.get('channelTitle', '')
+                result[_id]['channelName'] = snippet.get('channelTitle', '')
+                result[_id]['channelId'] = snippet.get('channelId', '')
                 result[_id]['plot'] = snippet.get('description', '')
                 
                 thumbnails = snippet.get('thumbnails', {})
