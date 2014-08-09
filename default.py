@@ -239,24 +239,36 @@ def _getBestFanart(jsonData):
     
     return ''
 
-def _createContextMenuForVideo(videoId, playlistItemId=None, isMyPlaylist=False, isWatchLaterPlaylist=False):
+def _createContextMenuForVideo(videoId, playlistItemId=None, isMyPlaylist=False, playlistId=None):
     contextMenu = []
     
-    # 'Watch Later'
-    playlistId = __YT_PLAYLISTS__.get('watchLater', None)
-    if not isWatchLaterPlaylist and playlistId!=None and videoId!=None:
-        contextParams = {'action': __ACTION_ADD_TO_PLAYLIST__,
-                         'id': videoId,
-                         'playlistId': playlistId}
-        contextRun = 'RunPlugin('+__plugin__.createUrl(contextParams)+')'
-        contextMenu.append( ("[B]"+__plugin__.localize(30005)+"[/B]", contextRun) )
-        pass
+    if __client__.hasLogin():
+        # 'Watch Later'
+        watchLaterPlaylistId = __YT_PLAYLISTS__.get('watchLater', None)
+        if watchLaterPlaylistId!=None and watchLaterPlaylistId!=playlistId and videoId!=None:
+            contextParams = {'action': __ACTION_ADD_TO_PLAYLIST__,
+                             'id': videoId,
+                             'playlistId': watchLaterPlaylistId}
+            contextRun = 'RunPlugin('+__plugin__.createUrl(contextParams)+')'
+            contextMenu.append( ("[B]"+__plugin__.localize(30005)+"[/B]", contextRun) )
+            pass
         
-    if isMyPlaylist and playlistItemId!=None:
-        contextParams = {'action': __ACTION_REMOVE_FROM_PLAYLIST__,
-                         'id': playlistItemId}
-        contextRun = 'RunPlugin('+__plugin__.createUrl(contextParams)+')'
-        contextMenu.append( ("[B]"+__plugin__.localize(30012)+"[/B]", contextRun) )
+        # 'Like'
+        likedVideosPlaylistId = __YT_PLAYLISTS__.get('likes', None)
+        if likedVideosPlaylistId!=None and likedVideosPlaylistId!=playlistId and videoId!=None:
+            contextParams = {'action': __ACTION_ADD_TO_PLAYLIST__,
+                             'id': videoId,
+                             'playlistId': likedVideosPlaylistId}
+            contextRun = 'RunPlugin('+__plugin__.createUrl(contextParams)+')'
+            contextMenu.append( ("[B]"+__plugin__.localize(30014)+"[/B]", contextRun) )
+            pass
+            
+        if isMyPlaylist and playlistItemId!=None:
+            contextParams = {'action': __ACTION_REMOVE_FROM_PLAYLIST__,
+                             'id': playlistItemId}
+            contextRun = 'RunPlugin('+__plugin__.createUrl(contextParams)+')'
+            contextMenu.append( ("[B]"+__plugin__.localize(30012)+"[/B]", contextRun) )
+            pass
         pass
     
     return contextMenu
@@ -270,7 +282,7 @@ def _listVideo(title, videoId,
                channelName=None,
                playlistItemId=None,
                isMyPlaylist=False,
-               isWatchLaterPlaylist=False):
+               playlistId=None):
     
     plot2 = ''
     if __plugin__.getSettingAsBool('showUploadInfo', False):
@@ -299,7 +311,7 @@ def _listVideo(title, videoId,
     infoLabels = {'duration': duration,
                   'plot': plot2}
     
-    contextMenu = _createContextMenuForVideo(videoId, playlistItemId, isMyPlaylist, isWatchLaterPlaylist)
+    contextMenu = _createContextMenuForVideo(videoId, playlistItemId, isMyPlaylist, playlistId=playlistId)
     
     __plugin__.addVideoLink(name=title, params=params, thumbnailImage=thumbnailImage, fanart=fanart, infoLabels=infoLabels, contextMenu=contextMenu)
     pass
@@ -478,17 +490,13 @@ def _listResult(jsonData, nextPageParams={}, pageIndex=1, mine=False, fanart=__F
                 videoId = resourceId.get('videoId', None)
                 if videoId!=None:
                     
-                    isWatchLaterPlaylist = False
                     playlistId = snippet.get('playlistId', None)
-                    if playlistId!=None and playlistId == __YT_PLAYLISTS__.get('watchLater', None):
-                        isWatchLaterPlaylist = True
-                        pass
                     
                     params = {'action': __ACTION_PLAY__,
                               'id': videoId}
                     
-                    if isWatchLaterPlaylist:
-                        params['watchLaterItemId'] = item.get('id', '')
+                    #if isWatchLaterPlaylist:
+                    #   params['watchLaterItemId'] = item.get('id', '')
                     
                     videoInfo = videoInfos.get(videoId, {})
                     infoLabels = {'plot': uploadInfo+description,
@@ -497,7 +505,7 @@ def _listResult(jsonData, nextPageParams={}, pageIndex=1, mine=False, fanart=__F
                     contextMenu = _createContextMenuForVideo(videoId=videoId,
                                                              playlistItemId=item.get('id', None),
                                                              isMyPlaylist=mine,
-                                                             isWatchLaterPlaylist=isWatchLaterPlaylist)
+                                                             playlistId=playlistId)
                     __plugin__.addVideoLink(name=title, params=params, thumbnailImage=thumbnailImage, fanart=fanart, infoLabels=infoLabels, contextMenu=contextMenu)
                     pass
                 pass
