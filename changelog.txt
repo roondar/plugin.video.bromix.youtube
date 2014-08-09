@@ -1,4 +1,5 @@
 1.0.0~alpha17 (2014-08-10)
+- ADD: 'Go to CHANNEL' of a selected video
 - ADD: Support for 'Subscribe' and 'Unsubscribe' of channels
 - ADD: Full support for 'Like'
 - ADD: Remove own playlist via context menu
