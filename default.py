@@ -359,25 +359,9 @@ def _listResult(jsonData, nextPageParams={}, pageIndex=1, mine=False, fanart=__F
         for item in items:
             kind = item.get('kind', '')
             snippet = item.get('snippet', None)
+            publishedAt = snippet.get('publishedAt', '')
+            channelName = snippet.get('channelTitle', '')
             
-            uploadInfo = ''
-            if __plugin__.getSettingAsBool('showUploadInfo', False):
-                channelTitle = snippet.get('channelTitle', None)
-                publishedAt = snippet.get('publishedAt', '')
-                match = re.compile('(\d+)-(\d+)-(\d+)T(\d+)\:(\d+)\:(\d+)\.(.+)').findall(publishedAt)
-                if match and len(match)>0 and len(match[0])>=7:
-                    uploadInfo = __plugin__.localize(30008)+': '
-                    uploadInfo = uploadInfo+bromixbmc.getFormatDateShort(match[0][0], match[0][1], match[0][2])
-                    uploadInfo = uploadInfo+' '+bromixbmc.getFormatTime(match[0][3], match[0][4], match[0][5])
-                    if channelTitle!=None:
-                        uploadInfo = uploadInfo+"[CR]"+__plugin__.localize(30009)+": "
-                        uploadInfo = uploadInfo+channelTitle
-                        pass
-                    
-                    uploadInfo = '[B]'+uploadInfo+"[/B][CR][CR]"
-                    pass
-                pass
-                
             # a special kind of youtube category
             if kind=='youtube#guideCategory' and snippet!=None:
                 _id = item.get('id', None)
@@ -399,13 +383,14 @@ def _listResult(jsonData, nextPageParams={}, pageIndex=1, mine=False, fanart=__F
                 videoId = upload.get('videoId', None)
                 if videoId!=None and title!=None:
                     videoInfo = videoInfos.get(videoId, {})
-                    infoLabels = {'plot': uploadInfo+description,
-                                  'duration': videoInfo.get('duration', '1')}
-                    params = {'action': __ACTION_PLAY__,
-                              'id': videoId}
-                    
-                    contextMenu = _createContextMenuForVideo(videoId=videoId)
-                    __plugin__.addVideoLink(name=title, params=params, thumbnailImage=thumbnailImage, fanart=fanart, infoLabels=infoLabels, contextMenu=contextMenu)
+                    _listVideo(title=title,
+                               videoId=videoId,
+                               duration=videoInfo.get('duration', '1'),
+                               plot=description,
+                               thumbnailImage=thumbnailImage,
+                               fanart=fanart,
+                               publishedAt=publishedAt,
+                               channelName=channelName)
                     pass
                 pass
             elif kind=='youtube#subscription' and snippet!=None:
@@ -458,15 +443,16 @@ def _listResult(jsonData, nextPageParams={}, pageIndex=1, mine=False, fanart=__F
                         pass
                     elif kind=='youtube#video':
                         videoId = _id.get('videoId', '')
-                        params = {'action': __ACTION_PLAY__,
-                                  'id': videoId}
                         
                         videoInfo = videoInfos.get(videoId, {})
-                        infoLabels = {'plot': uploadInfo+description,
-                                      'duration': videoInfo.get('duration', '1')}
-                        
-                        contextMenu = _createContextMenuForVideo(videoId=videoId)
-                        __plugin__.addVideoLink(name=title, params=params, thumbnailImage=thumbnailImage, fanart=fanart, infoLabels=infoLabels, contextMenu=contextMenu)
+                        _listVideo(title=title,
+                                   videoId=videoId,
+                                   duration=videoInfo.get('duration', ''),
+                                   plot=description,
+                                   thumbnailImage=thumbnailImage,
+                                   fanart=fanart,
+                                   publishedAt=publishedAt,
+                                   channelName=channelName)
                     pass
                 pass
             elif kind=='youtube#channel' and snippet!=None:
@@ -523,14 +509,18 @@ def _listResult(jsonData, nextPageParams={}, pageIndex=1, mine=False, fanart=__F
                     #   params['watchLaterItemId'] = item.get('id', '')
                     
                     videoInfo = videoInfos.get(videoId, {})
-                    infoLabels = {'plot': uploadInfo+description,
-                                  'duration': videoInfo.get('duration', '1')}
                     
-                    contextMenu = _createContextMenuForVideo(videoId=videoId,
-                                                             playlistItemId=item.get('id', None),
-                                                             isMyPlaylist=mine,
-                                                             playlistId=playlistId)
-                    __plugin__.addVideoLink(name=title, params=params, thumbnailImage=thumbnailImage, fanart=fanart, infoLabels=infoLabels, contextMenu=contextMenu)
+                    _listVideo(title=title,
+                               videoId=videoId,
+                               duration=videoInfo.get('duration', '1'),
+                               plot=description,
+                               thumbnailImage=thumbnailImage,
+                               fanart=fanart,
+                               publishedAt=publishedAt,
+                               channelName=channelName,
+                               playlistItemId=item.get('id', None),
+                               isMyPlaylist=mine,
+                               playlistId=playlistId)
                     pass
                 pass
             pass
