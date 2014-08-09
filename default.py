@@ -241,7 +241,7 @@ def _getBestFanart(jsonData):
     
     return ''
 
-def _createContextMenuForVideo(videoId, playlistItemId=None, isMyPlaylist=False, playlistId=None):
+def _createContextMenuForVideo(videoId, playlistItemId=None, isMyPlaylist=False, playlistId=None, channelName=None, channelId=None):
     contextMenu = []
     
     if __client__.hasLogin():
@@ -273,6 +273,15 @@ def _createContextMenuForVideo(videoId, playlistItemId=None, isMyPlaylist=False,
             pass
         pass
     
+    if channelName!=None and channelId!=None:
+        contextParams = {'action': __ACTION_SHOW_CHANNEL__,
+                         'id': channelId}
+        contextRun = 'XBMC.Container.Update('+__plugin__.createUrl(contextParams)+')'
+        #contextMenu.append( ("[B]"+__plugin__.localize(30012)+"[/B]", contextRun) )
+        menuEntry = __plugin__.localize(30017) %  (channelName)
+        contextMenu.append( (menuEntry, contextRun) )
+        pass
+    
     return contextMenu
 
 def _listVideo(title, videoId,
@@ -282,6 +291,7 @@ def _listVideo(title, videoId,
                fanart=__FANART__,
                publishedAt=None,
                channelName=None,
+               channelId=None,
                playlistItemId=None,
                isMyPlaylist=False,
                playlistId=None):
@@ -313,7 +323,12 @@ def _listVideo(title, videoId,
     infoLabels = {'duration': duration,
                   'plot': plot2}
     
-    contextMenu = _createContextMenuForVideo(videoId, playlistItemId, isMyPlaylist, playlistId=playlistId)
+    contextMenu = _createContextMenuForVideo(videoId,
+                                             playlistItemId=playlistItemId,
+                                             isMyPlaylist=isMyPlaylist,
+                                             playlistId=playlistId,
+                                             channelName=channelName,
+                                             channelId=channelId)
     
     __plugin__.addVideoLink(name=title, params=params, thumbnailImage=thumbnailImage, fanart=fanart, infoLabels=infoLabels, contextMenu=contextMenu)
     pass
@@ -450,7 +465,8 @@ def _listResult(jsonData, nextPageParams={}, pageIndex=1, mine=False, fanart=__F
                                    thumbnailImage=thumbnailImage,
                                    fanart=fanart,
                                    publishedAt=publishedAt,
-                                   channelName=videoInfo.get('channelName', ''))
+                                   channelName=videoInfo.get('channelName', ''),
+                                   channelId=videoInfo.get('channelId', None))
                     pass
                 pass
             elif kind=='youtube#channel' and snippet!=None:
@@ -507,6 +523,11 @@ def _listResult(jsonData, nextPageParams={}, pageIndex=1, mine=False, fanart=__F
                     
                     videoInfo = videoInfos.get(videoId, {})
                     
+                    thisChannelId = snippet.get('channelId', None)
+                    videoChannelId = videoInfo.get('channelId', None)
+                    if thisChannelId!=None and videoChannelId!=None and thisChannelId==videoChannelId:
+                        thisChannelId=None
+                    
                     _listVideo(title=title,
                                videoId=videoId,
                                duration=videoInfo.get('duration', '1'),
@@ -515,6 +536,7 @@ def _listResult(jsonData, nextPageParams={}, pageIndex=1, mine=False, fanart=__F
                                fanart=fanart,
                                publishedAt=publishedAt,
                                channelName=videoInfo.get('channelName', ''),
+                               channelId=thisChannelId,
                                playlistItemId=item.get('id', None),
                                isMyPlaylist=mine,
                                playlistId=playlistId)
@@ -735,11 +757,6 @@ def showMySubscriptions(pageIndex=1, startIndex=None):
         
         for entry in entries:
             try:
-                channelName = ''
-                author = entry.find('{http://www.w3.org/2005/Atom}author')
-                if author!=None:
-                    channelName = unicode(author.find('{http://www.w3.org/2005/Atom}name').text)
-                    pass
                 publishedAt = unicode(entry.find('{http://www.w3.org/2005/Atom}published').text)
                 title = unicode(entry.find('{http://www.w3.org/2005/Atom}title').text)
                 mediaGroup = entry.find('{http://search.yahoo.com/mrss/}group')
@@ -753,7 +770,8 @@ def showMySubscriptions(pageIndex=1, startIndex=None):
                                plot=videoInfo.get('plot'),
                                thumbnailImage=videoInfo.get('thumbnailImage', __ICON_FALLBACK__),
                                publishedAt=publishedAt,
-                               channelName=channelName)
+                               channelName=videoInfo.get('channelName', ''),
+                               channelId=videoInfo.get('channelId', None))
                     pass
                 pass
             except:

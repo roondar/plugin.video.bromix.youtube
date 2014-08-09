@@ -18,6 +18,7 @@
 	<string id="30014">Like</string>
 	<string id="30015">Subscribe</string>
 	<string id="30016">Unsubscribe</string>
+	<string id="30017">[B]Go to[/B] '%s'</string>
 	
 	<!-- Settings -->
 	<string id="30500">Show Fanart</string>
