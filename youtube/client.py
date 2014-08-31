@@ -36,6 +36,33 @@ class YouTubeClient(object):
             if not os.path.isdir(self._cache_path):
                 os.mkdir(self._cache_path)
                 pass
+            
+            self._updateCache()
+            pass
+        pass
+    
+    def _updateCache(self):
+        if self._cache_path!=None:
+            files = os.listdir(self._cache_path)
+            files.sort(key=lambda x: os.stat(os.path.join(self._cache_path, x)).st_mtime)
+            sumFileSize = 0
+            
+            # first calculate size
+            for fileItem in files:
+                fileItem = os.path.join(self._cache_path, fileItem)
+                if os.path.isfile(fileItem):
+                    sumFileSize = sumFileSize + os.path.getsize(fileItem)
+                    pass
+                pass
+            
+            #if sumFileSize>=5368709120:
+            if sumFileSize>=(1024*1024*5):
+                count = min(10, len(files))
+                for i in range(count):
+                    fileItem = os.path.join(self._cache_path, files[i])
+                    os.remove(fileItem)
+                    pass
+                pass
             pass
         pass
     
