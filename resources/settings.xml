@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8" standalone="yes"?>
 <settings>
 	<!-- General -->
-	<category label="30014">
+	<category label="30514">
 		<setting id="username" type="text" label="30512" />
 	    <setting id="password" type="text" option="hidden" label="30513" />
 	    <setting type="sep" />
