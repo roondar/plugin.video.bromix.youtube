@@ -10,8 +10,8 @@ try:
 except ImportError:
     import xml.etree.ElementTree as ET
 
-#import pydevd
-#pydevd.settrace('localhost', stdoutToServer=True, stderrToServer=True)
+import pydevd
+pydevd.settrace('localhost', stdoutToServer=True, stderrToServer=True)
 
 import bromixbmc
 __plugin__ = bromixbmc.Plugin()
@@ -90,7 +90,8 @@ __client__ = YouTubeClient(username = __ACCESS_USERNAME__,
                            cachedToken = __plugin__.getSettingAsString('oauth2_access_token', None),
                            accessTokenExpiresAt = __plugin__.getSettingAsFloat('oauth2_access_token_expires_at', -1),
                            language = bromixbmc.getLanguageId(),
-                           maxResult = __plugin__.getSettingAsInt('resultPerPage', default=5, mapping={0:5, 1:10, 2:15, 3:20, 4:25, 5:30, 6:35, 7:40, 8:45, 9:50})
+                           maxResult = __plugin__.getSettingAsInt('resultPerPage', default=5, mapping={0:5, 1:10, 2:15, 3:20, 4:25, 5:30, 6:35, 7:40, 8:45, 9:50}),
+                           dataPath = __plugin__.getAddonDataPath()
                            );
 
 _INT_UPDATE_YOUTUBE_DATA_ = False
@@ -843,6 +844,18 @@ def play(videoId):
             if __client__.hasLogin():
                 # remove the video from the 'Watch Later' playlist
                 if __plugin__.getSettingAsBool('automaticWatchLater'):
+                    items = __client__.getPlaylistItems(playlistId=__YT_PLAYLISTS__.get('watchLater', None), mine=True)
+                    items = items.get('items', [])
+                    for item in items:
+                        playlistItemId = item.get('id', None)
+                        snippet = item.get('snippet', {})
+                        resourceId = snippet.get('resourceId', {})
+                        playListVideoId = resourceId.get('videoId', None)
+                        if videoId==playListVideoId and playlistItemId!=None:
+                            __client__.removePlaylistItem(playlistItemId)
+                            break
+                        pass 
+                    
                     watchLaterItemId = bromixbmc.getParam('watchLaterItemId', None)
                     if watchLaterItemId!=None:
                         __client__.removePlaylistItem(watchLaterItemId)

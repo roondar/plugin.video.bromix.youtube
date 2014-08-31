@@ -87,6 +87,9 @@ class Plugin(object):
     def logError(self, text):
         xbmc.log(msg=self._formatLogText(text), level=xbmc.LOGERROR)
         pass
+    
+    def getAddonDataPath(self):
+        return self._addon_data_path
         
     def createUrl(self, params={}):
         if params and len(params)>0:

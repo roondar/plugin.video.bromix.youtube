@@ -6,12 +6,14 @@ import json
 import re
 import time
 import requests
+import hashlib
+import os
 
 __YOUTUBE_API_KEY__ = 'AIzaSyA8eiZmM1FaDVjRy-df2KTyQ_vz_yYM39w' #prim
 #__YOUTUBE_API_KEY__ = 'AIzaSyAjbrAsTJS55zRnLb_P3Pf4-vAnMi125GI' #seco
 
 class YouTubeClient(object):
-    def __init__(self, username=None, password=None, language='en-US', maxResult=5, cachedToken=None, accessTokenExpiresAt=-1):
+    def __init__(self, username=None, password=None, language='en-US', maxResult=5, cachedToken=None, accessTokenExpiresAt=-1, dataPath=None):
         self._opener = urllib2.build_opener()
         #opener.addheaders = [('User-Agent', 'stagefright/1.2 (Linux;Android 4.4.2)')]
         
@@ -27,6 +29,13 @@ class YouTubeClient(object):
         
         self._API_Key = __YOUTUBE_API_KEY__
         self._MaxResult = maxResult
+        
+        self._data_path = dataPath
+        if self._data_path!=None:
+            if not os.path.isdir(self._data_path):
+                os.mkdir(self._data_path)
+                pass
+            pass
         pass
     
     def hasLogin(self):
@@ -114,11 +123,42 @@ class YouTubeClient(object):
         
         return True
     
+    def _getCachedData(self, url):
+        result = {}
+        
+        if self._data_path!=None:
+            m = hashlib.md5()
+            m.update(url)
+            
+            cacheFile = os.path.join(self._data_path, m.hexdigest())
+            if os.path.isfile(cacheFile):
+                try:
+                    file = open(cacheFile, 'r')
+                    result = json.loads(file.read(), encoding='utf-8')
+                except:
+                    #do nothing
+                    pass
+                pass
+            pass
+        
+        return result
+    
+    def _storeCachedData(self, url, data):
+        m = hashlib.md5()
+        m.update(url)
+        
+        cacheFile = os.path.join(self._data_path, m.hexdigest())
+        with open(cacheFile, 'w') as outfile:
+            json.dump(data, outfile, sort_keys = True, indent = 4, encoding='utf-8')
+        pass
+    
     def _executeApiV3(self, command, params={}, jsonData=None, tries=1, method='GET'):
         if 'access_token' in params:
             if not self._hasValidToken():
                 self._updateToken()
                 params['access_token'] = self.AccessToken
+                pass
+            pass        
                 
         headers = {'X-JavaScript-User-Agent': 'Google APIs Explorer',
                    'Host': 'www.googleapis.com',
@@ -128,11 +168,23 @@ class YouTubeClient(object):
             del params['access_token']
         
         url = self._createUrlV3(command=command, params=params)
+        cachedData = self._getCachedData(url)
+        etag = cachedData.get('etag', None)
+        if etag!=None:
+            headers['If-None-Match'] = etag
+            pass
         
         try:
             if method=='GET':
                 content = requests.get(url, headers=headers, verify=False)
-                return json.loads(content.text)
+                if content.status_code==304:
+                    jsonData = cachedData
+                else:
+                    jsonData = json.loads(content.text)
+                    self._storeCachedData(url, jsonData)
+                    pass
+                 
+                return jsonData
             elif method=='POST':
                 headers['content-type'] = 'application/json'
                 content = requests.post(url, data=json.dumps(jsonData), headers=headers, verify=False)
@@ -291,7 +343,7 @@ class YouTubeClient(object):
             params['access_token'] = self.AccessToken
             params['mine'] = 'true'
 
-        return self._executeApiV3('playlists', params)
+        return self._executeApiV3(command='playlists', params=params)
     
     def getPlaylistItems(self, playlistId, mine=False, nextPageToken=None):
         params = {'part': 'snippet',
@@ -305,7 +357,7 @@ class YouTubeClient(object):
         if nextPageToken!=None:
             params['pageToken'] = nextPageToken
 
-        return self._executeApiV3('playlistItems', params)
+        return self._executeApiV3(command='playlistItems', params=params)
     
     def removePlaylist(self, playlistId):
         params = {'id': playlistId,
