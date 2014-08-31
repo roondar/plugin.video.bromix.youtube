@@ -1,4 +1,5 @@
 1.0.0~alpha18 (2014-08-XX)
+- ADD: Support for ETag - could improve performance
 - ADD: remove item of search history
 - FIX: #22 calculation of duration
 - FIX: #28 display 'general' instead of 'like' in settings
