@@ -30,10 +30,11 @@ class YouTubeClient(object):
         self._API_Key = __YOUTUBE_API_KEY__
         self._MaxResult = maxResult
         
-        self._data_path = dataPath
-        if self._data_path!=None:
-            if not os.path.isdir(self._data_path):
-                os.mkdir(self._data_path)
+        self._cache_path = dataPath
+        if self._cache_path!=None:
+            self._cache_path = os.path.join(self._cache_path, 'cache')
+            if not os.path.isdir(self._cache_path):
+                os.mkdir(self._cache_path)
                 pass
             pass
         pass
@@ -126,11 +127,11 @@ class YouTubeClient(object):
     def _getCachedData(self, url):
         result = {}
         
-        if self._data_path!=None:
+        if self._cache_path!=None:
             m = hashlib.md5()
             m.update(url)
             
-            cacheFile = os.path.join(self._data_path, m.hexdigest())
+            cacheFile = os.path.join(self._cache_path, m.hexdigest()+'.cache')
             if os.path.isfile(cacheFile):
                 try:
                     file = open(cacheFile, 'r')
@@ -147,7 +148,7 @@ class YouTubeClient(object):
         m = hashlib.md5()
         m.update(url)
         
-        cacheFile = os.path.join(self._data_path, m.hexdigest())
+        cacheFile = os.path.join(self._cache_path, m.hexdigest()+'.cache')
         with open(cacheFile, 'w') as outfile:
             json.dump(data, outfile, sort_keys = True, indent = 4, encoding='utf-8')
         pass
