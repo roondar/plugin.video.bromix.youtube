@@ -173,16 +173,21 @@ class YouTubeClient(object):
             contentDetails = video.get('contentDetails', {})
             duration = contentDetails.get('duration', None)
             if id!=None and duration!=None:
-                durationMatch = re.compile('PT((\d)*H)*((\d*)M)+((\d*)S)+').findall(duration)
+                durationMatch = re.compile('PT((\d+)H)?((\d+)M)?((\d+)S)?').findall(duration)
                 
                 minutes = 1
                 if durationMatch!=None and len(durationMatch)>0:
+                    hours = 0
+                    if durationMatch[0][1]!='':
+                        hours = int(durationMatch[0][1])
+                        pass
+                    
                     minutes = 1
-                    if len(durationMatch[0])>=2 and durationMatch[0][3]!='':
+                    if durationMatch[0][3]!='':
                         minutes = int(durationMatch[0][3])
-                        
-                    if len(durationMatch[0])>=1 and durationMatch[0][1]!='':
-                        minutes = minutes+ int(durationMatch[0][1])*60
+                        pass
+                    
+                    minutes = (hours*60)+minutes
                     pass
                 
                 duration = str(minutes)
