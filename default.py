@@ -3,6 +3,7 @@
 import os
 import re
 import hashlib
+from bromixbmc.search_history import SeachHistory
 
 try:
     from xml.etree import ElementTree as ET
@@ -41,6 +42,9 @@ __ACTION_PLAY__ = 'play'
 __ACTION_ADD_TO_PLAYLIST__ = 'addToPlaylist'
 __ACTION_REMOVE_FROM_PLAYLIST__ = 'removeFromPlaylist'
 __ACTION_REMOVE_PLAYLIST__ = 'removePlaylist'
+
+__ACTION_REMOVE__ = 'remove'
+__ACTION_TYPE_SEARCH_HISTORY_ITEM = 'searchHistoryItem'
 
 """ CACHED YOUTUBE DATA """
 __YT_PLAYLISTS__ = {'likes': '', 'favorites': '', 'uploads': '', 'watchHistory': '', 'watchLater': ''}
@@ -567,7 +571,14 @@ def showSearchIndex():
     for item in items:
         params = {'action': __ACTION_SEARCH__,
                   'query': item}
-        __plugin__.addDirectory(name=item, params=params, thumbnailImage=__ICON_FALLBACK__, fanart=__FANART__)
+        
+        contextMenu = []
+        contextParams = {'action': __ACTION_REMOVE__,
+                         'type': __ACTION_TYPE_SEARCH_HISTORY_ITEM,
+                         'id': item}
+        contextRun = 'RunPlugin('+__plugin__.createUrl(contextParams)+')'
+        contextMenu.append( (__plugin__.localize(30012), contextRun) )
+        __plugin__.addDirectory(name=item, params=params, thumbnailImage=__ICON_FALLBACK__, fanart=__FANART__, contextMenu=contextMenu)
         pass
     
     __plugin__.endOfDirectory()
@@ -860,6 +871,26 @@ def removeFromPlaylist(playlistItemId):
     bromixbmc.executebuiltin("Container.Refresh");
     pass
 
+def remove():
+    actionType = bromixbmc.getParam('type', '')
+    
+    # remove item of the search history
+    if actionType==__ACTION_TYPE_SEARCH_HISTORY_ITEM:
+        searchItem = bromixbmc.getParam('id', '')
+        if searchItem=='':
+            __plugin__.logError("Missing 'id' for type '%s' of action 'remove'" % (actionType))
+            return
+        
+        size = __plugin__.getSettingAsInt('search.history.size', default=5, mapping={0:0, 1:10, 2:20, 3:30, 4:40, 5:50})
+        searchHistory = bromixbmc.SeachHistory(__plugin__, size)
+        searchHistory.removeItem(searchItem)
+        bromixbmc.executebuiltin("Container.Refresh");
+        pass
+    else:
+        __plugin__.logError("Unknown type '%s' for action 'remove'" % (actionType))
+        pass
+    pass
+
 action = bromixbmc.getParam('action')
 _id = bromixbmc.getParam('id')
 query = bromixbmc.getParam('query', '')
@@ -867,7 +898,9 @@ pageToken = bromixbmc.getParam('pageToken')
 pageIndex = int(bromixbmc.getParam('pageIndex', '1'))
 mine = bromixbmc.getParam('mine', 'no')=='yes'
 
-if action == __ACTION_SHOW_SEARCH_INDEX__:
+if action == __ACTION_REMOVE__:
+    remove()
+elif action == __ACTION_SHOW_SEARCH_INDEX__:
     showSearchIndex()
 elif action == __ACTION_SEARCH__:
     search(query, pageToken, pageIndex)

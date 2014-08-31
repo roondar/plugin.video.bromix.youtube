@@ -25,6 +25,20 @@ class SeachHistory(object):
         
         return result
     
+    def removeItem(self, search):
+         # get old items
+        oldItems = self._getSearchItems()
+        
+        # remove the old item to move it up front
+        if search in oldItems:
+            index = oldItems.index(search)
+            del oldItems[index]
+            pass
+        
+        data = '|'.join(oldItems)
+        self._plugin.setSettingAsString('bromix.search.history', data)
+        pass
+    
     def clear(self):
         self._plugin.setSettingAsString('bromix.search.history', '')
         pass
