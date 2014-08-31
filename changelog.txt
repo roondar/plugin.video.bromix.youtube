@@ -1,4 +1,4 @@
-1.0.0~alpha18 (2014-08-XX)
+1.0.0~alpha18 (2014-08-31)
 - ADD: Support for ETag - could improve performance
 - ADD: remove item of search history
 - FIX: #22 calculation of duration
