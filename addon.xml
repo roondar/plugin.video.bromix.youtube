@@ -2,6 +2,7 @@
 <addon id="plugin.video.bromix.youtube" name="YouTube (alpha 19)" version="1.0.0~alpha19" provider-name="bromix">
 	<requires>
 		<import addon="xbmc.python" version="2.1.0"/>
+        <import addon="script.module.requests" version="2.3.0"/>
 	</requires>
 	<extension point="xbmc.python.pluginsource" library="default.py">
 		<provides>video</provides>

@@ -5,7 +5,7 @@ __author__ = 'bromix'
 
 
 class Client(object):
-    KEY = 'AIzaSyAd-YEOqZz9nXVzGtn3KWzYLbLaajhqIDA'
+    KEY = 'AIzaSyAd-YEOqZz9nXVzGtn3KWzYLbLaajhqIDA' #TV
 
     def __init__(self, key='', language='en-US'):
         self._key = self.KEY
@@ -18,54 +18,71 @@ class Client(object):
         pass
 
     def get_guide(self):
-        post_data = {"context": {
-                        "client": {
-                            "clientName": "TVHTML5",
-                            "clientVersion": "4",
-                            "acceptRegion": "%s" % self._country,
-                            "acceptLanguage": "%s" % self._language}
-                        }
-                    }
-        headers = {'Accept': '*/*',
-                   'Content-Type': 'application/json'}
-        return self._perform_request(method='POST',
-                                     headers=headers,
-                                     path='youtubei/v1/guide',
-                                     post_data=json.dumps(post_data))
+        return self._perform_tv_request(method='POST', path='guide')
 
+    def _perform_tv_request(self, method='GET', headers=None, path=None, post_data=None, params=None,
+                            allow_redirects=True):
+        """
+        This is part of the YouTube TV API for TVs
+        :param method:
+        :param headers:
+        :param path:
+        :param post_data:
+        :param params:
+        :param allow_redirects:
+        :return:
+        """
 
-    def _perform_request(self, method='GET', headers=None, path=None, post_data=None, params=None,
-                         allow_redirects=True):
         # params
         if not params:
             params = {}
             pass
-        params['key'] = self._key
+        _params = {'key': self._key}
+        _params.update(params)
 
-        # basic header
-        _headers = {'Accept-Encoding': 'gzip, deflate',
-                    'Host': 'www.googleapis.com',
-                    'Connection': 'Keep-Alive',
-                    'User-Agent': 'Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/39.0.2171.27 Safari/537.36'}
+        # headers
         if not headers:
             headers = {}
             pass
+        _headers = {'Host': 'www.googleapis.com',
+                    'Connection': 'keep-alive',
+                    'Origin': 'https://www.youtube.com',
+                    'User-Agent': 'Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/39.0.2171.36 Safari/537.36',
+                    'Content-Type': 'application/json',
+                    'Accept': '*/*',
+                    'DNT': '1',
+                    'Referer': 'https://www.youtube.com/tv',
+                    'Accept-Encoding': 'gzip, deflate',
+                    'Accept-Language': 'en-US,en;q=0.8,de;q=0.6'}
+
+        # postdata - IS ALWAYS JSON!
+        if not post_data:
+            post_data = {}
+            pass
+        _post_data = {'context': {'client': {'acceptLanguage': self._language,
+                                             'acceptRegion': self._country,
+                                             'clientName': 'TVHTML5',
+                                             'clientVersion': '4'}}}
+        if isinstance(post_data, dict):
+            _post_data.update(post_data)
+            pass
+
         _headers.update(headers)
 
         # url
-        _url = 'https://www.googleapis.com/%s' % path
+        _url = 'https://www.googleapis.com/youtubei/v1/%s' % path.strip('/')
 
         result = None
         if method == 'GET':
-            result = requests.get(_url, params=params, headers=_headers, verify=False, allow_redirects=allow_redirects)
+            result = requests.get(_url, params=_params, headers=_headers, verify=False, allow_redirects=allow_redirects)
         elif method == 'POST':
-            result = requests.post(_url, data=post_data, params=params, headers=_headers, verify=False,
+            result = requests.post(_url, data=json.dumps(_post_data), params=_params, headers=_headers, verify=False,
                                    allow_redirects=allow_redirects)
         elif method == 'PUT':
-            result = requests.put(_url, data=post_data, params=params, headers=_headers, verify=False,
+            result = requests.put(_url, data=json.dumps(_post_data), params=_params, headers=_headers, verify=False,
                                   allow_redirects=allow_redirects)
         elif method == 'DELETE':
-            result = requests.delete(_url, data=post_data, params=params, headers=_headers, verify=False,
+            result = requests.delete(_url, data=json.dumps(_post_data), params=_params, headers=_headers, verify=False,
                                      allow_redirects=allow_redirects)
             pass
 

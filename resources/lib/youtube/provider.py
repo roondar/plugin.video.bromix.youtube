@@ -9,6 +9,7 @@ class Provider(kodimon.AbstractProvider):
         kodimon.AbstractProvider.__init__(self, plugin)
 
         from resources.lib import youtube
+
         self._client = youtube.Client()
         pass
 
@@ -17,17 +18,7 @@ class Provider(kodimon.AbstractProvider):
 
         # Guide
         json_data = self._client.get_guide()
-        items = json_data.get('items', [])
-        if len(items) > 0:
-            guide_section_renderer = items[0].get('guideSectionRenderer', {})
-            title = guide_section_renderer.get('title', '')
-            if title:
-                guide_item = DirectoryItem(title,
-                                           '')
-                guide_item.set_fanart(self.get_fanart())
-                result.append(guide_item)
-                pass
-            pass
+        result.extend(self._do_youtube_tv_response(json_data))
 
         return result
 
@@ -37,5 +28,28 @@ class Provider(kodimon.AbstractProvider):
             :return:
             """
         return self.create_resource_path('media', 'fanart.jpg')
+
+    def _do_youtube_tv_response(self, json_data):
+        result = []
+
+        kind = json_data.get('kind', '')
+        items = json_data.get('items', [])
+        for item in items:
+            # if kind=='youtubei#guideResponse'
+            sub_items = item.get('guideSectionRenderer', {}).get('items', [])
+            for sub_item in sub_items:
+                guide_entry_renderer = sub_item.get('guideEntryRenderer', {})
+                title = guide_entry_renderer['title']
+                browse_id = guide_entry_renderer.get('navigationEndpoint', {}).get('browseEndpoint', {}).get('browseId',
+                                                                                                             '')
+                if browse_id:
+                    guide_item = DirectoryItem(title,
+                                               self.create_uri(['browse/tv', browse_id]))
+                    result.append(guide_item)
+                    pass
+                pass
+            pass
+
+        return result
 
     pass
