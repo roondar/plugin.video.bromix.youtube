@@ -8,6 +8,18 @@ class TestClient(unittest.TestCase):
     def setUp(self):
         pass
 
+    def test_get_channel_sections_v3(self):
+        client = Client()
+
+        # 'Popular on YouTube'
+        json_data = client.get_channel_sections_v3(channel_id='UCF0pVplsI8R5kcAqgtoRqoA')
+
+        # 'Sports'
+        json_data = client.get_channel_sections_v3(channel_id='UCEgdi0XIXXZ-qJOFPf4JSKw')
+
+        # TODO: the first playlist of the section is the content of the 'HOME' and YouTube TV section
+        pass
+
     def test_get_channels_v3(self):
         client = Client()
 

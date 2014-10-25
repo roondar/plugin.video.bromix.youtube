@@ -17,6 +17,11 @@ class Client(object):
         self._country = language.split('-')[1]
         pass
 
+    def get_channel_sections_v3(self, channel_id):
+        params = {'part': 'snippet,contentDetails,id',
+                  'channelId': channel_id}
+        return self._perform_v3_request(method='GET', path='channelSections', params=params)
+
     def get_channels_v3(self, channel_id):
         """
         :param channel_id: list or comma-separated list of the YouTube channel ID(s)
