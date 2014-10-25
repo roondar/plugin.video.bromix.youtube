@@ -17,6 +17,7 @@ class Client(object):
 
         self._language = language
         self._country = language.split('-')[1]
+        self._max_results = 50
         pass
 
     def get_channel_sections_v3(self, channel_id):
@@ -29,7 +30,7 @@ class Client(object):
                   'channelId': channel_id}
         return self._perform_v3_request(method='GET', path='channelSections', params=params)
 
-    def search_v3(self, q, search_type=['video', 'channel' 'playlist'], page_token=''):
+    def search_v3(self, q, search_type=['video', 'channel', 'playlist'], page_token=''):
         """
         Returns the search result.
         :param q:
@@ -54,7 +55,8 @@ class Client(object):
         # prepare params
         params = {'q': q,
                   'part': 'snippet',
-                  'regionCode': self._country}
+                  'regionCode': self._country,
+                  'maxResults': str(self._max_results)}
         if search_type:
             params['type'] = search_type
             pass

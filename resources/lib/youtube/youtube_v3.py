@@ -1,4 +1,4 @@
-from resources.lib.kodimon import KodimonException, VideoItem
+from resources.lib.kodimon import KodimonException, VideoItem, DirectoryItem
 
 __author__ = 'bromix'
 
@@ -14,7 +14,7 @@ def _process_search_list_response(provider, path, params, json_data):
             if sub_kind == 'youtube#video':
                 video_id = item.get('id', {})['videoId']  # should crash if the API is not conform!
                 snippet = item.get('snippet', {})
-                title = snippet['title'] # should crash if the API is not conform!
+                title = snippet['title']  # should crash if the API is not conform!
                 image = snippet.get('thumbnails', {}).get('medium', {}).get('url', '')
 
                 video_item = VideoItem(title,
@@ -22,9 +22,30 @@ def _process_search_list_response(provider, path, params, json_data):
                                        image=image)
                 video_item.set_fanart(provider.get_fanart())
                 result.append(video_item)
-                pass
+            elif sub_kind == 'youtube#channel':
+                channel_id = item.get('id', {})['channelId']  # should crash if the API is not conform!
+                snippet = item.get('snippet', {})
+                title = snippet['title']  # should crash if the API is not conform!
+                image = snippet.get('thumbnails', {}).get('medium', {}).get('url', '')
+
+                playlist_item = DirectoryItem(title,
+                                              provider.create_uri(['playlist', channel_id]),
+                                              image=image)
+                playlist_item.set_fanart(provider.get_fanart())
+                result.append(playlist_item)
+            elif sub_kind == 'youtube#playlist':
+                playlist_id = item.get('id', {})['playlistId']  # should crash if the API is not conform!
+                snippet = item.get('snippet', {})
+                title = snippet['title']  # should crash if the API is not conform!
+                image = snippet.get('thumbnails', {}).get('medium', {}).get('url', '')
+
+                channel_item = DirectoryItem(title,
+                                             provider.create_uri(['channel', channel_id]),
+                                             image=image)
+                channel_item.set_fanart(provider.get_fanart())
+                result.append(channel_item)
             else:
-                raise KodimonException("Unknown kind '%s' for youtube_v3" % kind)
+                raise KodimonException("Unknown kind '%s' for youtube_v3" % sub_kind)
         else:
             raise KodimonException("Unknown kind '%s' for youtube_v3" % kind)
 

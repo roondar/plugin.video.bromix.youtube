@@ -14,7 +14,7 @@ class TestProvider(unittest.TestCase):
         provider = Provider()
 
         path = '/%s/query/' % provider.PATH_SEARCH
-        result = provider.navigate(path, {'q': 'batman'})
+        result = provider.navigate(path, {'q': 'lgr'})
 
         items = result[0]
         kodimon.print_items(items)

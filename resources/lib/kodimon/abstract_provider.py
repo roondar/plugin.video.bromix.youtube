@@ -406,7 +406,13 @@ class AbstractProvider(object):
             result, text = input.on_keyboard_input(self.localize(self.LOCAL_SEARCH_TITLE))
             if result:
                 self._search.update(text)
-                return self.on_search(text, path, params, re_match)
+
+                # we adjust the path and params as would it be a normal query
+                new_path = self.PATH_SEARCH+'/query/'
+                new_params = {}
+                new_params.update(params)
+                new_params['q'] = text
+                return self.on_search(text, new_path, new_params, re_match)
             pass
         elif command == 'remove':
             query = params['q']

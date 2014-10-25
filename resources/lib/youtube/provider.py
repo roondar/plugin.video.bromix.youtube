@@ -46,16 +46,13 @@ class Provider(kodimon.AbstractProvider):
         return result
 
     def on_search(self, search_text, path, params, re_match):
+        self.set_content_type(kodimon.constants.CONTENT_TYPE_EPISODES)
+
         result = []
 
         page_token = params.get('page_token', '')
         json_data = self._client.search_v3(q=search_text, page_token=page_token)
-
-        # for next page we adjust the path for 'query'
-        new_path = self.PATH_SEARCH+'/query/'
-        new_params = {'q': search_text}
-        new_params.update(params)
-        result.extend(youtube_v3.process_response(provider=self, path=new_path, params=new_params, json_data=json_data))
+        result.extend(youtube_v3.process_response(self, path, params, json_data=json_data))
 
         return result
 
