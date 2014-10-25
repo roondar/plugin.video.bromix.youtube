@@ -1,4 +1,5 @@
 import json
+import urlparse
 import requests
 
 __author__ = 'bromix'
@@ -7,7 +8,7 @@ __author__ = 'bromix'
 class Client(object):
     BROWSE_ID_WHAT_TO_WATCH = 'FEwhat_to_watch'
 
-    KEY = 'AIzaSyAd-YEOqZz9nXVzGtn3KWzYLbLaajhqIDA' #TV
+    KEY = 'AIzaSyAd-YEOqZz9nXVzGtn3KWzYLbLaajhqIDA'  # TV
 
     def __init__(self, key='', language='en-US'):
         self._key = self.KEY
@@ -108,6 +109,61 @@ class Client(object):
 
     def get_guide_tv(self):
         return self._perform_tv_request(method='POST', path='guide')
+
+    def get_video_info_tv(self, video_id):
+        headers = {'Host': 'www.youtube.com',
+                   'Connection': 'keep-alive',
+                   'User-Agent': 'Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/39.0.2171.36 Safari/537.36',
+                   'Accept': '*/*',
+                   'DNT': '1',
+                   'Referer': 'https://www.youtube.com/tv',
+                   'Accept-Encoding': 'gzip, deflate',
+                   'Accept-Language': 'en-US,en;q=0.8,de;q=0.6'}
+
+        params = {'html5': '1',
+                  'video_id': video_id,
+                  'hl': self._language,
+                  'c': 'TVHTML5',
+                  'cver': '4',
+                  'cbr': 'Chrome',
+                  'cbrver': '39.0.2171.36',
+                  'cos': 'Windows',
+                  'cosver': '6.1'}
+
+        url = 'https://www.youtube.com/get_video_info'
+
+        result = requests.get(url, params=params, headers=headers, verify=False, allow_redirects=True)
+
+        stream_list = []
+
+        data = result.text
+        params = dict(urlparse.parse_qsl(data))
+
+        # prepare format list
+        old_fmt_list = params['fmt_list']
+        old_fmt_list = old_fmt_list.split(',')
+        itag_dict = {}
+        for item in old_fmt_list:
+            data = item.split('/')
+
+            size = data[1].split('x')
+            itag_dict[data[0]] = {'width': size[0],
+                                  'height': size[1]}
+            pass
+
+        # prepare stream map
+        old_url_encoded_fmt_stream_map = params['url_encoded_fmt_stream_map']
+        old_url_encoded_fmt_stream_map = old_url_encoded_fmt_stream_map.split(',')
+        for item in old_url_encoded_fmt_stream_map:
+            stream_map = dict(urlparse.parse_qsl(item))
+
+            video_stream = {'url': stream_map['url'],
+                            'format': itag_dict[stream_map['itag']]}
+
+            stream_list.append(video_stream)
+            pass
+
+        return stream_list
 
     def _perform_v3_request(self, method='GET', headers=None, path=None, post_data=None, params=None,
                             allow_redirects=True):

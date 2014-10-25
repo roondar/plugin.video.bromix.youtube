@@ -35,6 +35,17 @@ class Provider(kodimon.AbstractProvider):
 
         return result
 
+    @kodimon.RegisterPath('^/play/$')
+    def _on_play(self, path, params, re_match):
+        video_id = params['video_id']
+
+        # TODO: select correct quality based on settings
+        video_streams = self._client.get_video_info_tv(video_id)
+        video_stream = video_streams[0]
+
+        item = kodimon.VideoItem(video_id, video_stream['url'])
+        return item
+
     @kodimon.RegisterPath('^/guide/$')
     def _on_guide(self, path, params, re_match):
         result = []

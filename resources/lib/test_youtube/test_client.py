@@ -8,6 +8,12 @@ class TestClient(unittest.TestCase):
     def setUp(self):
         pass
 
+    def test_get_video_info_tv(self):
+        client = Client()
+
+        streams = client.get_video_info_tv('Y0noFhiUh1U')
+        pass
+
     def test_get_videos_v3(self):
         client = Client()
 
