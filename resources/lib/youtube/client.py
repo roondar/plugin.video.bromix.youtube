@@ -17,8 +17,62 @@ class Client(object):
         self._country = language.split('-')[1]
         pass
 
-    def get_guide(self):
+    def get_guide_v3(self):
+        params = {'part': 'snippet',
+                  'regionCode': self._country,
+                  'hl': self._language}
+        return self._perform_v3_request(method='GET', path='guideCategories', params=params)
+
+    def get_guide_tv(self):
         return self._perform_tv_request(method='POST', path='guide')
+
+    def _perform_v3_request(self, method='GET', headers=None, path=None, post_data=None, params=None,
+                            allow_redirects=True):
+        # params
+        if not params:
+            params = {}
+            pass
+        _params = {'key': self._key}
+        _params.update(params)
+
+        # headers
+        if not headers:
+            headers = {}
+            pass
+        _headers = {'Host': 'www.googleapis.com',
+                    'User-Agent': 'Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/39.0.2171.36 Safari/537.36',
+                    'X-JavaScript-User-Agent': 'Google APIs Explorer'}
+
+        # postdata - IS ALWAYS JSON!
+        if not post_data:
+            post_data = {}
+            pass
+        _post_data = {}
+        _post_data.update(post_data)
+
+        _headers.update(headers)
+
+        # url
+        _url = 'https://www.googleapis.com/youtube/v3/%s' % path.strip('/')
+
+        result = None
+        if method == 'GET':
+            result = requests.get(_url, params=_params, headers=_headers, verify=False, allow_redirects=allow_redirects)
+        elif method == 'POST':
+            result = requests.post(_url, data=json.dumps(_post_data), params=_params, headers=_headers, verify=False,
+                                   allow_redirects=allow_redirects)
+        elif method == 'PUT':
+            result = requests.put(_url, data=json.dumps(_post_data), params=_params, headers=_headers, verify=False,
+                                  allow_redirects=allow_redirects)
+        elif method == 'DELETE':
+            result = requests.delete(_url, data=json.dumps(_post_data), params=_params, headers=_headers, verify=False,
+                                     allow_redirects=allow_redirects)
+            pass
+
+        if result is None:
+            return {}
+
+        return result.json()
 
     def _perform_tv_request(self, method='GET', headers=None, path=None, post_data=None, params=None,
                             allow_redirects=True):
