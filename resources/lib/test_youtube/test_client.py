@@ -8,6 +8,13 @@ class TestClient(unittest.TestCase):
     def setUp(self):
         pass
 
+    def test_get_channels_v3(self):
+        client = Client()
+
+        # 'Popular on YouTube', 'Sport'
+        json_data = client.get_channels_v3(channel_id=['UCF0pVplsI8R5kcAqgtoRqoA','UCEgdi0XIXXZ-qJOFPf4JSKw'])
+        pass
+
     def test_get_guide_v3(self):
         client = Client()
 

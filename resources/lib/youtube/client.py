@@ -17,6 +17,19 @@ class Client(object):
         self._country = language.split('-')[1]
         pass
 
+    def get_channels_v3(self, channel_id):
+        """
+        :param channel_id: list or comma-separated list of the YouTube channel ID(s)
+        :return:
+        """
+        if isinstance(channel_id, list):
+            channel_id = ','.join(channel_id)
+            pass
+
+        params = {'part': 'snippet,contentDetails,brandingSettings',
+                  'id': channel_id}
+        return self._perform_v3_request(method='GET', path='channels', params=params)
+
     def get_guide_v3(self):
         params = {'part': 'snippet',
                   'regionCode': self._country,
