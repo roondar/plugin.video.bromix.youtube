@@ -20,9 +20,49 @@ class Client(object):
         pass
 
     def get_channel_sections_v3(self, channel_id):
+        """
+        Returns the sections of a channel
+        :param channel_id:
+        :return:
+        """
         params = {'part': 'snippet,contentDetails,id',
                   'channelId': channel_id}
         return self._perform_v3_request(method='GET', path='channelSections', params=params)
+
+    def search_v3(self, q, search_type=['video', 'channel' 'playlist'], page_token=''):
+        """
+        Returns the search result.
+        :param q:
+        :param search_type: acceptable values are: 'video' | 'channel' | 'playlist'
+        :param page_token: can be ''
+        :return:
+        """
+
+        # prepare search type
+        if not search_type:
+            search_type = ''
+            pass
+        if isinstance(search_type, list):
+            search_type = ','.join(search_type)
+            pass
+
+        # prepare page token
+        if not page_token:
+            page_token = ''
+            pass
+
+        # prepare params
+        params = {'q': q,
+                  'part': 'snippet',
+                  'regionCode': self._country}
+        if search_type:
+            params['type'] = search_type
+            pass
+        if page_token:
+            params['pageToken'] = page_token
+            pass
+
+        return self._perform_v3_request(method='GET', path='search', params=params)
 
     def get_channels_v3(self, channel_id):
         """

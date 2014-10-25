@@ -257,3 +257,19 @@ def strip_html_from_text(text):
     :return:
     """
     return re.sub('<[^<]+?>', '', text)
+
+
+def print_items(items):
+    """
+    Prints the given items. Basically for tests
+    :param items: list of instances of base_item
+    :return:
+    """
+    if not items:
+        items = []
+        pass
+
+    for item in items:
+        print item
+        pass
+    pass

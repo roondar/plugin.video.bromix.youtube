@@ -1,3 +1,4 @@
+from resources.lib import kodimon
 from resources.lib.youtube import Provider
 
 __author__ = 'bromix'
@@ -5,15 +6,18 @@ __author__ = 'bromix'
 import unittest
 
 
-def print_items(items):
-    for item in items:
-        print item
-        pass
-    pass
-
-
 class TestProvider(unittest.TestCase):
     def setUp(self):
+        pass
+
+    def test_search(self):
+        provider = Provider()
+
+        path = '/%s/query/' % provider.PATH_SEARCH
+        result = provider.navigate(path, {'q': 'batman'})
+
+        items = result[0]
+        kodimon.print_items(items)
         pass
 
     def test_what_to_watch(self):
@@ -23,7 +27,7 @@ class TestProvider(unittest.TestCase):
         items = result[0]
         self.assertGreater(len(items), 0)
 
-        print_items(items)
+        kodimon.print_items(items)
         pass
 
     def test_on_guide(self):
@@ -33,7 +37,7 @@ class TestProvider(unittest.TestCase):
         items = result[0]
         self.assertGreater(len(items), 0)
 
-        print_items(items)
+        kodimon.print_items(items)
         pass
 
     def test_on_root(self):

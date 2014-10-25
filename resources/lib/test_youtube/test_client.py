@@ -8,6 +8,13 @@ class TestClient(unittest.TestCase):
     def setUp(self):
         pass
 
+    def test_search(self):
+        client = Client()
+
+        #
+        json_data = client.search_v3(q='batman')
+        pass
+
     def test_get_what_to_watch_tv(self):
         client = Client()
 
