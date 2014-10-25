@@ -10,6 +10,7 @@ class Provider(kodimon.AbstractProvider):
 
         from resources.lib import youtube
 
+        # TODO: set language of XBMC/KODI (en-US) in the client. YouTube will already localize some strings
         self._client = youtube.Client()
         pass
 
