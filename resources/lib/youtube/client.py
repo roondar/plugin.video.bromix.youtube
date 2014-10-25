@@ -128,7 +128,9 @@ class Client(object):
                   'cbr': 'Chrome',
                   'cbrver': '39.0.2171.36',
                   'cos': 'Windows',
-                  'cosver': '6.1'}
+                  'cosver': '6.1',
+                  'ps': 'leanback',
+                  'el': 'leanback'}
 
         url = 'https://www.youtube.com/get_video_info'
 

@@ -11,6 +11,10 @@ class TestClient(unittest.TestCase):
     def test_get_video_info_tv(self):
         client = Client()
 
+        # vevo
+        streams = client.get_video_info_tv('O-zpOMYRi0w')
+
+        # free
         streams = client.get_video_info_tv('Y0noFhiUh1U')
         pass
 
