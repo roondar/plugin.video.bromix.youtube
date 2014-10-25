@@ -8,6 +8,13 @@ class TestClient(unittest.TestCase):
     def setUp(self):
         pass
 
+    def test_get_what_to_watch_tv(self):
+        client = Client()
+
+        # 'Popular on YouTube'
+        json_data = client.get_what_to_watch_tv()
+        pass
+
     def test_get_channel_sections_v3(self):
         client = Client()
 

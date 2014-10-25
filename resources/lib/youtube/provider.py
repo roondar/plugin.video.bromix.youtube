@@ -2,6 +2,7 @@ from functools import partial
 from resources.lib import kodimon
 from resources.lib.kodimon import DirectoryItem
 from resources.lib.kodimon.helper.function_cache import FunctionCache
+import youtube_tv
 
 __author__ = 'bromix'
 
@@ -16,13 +17,30 @@ class Provider(kodimon.AbstractProvider):
         self._client = youtube.Client()
         pass
 
+    def get_client(self):
+        """
+        Return the internal client. Respect the class definition!
+        :return:
+        """
+        return self._client
+
+    @kodimon.RegisterPath('^/browse/tv/(?P<browse_id>.+)/$')
+    def _on_browse_id_tv(self, path, params, re_match):
+        result = []
+
+        browse_id = re_match.group('browse_id')
+        json_data = self._client.browse_id_tv(browse_id=browse_id)
+        result.extend(youtube_tv.process_response(provider=self, json_data=json_data))
+
+        return result
+
     @kodimon.RegisterPath('^/guide/$')
     def _on_guide(self, path, params, re_match):
         result = []
 
         # cashing
         json_data = self.call_function_cached(partial(self._client.get_guide_tv), seconds=FunctionCache.ONE_MINUTE*5)
-        result.extend(self._do_youtube_tv_response(json_data))
+        result.extend(youtube_tv.process_response(self, json_data))
 
         return result
 
@@ -42,7 +60,8 @@ class Provider(kodimon.AbstractProvider):
 
         # TODO: try to implement 'What to Watch'
         # what to watch
-        what_to_watch_item = DirectoryItem('What to watch (Dummy)', '')
+        what_to_watch_item = DirectoryItem('What to watch (Dummy)',
+                                           self.create_uri(['browse/tv', self._client.BROWSE_ID_WHAT_TO_WATCH]))
         result.append(what_to_watch_item)
 
         # TODO: setting to disable this item
@@ -67,42 +86,4 @@ class Provider(kodimon.AbstractProvider):
             """
         return self.create_resource_path('media', 'fanart.jpg')
 
-    def _do_youtube_tv_response(self, json_data):
-        channel_map = {}
-        result = []
-
-        kind = json_data.get('kind', '')
-        items = json_data.get('items', [])
-        for item in items:
-            # if kind=='youtubei#guideResponse'
-            sub_items = item.get('guideSectionRenderer', {}).get('items', [])
-            for sub_item in sub_items:
-                guide_entry_renderer = sub_item.get('guideEntryRenderer', {})
-                title = guide_entry_renderer['title']
-                browse_id = guide_entry_renderer.get('navigationEndpoint', {}).get('browseEndpoint', {}).get('browseId',
-                                                                                                             '')
-                if browse_id:
-                    guide_item = DirectoryItem(title, self.create_uri(['browse/tv', browse_id]))
-                    result.append(guide_item)
-
-                    channel_map[browse_id] = guide_item
-                    pass
-                pass
-            pass
-
-        # we update the channels with the correct thumbnails and fanarts
-        json_channel_data = self._client.get_channels_v3(channel_id=list(channel_map.keys()))
-        items = json_channel_data.get('items', [])
-        for item in items:
-            guide_item = channel_map[item['id']] # should crash if something is missing
-
-            image = item.get('snippet', {}).get('thumbnails', {}).get('medium', {}).get('url', '')
-            guide_item.set_image(image)
-
-            fanart = item.get('brandingSettings', {}).get('image', {}).get('bannerTvImageUrl', self.get_fanart())
-            guide_item.set_fanart(fanart)
-            pass
-
-        return result
-
-pass
+    pass

@@ -16,6 +16,16 @@ class TestProvider(unittest.TestCase):
     def setUp(self):
         pass
 
+    def test_what_to_watch(self):
+        provider = Provider()
+        result = provider.navigate('/browse/tv/%s/' % provider.get_client().BROWSE_ID_WHAT_TO_WATCH)
+
+        items = result[0]
+        self.assertGreater(len(items), 0)
+
+        print_items(items)
+        pass
+
     def test_on_guide(self):
         provider = Provider()
         result = provider.navigate('/guide/')
@@ -24,6 +34,7 @@ class TestProvider(unittest.TestCase):
         self.assertGreater(len(items), 0)
 
         print_items(items)
+        pass
 
     def test_on_root(self):
         provider = Provider()

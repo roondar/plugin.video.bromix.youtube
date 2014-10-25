@@ -462,7 +462,7 @@ class YouTubeClient(object):
         params = {'q': text,
                   'part': 'snippet',
                   'maxResults': self._MaxResult}
-        
+
         types = []
         if searchForVideos!=None and searchForVideos==True:
             types.append('video')

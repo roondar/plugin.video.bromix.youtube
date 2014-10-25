@@ -5,6 +5,8 @@ __author__ = 'bromix'
 
 
 class Client(object):
+    BROWSE_ID_WHAT_TO_WATCH = 'FEwhat_to_watch'
+
     KEY = 'AIzaSyAd-YEOqZz9nXVzGtn3KWzYLbLaajhqIDA' #TV
 
     def __init__(self, key='', language='en-US'):
@@ -40,6 +42,13 @@ class Client(object):
                   'regionCode': self._country,
                   'hl': self._language}
         return self._perform_v3_request(method='GET', path='guideCategories', params=params)
+
+    def get_what_to_watch_tv(self):
+        return self.browse_id_tv(self.BROWSE_ID_WHAT_TO_WATCH)
+
+    def browse_id_tv(self, browse_id):
+        post_data = {'browseId': browse_id}
+        return self._perform_tv_request(method='POST', path='browse', post_data=post_data)
 
     def get_guide_tv(self):
         return self._perform_tv_request(method='POST', path='guide')
