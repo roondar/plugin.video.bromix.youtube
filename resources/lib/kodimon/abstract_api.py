@@ -141,6 +141,7 @@ def sort_items_by_info_label(content_items, info_type, reverse=False):
 def parse_iso_8601(iso_8601_string):
     def _parse_date(_date):
         _result = {}
+
         _split_date = _date.split('-')
         if len(_split_date) > 0:
             _result['year'] = int(_split_date[0])
@@ -166,7 +167,8 @@ def parse_iso_8601(iso_8601_string):
             _result['minute'] = int(_time2[1])
             pass
         if len(_time2) >= 2:
-            _result['second'] = int(_time2[2])
+            _seconds = _time2[2].split('.')[0]
+            _result['second'] = int(_seconds)
             pass
 
         if len(_split_time) > 1:
@@ -175,11 +177,45 @@ def parse_iso_8601(iso_8601_string):
             if _time.find('-') != -1:
                 _result['offset_hour'] *= -1
             pass
+
+        if _time.endswith('Z'):
+            _result['offset_hour'] = 0
+            pass
+
+        return _result
+
+    def _parse_period(_iso_8601_string):
+        _result = {}
+
+        re_match = re.match('P((?P<years>\d+)Y)?((?P<months>\d+)M)?((?P<days>\d+)D)?(T((?P<hours>\d+)H)?((?P<minutes>\d+)M)?((?P<seconds>\d+)S)?)?', _iso_8601_string)
+        if re_match:
+            _result['years'] = re_match.group('years')
+            _result['months'] = re_match.group('months')
+            _result['days'] = re_match.group('days')
+            _result['hours'] = re_match.group('hours')
+            _result['minutes'] = re_match.group('minutes')
+            _result['seconds'] = re_match.group('seconds')
+
+            for key in _result:
+                value = _result[key]
+                if value is None:
+                    _result[key] = 0
+                elif isinstance(value, basestring):
+                    _result[key] = int(value)
+                    pass
+                pass
+            pass
+
         return _result
 
     result = {}
 
     _data = re.split('T| ', iso_8601_string)
+
+    # period
+    if _data[0] == 'P':
+        return _parse_period(iso_8601_string)
+
     result.update(_parse_date(_data[0]))
     if len(_data) > 1:
         result.update(_parse_time(_data[1]))

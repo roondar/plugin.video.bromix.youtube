@@ -1,14 +1,25 @@
 import os
-import shelve
-import time
+import sqlite3
+import datetime
+
+try:
+    import cPickle as pickle
+except ImportError:
+    import pickle
+    pass
 
 __author__ = 'bromix'
 
 
 class Storage(object):
     def __init__(self, filename, max_item_count=1000, max_file_size_kb=-1):
+        self._tablename = 'storage'
         self._filename = filename
+        if not self._filename.endswith('.sqlite'):
+            self._filename = self._filename+'.sqlite'
+            pass
         self._file = None
+        self._cursor = None
         self._max_item_count = max_item_count
         self._max_file_size_kb = max_file_size_kb
         pass
@@ -22,12 +33,30 @@ class Storage(object):
         pass
 
     def __del__(self):
+        self._close()
+        pass
+
+    def _open(self):
+        if self._file is None:
+            self._optimize_file_size()
+
+            path = os.path.dirname(self._filename)
+            if not os.path.exists(path):
+                os.makedirs(path)
+                pass
+
+            self._file = sqlite3.connect(self._filename, detect_types=sqlite3.PARSE_DECLTYPES)
+            self._cursor = self._file.cursor()
+            self._create_table()
+        pass
+
+    def _close(self):
         if self._file is not None:
-            self._file.sync()
+            self._file.commit()
+            self._cursor.close()
+            self._cursor = None
             self._file.close()
             self._file = None
-
-            self._optimize_file_size()
             pass
         pass
 
@@ -41,122 +70,107 @@ class Storage(object):
         if not os.path.exists(path):
             return
 
-        # collect all files which will match the beginning of the filename
-        filename = os.path.basename(self._filename)
-        files = os.listdir(path)
-        file_size_kb = 0
-        collected_files = []
-        for test_file in files:
-            if test_file.startswith(filename):
-                test_file = os.path.join(path, test_file)
-                if os.path.isfile(test_file):
-                    collected_files.append(test_file)
-                    file_size_kb += os.path.getsize(test_file) / 1024
-                    pass
-                pass
-            pass
+        if not os.path.exists(self._filename):
+            return
 
-        # if the file size exceeds the allowed max file size we delete all collected files
+        file_size_kb = os.path.getsize(self._filename) / 1024
         if file_size_kb >= self._max_file_size_kb:
-            for collected_file in collected_files:
-                os.remove(collected_file)
-                pass
+            os.remove(self._filename)
             pass
         pass
 
-    def _open(self):
-        if self._file is None:
-            self._optimize_file_size()
-
-            path = os.path.dirname(self._filename)
-            if not os.path.exists(path):
-                os.makedirs(path)
-                pass
-
-            self._file = shelve.open(self._filename, writeback=True)
+    def _create_table(self):
+        self._open()
+        query = 'CREATE TABLE IF NOT EXISTS %s (key TEXT PRIMARY KEY, time TIMESTAMP, value BLOB)' % self._tablename
+        self._cursor.execute(query)
         pass
 
     def sync(self):
         if self._file is not None:
-            self._file.sync()
+            self._file.commit()
             pass
         pass
 
     def _set(self, item_id, item):
+        def _encode(obj):
+            return sqlite3.Binary(pickle.dumps(obj, protocol=pickle.HIGHEST_PROTOCOL))
+
         self._open()
-        now = time.time()
-        self._file[item_id] = (item, now)
+        now = datetime.datetime.now()
+        query = 'REPLACE INTO %s (key,time,value) VALUES(?,?,?)' % self._tablename
+        self._cursor.execute(query, [item_id, now, _encode(item)])
         self._optimize_item_count()
         pass
 
     def _optimize_item_count(self):
-        def _sort(x):
-            return x[1][1]
-
-        try:
-            if len(self._file) > self._max_item_count:
-                cut_off = len(self._file) - self._max_item_count
-                items = sorted(self._file.items(), key=_sort, reverse=False)
-
-                for i in range(cut_off):
-                    item = items[i]
-                    self._remove(item[0])
-                    pass
+        self._open()
+        query = 'SELECT key FROM %s ORDER BY time LIMIT -1 OFFSET %d' % (self._tablename, self._max_item_count)
+        result = self._cursor.execute(query)
+        if result is not None:
+            for item in result:
+                self._remove(item[0])
                 pass
-        except Exception, ex:
-            self._reset("Failed to optimize", ex.__str__())
+
+            self.sync()
             pass
         pass
 
     def _clear(self):
         self._open()
-        self._file.clear()
+        query = 'DELETE FROM %s' % self._tablename
+        self._cursor.execute(query)
+        self.sync()
+        self._create_table()
+        self.sync()
         pass
 
     def _is_empty(self):
         self._open()
-        return len(self._file) == 0
+        query = 'SELECT exists(SELECT 1 FROM %s LIMIT 1);' % self._tablename
+        result = self._cursor.execute(query)
+        for item in result:
+            return item[0] == 0
 
-    def _get_ids(self):
+        return False
+
+    def _get_ids(self, oldest_first=True):
         self._open()
-        return self._file.keys()
+        query = 'SELECT key FROM %s' % self._tablename
+        if oldest_first:
+            query = '%s ORDER BY time ASC' % query
+        else:
+            query = '%s ORDER BY time DESC' % query
+            pass
+
+        query_result = self._cursor.execute(query)
+
+        result = []
+        for item in query_result:
+            result.append(item[0])
+            pass
+
+        return result
 
     def _get(self, item_id):
+        def _decode(obj):
+            return pickle.loads(bytes(obj))
+
         self._open()
-        try:
-            # we check for tuple so old data will be discarded
-            result = self._file.get(item_id, None)
-            if isinstance(result, tuple):
-                return result
-
+        query = 'SELECT time, value FROM %s WHERE key=?' % self._tablename
+        result = self._cursor.execute(query, [item_id])
+        if result is None:
             return None
-        except Exception, ex:
-            self._reset("Failed to load item with id '%s'" % item_id, ex.__str__())
-            pass
-        pass
 
-    def _reset(self, text, cause):
-        from .. import log, constants
-        log("%s (%s)" % (text, cause), constants.LOG_ERROR)
-        log("Resetting database...", constants.LOG_INFO)
+        item = result.fetchone()
+        if item is None:
+            return None
 
-        if self._file is not None:
-            self._file.close()
-            self._file = None
-            pass
-
-        if os.path.exists(self._filename):
-            os.remove(self._filename)
-            pass
-
-        log("Resetting database...Done", constants.LOG_INFO)
-        pass
+        return _decode(item[1]), item[0]
 
     def _remove(self, item_id):
         self._open()
-        if item_id in self._file:
-            del self._file[item_id]
-            pass
+        query = 'DELETE FROM %s WHERE key = ?' % self._tablename
+        self._cursor.execute(query, [item_id])
         pass
 
     pass

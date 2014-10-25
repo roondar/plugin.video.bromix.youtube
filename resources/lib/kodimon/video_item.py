@@ -60,6 +60,13 @@ class VideoItem(BaseItem):
         self.set_info(self.INFO_AIRED, u'%s-%s-%s' % (_data[0], _data[1], _data[2]))
         pass
 
+    def set_duration(self, hours, minutes, seconds=0):
+        _seconds = seconds
+        _seconds += minutes * 60
+        _seconds += hours * 60 * 60
+        self.set_duration_in_seconds(_seconds)
+        pass
+
     def set_duration_in_minutes(self, int_minutes):
         self.set_duration_in_seconds(int_minutes * 60)
         pass

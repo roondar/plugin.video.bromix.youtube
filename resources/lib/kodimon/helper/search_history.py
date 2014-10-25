@@ -13,26 +13,10 @@ class SearchHistory(Storage):
     def list(self):
         result = []
 
-        for key in self._get_ids():
+        keys = self._get_ids(oldest_first=False)
+        for key in keys:
             item = self._get(key)
-            if item is not None:
-                # clean up old mistakes :)
-                if not isinstance(item[0], basestring):
-                    self._remove(key)
-                    self.sync()
-                else:
-                    result.append(item)
-                    pass
-            pass
-
-        def _sort(x):
-            return x[1]
-
-        # first sort the items based on their last timestamp
-        result = sorted(result, key=_sort, reverse=True)
-        # normalize the items by removing the timestamp
-        for i in range(len(result)):
-            result[i] = result[i][0]
+            result.append(item[0])
             pass
 
         return result

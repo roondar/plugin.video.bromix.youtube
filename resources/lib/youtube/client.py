@@ -66,6 +66,20 @@ class Client(object):
 
         return self._perform_v3_request(method='GET', path='search', params=params)
 
+    def get_videos_v3(self, video_id):
+        """
+
+        :param video_id:
+        :return:
+        """
+        if isinstance(video_id, list):
+            video_id = ','.join(video_id)
+            pass
+
+        params = {'part': 'snippet,contentDetails',
+                  'id': video_id}
+        return self._perform_v3_request(method='GET', path='videos', params=params)
+
     def get_channels_v3(self, channel_id):
         """
         :param channel_id: list or comma-separated list of the YouTube channel ID(s)

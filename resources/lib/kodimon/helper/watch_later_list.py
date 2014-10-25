@@ -21,18 +21,8 @@ class WatchLaterList(Storage):
 
         for key in self._get_ids():
             data = self._get(key)
-            if data is not None:
-                item = data[0]
-
-                # remove old stuff - we only want json data
-                if not isinstance(item, dict):
-                    self._remove(key)
-                    pass
-
-                # at this point we could react on api changes if the '_version' of
-                # the base_item is different.
-                item = json_to_item(item)
-                result.append(item)
+            item = json_to_item(data[0])
+            result.append(item)
             pass
 
         from .. import sort_items_by_info_label, VideoItem
