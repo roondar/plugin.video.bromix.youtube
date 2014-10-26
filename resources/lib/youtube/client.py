@@ -1,6 +1,8 @@
 import json
 import urlparse
+
 import requests
+
 
 __author__ = 'bromix'
 
@@ -167,7 +169,23 @@ class Client(object):
 
         return ''.join(a)
 
-    def get_video_info_tv(self, video_id):
+    def get_best_fitting_video_stream(self, video_id, video_height):
+        streams = self.get_video_streams_tv(video_id)
+
+        result = None
+        last_size = 0
+        for stream in streams:
+            size = stream['format']['height']
+
+            if size >= last_size and size <= video_height:
+                last_size = size
+                result = stream
+                pass
+            pass
+
+        return result
+
+    def get_video_streams_tv(self, video_id):
         headers = {'Host': 'www.youtube.com',
                    'Connection': 'keep-alive',
                    'User-Agent': 'Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/39.0.2171.36 Safari/537.36',
@@ -206,8 +224,8 @@ class Client(object):
             data = item.split('/')
 
             size = data[1].split('x')
-            itag_dict[data[0]] = {'width': size[0],
-                                  'height': size[1]}
+            itag_dict[data[0]] = {'width': int(size[0]),
+                                  'height': int(size[1])}
             pass
 
         # prepare stream map

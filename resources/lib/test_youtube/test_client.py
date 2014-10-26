@@ -81,14 +81,22 @@ class TestClient(unittest.TestCase):
         json_data = client.get_playlists_v3('UCLx053rWZxCiYWsBETgdKrQ')
         pass
 
-    def test_get_video_info_tv(self):
+    def test_get_best_fitting_video_stream(self):
+        client = Client()
+
+        # free
+        stream = client.get_best_fitting_video_stream('Y0noFhiUh1U', 576)
+        stream = client.get_best_fitting_video_stream('Y0noFhiUh1U', 720)
+        pass
+
+    def test_get_video_streams_tv(self):
         client = Client()
 
         # vevo
-        streams = client.get_video_info_tv('O-zpOMYRi0w')
+        streams = client.get_video_streams_tv('O-zpOMYRi0w')
 
         # free
-        streams = client.get_video_info_tv('Y0noFhiUh1U')
+        streams = client.get_video_streams_tv('Y0noFhiUh1U')
         pass
 
     def test_get_videos_v3(self):

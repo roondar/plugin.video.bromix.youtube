@@ -60,7 +60,8 @@ class AbstractSettings(object):
         import constants
         vq_dict = {0: 576,
                    1: 720,
-                   2: 1080}
+                   2: 1080,
+                   3: 2160}
         vq = self.get_int(constants.SETTING_VIDEO_QUALITY, 1)
         return vq_dict[vq]
 

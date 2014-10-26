@@ -96,9 +96,7 @@ class Provider(kodimon.AbstractProvider):
 
         # TODO: select correct quality based on settings
         vq = self.get_settings().get_video_quality()
-
-        video_streams = self._client.get_video_info_tv(video_id)
-        video_stream = video_streams[0]
+        video_stream = self._client.get_best_fitting_video_stream(video_id, vq)
 
         item = kodimon.VideoItem(video_id, video_stream['url'])
         return item
