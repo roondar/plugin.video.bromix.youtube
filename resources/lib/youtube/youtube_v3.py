@@ -68,22 +68,22 @@ def _process_search_list_response(provider, path, params, json_data):
                 title = snippet['title']  # should crash if the API is not conform!
                 image = snippet.get('thumbnails', {}).get('medium', {}).get('url', '')
 
-                playlist_item = DirectoryItem('[CH]'+title,
-                                              provider.create_uri(['playlist', channel_id]),
-                                              image=image)
-                playlist_item.set_fanart(provider.get_fanart())
-                result.append(playlist_item)
+                channel_item = DirectoryItem('[CH]' + title,
+                                             provider.create_uri(['channel', channel_id]),
+                                             image=image)
+                channel_item.set_fanart(provider.get_fanart())
+                result.append(channel_item)
             elif sub_kind == 'youtube#playlist':
                 playlist_id = item.get('id', {})['playlistId']  # should crash if the API is not conform!
                 snippet = item.get('snippet', {})
                 title = snippet['title']  # should crash if the API is not conform!
                 image = snippet.get('thumbnails', {}).get('medium', {}).get('url', '')
 
-                channel_item = DirectoryItem('[PL]'+title,
-                                             provider.create_uri(['channel', channel_id]),
-                                             image=image)
-                channel_item.set_fanart(provider.get_fanart())
-                result.append(channel_item)
+                playlist_item = DirectoryItem('[PL]' + title,
+                                              provider.create_uri(['playlist', playlist_id]),
+                                              image=image)
+                playlist_item.set_fanart(provider.get_fanart())
+                result.append(playlist_item)
             else:
                 raise KodimonException("Unknown kind '%s' for youtube_v3" % sub_kind)
         else:
@@ -91,7 +91,38 @@ def _process_search_list_response(provider, path, params, json_data):
         pass
 
     _update_video_infos(provider, video_item_dict)
+    return result
 
+
+def _process_playlist_item_response(provider, path, params, json_data):
+    video_item_dict = {}
+    result = []
+
+    items = json_data.get('items', [])
+    for item in items:
+        kind = item.get('kind', '')
+        if kind == 'youtube#playlistItem':
+            snippet = item.get('snippet', {})
+            sub_kind = snippet.get('resourceId', {}).get('kind', '')
+            if sub_kind == 'youtube#video':
+                video_id = snippet.get('resourceId', {})['videoId']  # let it crash if not conform
+                title = snippet['title']  # let it crash if not conform
+                image = snippet.get('thumbnails', {}).get('medium', {}).get('url', '')
+
+                video_item = VideoItem(title,
+                                       provider.create_uri(['play'], {'video_id': video_id}),
+                                       image=image)
+                video_item.set_fanart(provider.get_fanart())
+                result.append(video_item)
+
+                video_item_dict[video_id] = video_item
+            else:
+                raise KodimonException("Unknown kind '%s' for youtube_v3" % sub_kind)
+        else:
+            raise KodimonException("Unknown kind '%s' for youtube_v3" % kind)
+        pass
+
+    _update_video_infos(provider, video_item_dict)
     return result
 
 
@@ -105,7 +136,8 @@ def process_response(provider, path, params, json_data):
     kind = json_data.get('kind', '')
     if kind == 'youtube#searchListResponse':
         result.extend(_process_search_list_response(provider, path, params, json_data))
-        pass
+    elif kind == 'youtube#playlistItemListResponse':
+        result.extend(_process_playlist_item_response(provider, path, params, json_data))
     else:
         raise KodimonException("Unknown kind '%s' for youtube_v3" % kind)
 

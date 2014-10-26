@@ -10,6 +10,15 @@ class TestProvider(unittest.TestCase):
     def setUp(self):
         pass
 
+    def test_playlist_items(self):
+        provider = Provider()
+
+        result = provider.navigate('/playlist/PL024E341A0495DF9F/')
+
+        items = result[0]
+        kodimon.print_items(items)
+        pass
+
     def test_search(self):
         provider = Provider()
 

@@ -25,6 +25,20 @@ class Provider(kodimon.AbstractProvider):
         """
         return self._client
 
+    @kodimon.RegisterPath('^/playlist/(?P<playlist_id>.+)/$')
+    def _on_playlist(self, path, params, re_match):
+        self._set_default_content_type_and_sort_methods()
+        
+        result = []
+
+        playlist_id = re_match.group('playlist_id')
+        page_token = params.get('page_token', '')
+
+        json_data = self._client.get_playlist_items(playlist_id=playlist_id, page_token=page_token)
+        result.extend(youtube_v3.process_response(self, path, params, json_data))
+
+        return result
+
     @kodimon.RegisterPath('^/browse/tv/(?P<browse_id>.+)/$')
     def _on_browse_id_tv(self, path, params, re_match):
         result = []
@@ -57,7 +71,7 @@ class Provider(kodimon.AbstractProvider):
         return result
 
     def on_search(self, search_text, path, params, re_match):
-        self.set_content_type(kodimon.constants.CONTENT_TYPE_EPISODES)
+        self._set_default_content_type_and_sort_methods()
 
         result = []
 
@@ -101,6 +115,13 @@ class Provider(kodimon.AbstractProvider):
             pass
 
         return result
+
+    def _set_default_content_type_and_sort_methods(self):
+        self.set_content_type(kodimon.constants.CONTENT_TYPE_EPISODES)
+        self.add_sort_method(kodimon.constants.SORT_METHOD_UNSORTED,
+                             kodimon.constants.SORT_METHOD_VIDEO_TITLE,
+                             kodimon.constants.SORT_METHOD_VIDEO_YEAR,
+                             kodimon.constants.SORT_METHOD_VIDEO_RUNTIME)
 
     def get_fanart(self):
         """

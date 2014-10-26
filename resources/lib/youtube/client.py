@@ -21,6 +21,22 @@ class Client(object):
         self._max_results = 50
         pass
 
+    def get_playlist_items(self, playlist_id, page_token=''):
+        # prepare page token
+        if not page_token:
+            page_token = ''
+            pass
+
+        # prepare params
+        params = {'part': 'snippet',
+                  'maxResults': str(self._max_results),
+                  'playlistId': playlist_id}
+        if page_token:
+            params['pageToken'] = page_token
+            pass
+
+        return self._perform_v3_request(method='GET', path='playlistItems', params=params)
+
     def get_channel_sections_v3(self, channel_id):
         """
         Returns the sections of a channel

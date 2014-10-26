@@ -69,6 +69,12 @@ class TestClient(unittest.TestCase):
         self.assertEqual('D8ED82B0DEAAEBBC71C2224CFEF675C3D777D523.768038101F740057AE510929A200F244E0D7361F', signature)
         pass
 
+    def test_get_playlist_items(self):
+        client = Client()
+
+        json_data = client.get_playlist_items('PL024E341A0495DF9F')
+        pass
+
     def test_get_video_info_tv(self):
         client = Client()
 
