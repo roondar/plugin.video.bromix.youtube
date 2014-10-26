@@ -10,7 +10,7 @@
 
         <!-- Kodimon Visual -->
         <setting id="kodimon.video.quality" type="enum" label="30010" lvalues="30011|30012|30013|30014" default="1" />
-        <setting id="kodimon.video.3D" type="bool" label="30020" default="false" />
+        <!--setting id="kodimon.video.3D" type="bool" label="30020" default="false" /-->
         <setting type="sep" />
         <setting id="kodimon.fanart.show" type="bool" label="30021" default="true"/>
         <setting id="kodimon.content.max_per_page" type="enum" label="30022" values="5|10|15|20|25|30|35|40|45|50" default="9" />

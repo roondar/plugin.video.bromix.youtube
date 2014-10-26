@@ -126,6 +126,31 @@ def _process_playlist_item_response(provider, path, params, json_data):
     return result
 
 
+def _process_playlist_response(provider, path, params, json_data):
+    result = []
+
+    items = json_data.get('items', [])
+    for item in items:
+        kind = item.get('kind', '')
+        if kind == 'youtube#playlist':
+            playlist_id = item['id']
+            snippet = item['snippet']
+            title = snippet['title']
+            image = snippet.get('thumbnails', {}).get('medium', {}).get('url', '')
+
+            playlist_item = DirectoryItem(title,
+                                          provider.create_uri(['playlist', playlist_id]),
+                                          image=image)
+            playlist_item.set_fanart(provider.get_fanart())
+            result.append(playlist_item)
+            pass
+        else:
+            raise KodimonException("Unknown kind '%s' for youtube_v3" % kind)
+        pass
+
+    return result
+
+
 def process_response(provider, path, params, json_data):
     if not params:
         params = {}
@@ -138,6 +163,8 @@ def process_response(provider, path, params, json_data):
         result.extend(_process_search_list_response(provider, path, params, json_data))
     elif kind == 'youtube#playlistItemListResponse':
         result.extend(_process_playlist_item_response(provider, path, params, json_data))
+    elif kind == 'youtube#playlistListResponse':
+        result.extend(_process_playlist_response(provider, path, params, json_data))
     else:
         raise KodimonException("Unknown kind '%s' for youtube_v3" % kind)
 

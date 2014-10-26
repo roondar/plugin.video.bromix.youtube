@@ -10,7 +10,7 @@ class Client(object):
 
     KEY = 'AIzaSyAd-YEOqZz9nXVzGtn3KWzYLbLaajhqIDA'  # TV
 
-    def __init__(self, key='', language='en-US'):
+    def __init__(self, key='', language='en-US', items_per_page=50):
         self._key = self.KEY
         if key:
             self._key = key
@@ -18,10 +18,10 @@ class Client(object):
 
         self._language = language
         self._country = language.split('-')[1]
-        self._max_results = 50
+        self._max_results = items_per_page
         pass
 
-    def get_playlist_items(self, playlist_id, page_token=''):
+    def get_playlist_items_v3(self, playlist_id, page_token=''):
         # prepare page token
         if not page_token:
             page_token = ''
@@ -36,6 +36,22 @@ class Client(object):
             pass
 
         return self._perform_v3_request(method='GET', path='playlistItems', params=params)
+
+    def get_playlists_v3(self, channel_id, page_token=''):
+        # prepare page token
+        if not page_token:
+            page_token = ''
+            pass
+
+        # prepare params
+        params = {'part': 'snippet,contentDetails',
+                  'maxResults': str(self._max_results),
+                  'channelId': channel_id}
+        if page_token:
+            params['pageToken'] = page_token
+            pass
+
+        return self._perform_v3_request(method='GET', path='playlists', params=params)
 
     def get_channel_sections_v3(self, channel_id):
         """

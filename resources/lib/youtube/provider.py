@@ -15,7 +15,9 @@ class Provider(kodimon.AbstractProvider):
         from resources.lib import youtube
 
         # TODO: set language of XBMC/KODI (en-US) in the client. YouTube will already localize some strings
-        self._client = youtube.Client()
+        settings = self.get_settings()
+        items_per_page = settings.get_int(kodimon.constants.SETTING_ITEMS_PER_PAGE, 50, converter=lambda x: (x+1)*5)
+        self._client = youtube.Client(items_per_page=items_per_page)
         pass
 
     def get_client(self):
@@ -25,6 +27,18 @@ class Provider(kodimon.AbstractProvider):
         """
         return self._client
 
+    @kodimon.RegisterPath('^\/channel\/(?P<channel_id>.+)\/playlists/$')
+    def _on_channel_playlists(self, path, params, re_match):
+        result = []
+
+        channel_id = re_match.group('channel_id')
+        page_token = params.get('page_token', '')
+
+        json_data = self._client.get_playlists_v3(channel_id=channel_id, page_token=page_token)
+        result.extend(youtube_v3.process_response(self, path, params, json_data))
+
+        return result
+
     @kodimon.RegisterPath('^\/channel\/(?P<channel_id>.+)\/$')
     def _on_channel(self, path, params, re_match):
         self._set_default_content_type_and_sort_methods()
@@ -32,6 +46,13 @@ class Provider(kodimon.AbstractProvider):
         result = []
 
         channel_id = re_match.group('channel_id')
+        page = int(params.get('page', 1))
+        if page == 1:
+            playlists_item = DirectoryItem(self.localize('youtube.playlists'),
+                                           self.create_uri(['channel', channel_id, 'playlists']))
+            playlists_item.set_fanart(self.get_fanart())
+            result.append(playlists_item)
+            pass
 
         # first we must get the id of the upload playlist (thank you Google!)
         json_data = self.call_function_cached(partial(self._client.get_channels_v3, channel_id=channel_id),
@@ -40,7 +61,7 @@ class Provider(kodimon.AbstractProvider):
         item = items[0]
         uploads_playlist_id = item.get('contentDetails', {}).get('relatedPlaylists', {}).get('uploads', '')
         if uploads_playlist_id:
-            json_data = self._client.get_playlist_items(playlist_id=uploads_playlist_id)
+            json_data = self._client.get_playlist_items_v3(playlist_id=uploads_playlist_id)
             result.extend(youtube_v3.process_response(self, path, params, json_data))
             pass
 
@@ -55,7 +76,7 @@ class Provider(kodimon.AbstractProvider):
         playlist_id = re_match.group('playlist_id')
         page_token = params.get('page_token', '')
 
-        json_data = self._client.get_playlist_items(playlist_id=playlist_id, page_token=page_token)
+        json_data = self._client.get_playlist_items_v3(playlist_id=playlist_id, page_token=page_token)
         result.extend(youtube_v3.process_response(self, path, params, json_data))
 
         return result

@@ -72,7 +72,13 @@ class TestClient(unittest.TestCase):
     def test_get_playlist_items(self):
         client = Client()
 
-        json_data = client.get_playlist_items('PL024E341A0495DF9F')
+        json_data = client.get_playlist_items_v3('PL024E341A0495DF9F')
+        pass
+
+    def test_get_playlists(self):
+        client = Client()
+
+        json_data = client.get_playlists_v3('UCLx053rWZxCiYWsBETgdKrQ')
         pass
 
     def test_get_video_info_tv(self):
