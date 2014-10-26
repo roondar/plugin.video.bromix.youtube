@@ -10,6 +10,16 @@ class TestProvider(unittest.TestCase):
     def setUp(self):
         pass
 
+    def test_channel(self):
+        provider = Provider()
+
+        # 'Lazy Game Reviews'
+        result = provider.navigate('/channel/UCLx053rWZxCiYWsBETgdKrQ/')
+
+        items = result[0]
+        kodimon.print_items(items)
+        pass
+
     def test_playlist_items(self):
         provider = Provider()
 

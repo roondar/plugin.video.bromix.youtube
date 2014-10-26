@@ -25,10 +25,31 @@ class Provider(kodimon.AbstractProvider):
         """
         return self._client
 
+    @kodimon.RegisterPath('^\/channel\/(?P<channel_id>.+)\/$')
+    def _on_channel(self, path, params, re_match):
+        self._set_default_content_type_and_sort_methods()
+
+        result = []
+
+        channel_id = re_match.group('channel_id')
+
+        # first we must get the id of the upload playlist (thank you Google!)
+        json_data = self.call_function_cached(partial(self._client.get_channels_v3, channel_id=channel_id),
+                                              seconds=FunctionCache.ONE_DAY)
+        items = json_data['items']  # let it crash if not conform
+        item = items[0]
+        uploads_playlist_id = item.get('contentDetails', {}).get('relatedPlaylists', {}).get('uploads', '')
+        if uploads_playlist_id:
+            json_data = self._client.get_playlist_items(playlist_id=uploads_playlist_id)
+            result.extend(youtube_v3.process_response(self, path, params, json_data))
+            pass
+
+        return result
+
     @kodimon.RegisterPath('^/playlist/(?P<playlist_id>.+)/$')
     def _on_playlist(self, path, params, re_match):
         self._set_default_content_type_and_sort_methods()
-        
+
         result = []
 
         playlist_id = re_match.group('playlist_id')
@@ -65,7 +86,7 @@ class Provider(kodimon.AbstractProvider):
         result = []
 
         # cashing
-        json_data = self.call_function_cached(partial(self._client.get_guide_tv), seconds=FunctionCache.ONE_MINUTE*5)
+        json_data = self.call_function_cached(partial(self._client.get_guide_tv), seconds=FunctionCache.ONE_MINUTE * 5)
         result.extend(youtube_tv.process_response(self, json_data))
 
         return result
@@ -103,7 +124,7 @@ class Provider(kodimon.AbstractProvider):
 
         # TODO: setting to disable this item
         # guide - we call this function the get the localized string directly from YouTube
-        json_data = self.call_function_cached(partial(self._client.get_guide_tv), seconds=FunctionCache.ONE_MINUTE*10)
+        json_data = self.call_function_cached(partial(self._client.get_guide_tv), seconds=FunctionCache.ONE_MINUTE * 10)
         if json_data.get('kind', '') == 'youtubei#guideResponse':
             title = json_data.get('items', [{}])[0].get('guideSectionRenderer', {}).get('title', '')
             if title:
