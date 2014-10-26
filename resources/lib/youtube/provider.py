@@ -16,8 +16,7 @@ class Provider(kodimon.AbstractProvider):
 
         # TODO: set language of XBMC/KODI (en-US) in the client. YouTube will already localize some strings
         settings = self.get_settings()
-        items_per_page = settings.get_int(kodimon.constants.SETTING_ITEMS_PER_PAGE, 50, converter=lambda x: (x+1)*5)
-        self._client = youtube.Client(items_per_page=items_per_page)
+        self._client = youtube.Client(items_per_page=settings.get_items_per_page())
         pass
 
     def get_client(self):
@@ -96,6 +95,8 @@ class Provider(kodimon.AbstractProvider):
         video_id = params['video_id']
 
         # TODO: select correct quality based on settings
+        vq = self.get_settings().get_video_quality()
+
         video_streams = self._client.get_video_info_tv(video_id)
         video_stream = video_streams[0]
 

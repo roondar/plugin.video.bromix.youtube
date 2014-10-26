@@ -97,7 +97,7 @@ class TestClient(unittest.TestCase):
         json_data = client.get_videos_v3(['vyD70Huufco', 'AFdezM3_m-c'])
         pass
 
-    def test_search(self):
+    def test_search_v3(self):
         client = Client()
 
         json_data = client.search_v3(q='batman')
