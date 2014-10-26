@@ -110,6 +110,31 @@ class Client(object):
     def get_guide_tv(self):
         return self._perform_tv_request(method='POST', path='guide')
 
+    def decipher_signature(self, signature):
+        def _aJ(a, b):
+            return a[::-1]
+
+        def _KO(a, b):
+            del a[:b]
+            return a
+
+        def _Gs(a, b):
+            c = a[0]
+            a[0] = a[b % len(a)]
+            a[b] = c
+            return a
+
+        a = list(signature)  # a = a.split("");
+        a = _KO(a, 2)
+        a = _aJ(a, 52)
+        a = _KO(a, 3)
+        a = _aJ(a, 7)
+        a = _KO(a, 3)
+        a = _aJ(a, 4)
+        a = _Gs(a, 2)
+
+        return ''.join(a)
+
     def get_video_info_tv(self, video_id):
         headers = {'Host': 'www.youtube.com',
                    'Connection': 'keep-alive',
@@ -159,7 +184,19 @@ class Client(object):
         for item in old_url_encoded_fmt_stream_map:
             stream_map = dict(urlparse.parse_qsl(item))
 
-            video_stream = {'url': stream_map['url'],
+            url = stream_map['url']
+            if 'sig' in stream_map:
+                url += '&signature=%s' % stream_map['sig']
+            elif 's' in stream_map:
+                signature = self.decipher_signature(stream_map['s'])
+                url += '&signature=%s' % signature
+                url += '&alr=yes&ratebypass=yes&c=TVHTML5&cver=4&gir=yes&keepalive=yes'
+                pass
+
+            mime = stream_map['type'].split(';')[0]
+            url += '&mime=%s' % mime
+
+            video_stream = {'url': url,
                             'format': itag_dict[stream_map['itag']]}
 
             stream_list.append(video_stream)

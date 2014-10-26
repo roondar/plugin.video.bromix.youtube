@@ -68,7 +68,7 @@ def _process_search_list_response(provider, path, params, json_data):
                 title = snippet['title']  # should crash if the API is not conform!
                 image = snippet.get('thumbnails', {}).get('medium', {}).get('url', '')
 
-                playlist_item = DirectoryItem(title,
+                playlist_item = DirectoryItem('[CH]'+title,
                                               provider.create_uri(['playlist', channel_id]),
                                               image=image)
                 playlist_item.set_fanart(provider.get_fanart())
@@ -79,7 +79,7 @@ def _process_search_list_response(provider, path, params, json_data):
                 title = snippet['title']  # should crash if the API is not conform!
                 image = snippet.get('thumbnails', {}).get('medium', {}).get('url', '')
 
-                channel_item = DirectoryItem(title,
+                channel_item = DirectoryItem('[PL]'+title,
                                              provider.create_uri(['channel', channel_id]),
                                              image=image)
                 channel_item.set_fanart(provider.get_fanart())
