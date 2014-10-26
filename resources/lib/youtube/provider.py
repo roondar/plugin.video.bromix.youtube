@@ -94,7 +94,6 @@ class Provider(kodimon.AbstractProvider):
     def _on_play(self, path, params, re_match):
         video_id = params['video_id']
 
-        # TODO: select correct quality based on settings
         vq = self.get_settings().get_video_quality()
         video_stream = self._client.get_best_fitting_video_stream(video_id, vq)
 

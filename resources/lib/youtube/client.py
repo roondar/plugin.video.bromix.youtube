@@ -169,6 +169,7 @@ class Client(object):
 
         return ''.join(a)
 
+    # TODO: can be improved
     def get_best_fitting_video_stream(self, video_id, video_height):
         streams = self.get_video_streams_tv(video_id)
 
