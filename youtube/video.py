@@ -48,8 +48,35 @@ class YTVideoStreamInfo():
         self._itag = itag
         self._videoType = videoType
         pass
+
+    def decipher_signature(self, signature):
+        def _aJ(a, b):
+            return a[::-1]
+
+        def _KO(a, b):
+            del a[:b]
+            return a
+
+        def _Gs(a, b):
+            c = a[0]
+            a[0] = a[b % len(a)]
+            a[b] = c
+            return a
+
+        a = list(signature)  # a = a.split("");
+        a = _KO(a, 2)
+        a = _aJ(a, 52)
+        a = _KO(a, 3)
+        a = _aJ(a, 7)
+        a = _KO(a, 3)
+        a = _aJ(a, 4)
+        a = _Gs(a, 2)
+
+        return ''.join(a)
     
     def _getDecodeSignature(self, signature):
+        return self.decipher_signature(signature)
+
         result = ''
         try:
             url = 'http://www.freemake.com/SignatureDecoder/decoder.php?text=%s' % (signature)
@@ -203,7 +230,7 @@ def _getVideoStreamInfosPerPageView(videoId):
                 """
     return result
 
-def getVideoStreamInfos(videoId):
+def getVideoStreamInfos(videoId, access_token=''):
     result = _getVideoStreamInfosPerPageView(videoId)
     if len(result)>0:
         return result
@@ -212,6 +239,10 @@ def getVideoStreamInfos(videoId):
     opener = urllib2.build_opener()
     #url = 'https://www.youtube.com/get_video_info?video_id=%s&hl=en&gl=US&ptk=vevo&el=detailpage' % (videoId)
     url = 'https://www.youtube.com/get_video_info?video_id=%s&hl=en&gl=US&el=detailpage' % (videoId)
+    if access_token:
+        url += '&access_token=%s' % access_token
+        pass
+
     content = opener.open(url)
     
     html = content.read()
@@ -275,9 +306,9 @@ def getVideoStreamInfos(videoId):
     
     return result
 
-def getBestFittingVideoStreamInfo(videoId=None, videoInfos=None, size=720, allow3D=False):
+def getBestFittingVideoStreamInfo(videoId=None, videoInfos=None, size=720, allow3D=False, access_token=''):
     if videoId!=None:
-        videoInfos = getVideoStreamInfos(videoId)
+        videoInfos = getVideoStreamInfos(videoId, access_token)
     
     result = None
     lastSize = 0

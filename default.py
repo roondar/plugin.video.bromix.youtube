@@ -835,7 +835,7 @@ def removeSubscription(channelId):
 def play(videoId):
     allow3D = __plugin__.getSettingAsBool('allow3D', False)
     quality = __plugin__.getSettingAsInt('videoQuality', mapping={0:576, 1:720, 2:1080})
-    stream = youtube.video.getBestFittingVideoStreamInfo(videoId=videoId, size=quality, allow3D=allow3D)
+    stream = youtube.video.getBestFittingVideoStreamInfo(videoId=videoId, size=quality, allow3D=allow3D, access_token=__client__.AccessToken)
     if stream!=None:
         url = stream.getUrl()
         if url!=None:
