@@ -29,7 +29,7 @@ def process_response(provider, json_data):
             browse_id = guide_entry_renderer.get('navigationEndpoint', {}).get('browseEndpoint', {}).get('browseId',
                                                                                                          '')
             if browse_id:
-                guide_item = DirectoryItem(title, provider.create_uri(['browse/tv', browse_id]))
+                guide_item = DirectoryItem(title, provider.create_uri(['channel', browse_id]))
                 result.append(guide_item)
 
                 channel_map[browse_id] = guide_item

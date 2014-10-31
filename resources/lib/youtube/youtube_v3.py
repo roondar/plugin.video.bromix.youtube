@@ -6,6 +6,8 @@ __author__ = 'bromix'
 
 def _update_video_infos(provider, video_item_dict):
     video_ids = list(video_item_dict.keys())
+    if len(video_ids) == 0:
+        return
 
     json_data = provider.get_client().get_videos_v3(video_ids)
     items = json_data.get('items', [])

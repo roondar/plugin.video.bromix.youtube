@@ -80,22 +80,15 @@ class Provider(kodimon.AbstractProvider):
 
         return result
 
-    @kodimon.RegisterPath('^/browse/tv/(?P<browse_id>.+)/$')
-    def _on_browse_id_tv(self, path, params, re_match):
-        result = []
-
-        browse_id = re_match.group('browse_id')
-        json_data = self._client.browse_id_tv(browse_id=browse_id)
-        result.extend(youtube_tv.process_response(provider=self, json_data=json_data))
-
-        return result
-
     @kodimon.RegisterPath('^/play/$')
     def _on_play(self, path, params, re_match):
         video_id = params['video_id']
 
         vq = self.get_settings().get_video_quality()
-        video_stream = self._client.get_best_fitting_video_stream(video_id, vq)
+
+        from . import VideoInfoExtractor
+        vie = VideoInfoExtractor(self._client)
+        video_stream = vie.get_best_fitting_video_stream(video_id, vq)
 
         item = kodimon.VideoItem(video_id, video_stream['url'])
         return item
@@ -105,7 +98,7 @@ class Provider(kodimon.AbstractProvider):
         result = []
 
         # cashing
-        json_data = self.call_function_cached(partial(self._client.get_guide_tv), seconds=FunctionCache.ONE_MINUTE * 5)
+        json_data = self.call_function_cached(partial(self._client.get_guide_tv), seconds=FunctionCache.ONE_DAY)
         result.extend(youtube_tv.process_response(self, json_data))
 
         return result
@@ -126,8 +119,8 @@ class Provider(kodimon.AbstractProvider):
 
         # TODO: call settings dialog for login
         # possible sign in
-        sign_in_item = DirectoryItem('[B]Sign in (Dummy)[/B]', '')
-        result.append(sign_in_item)
+        #sign_in_item = DirectoryItem('[B]Sign in (Dummy)[/B]', '')
+        #result.append(sign_in_item)
 
         # search
         search_item = DirectoryItem(self.localize(self.LOCAL_SEARCH),

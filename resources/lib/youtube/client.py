@@ -23,6 +23,9 @@ class Client(object):
         self._max_results = items_per_page
         pass
 
+    def get_language(self):
+        return self._language
+
     def get_playlist_items_v3(self, playlist_id, page_token=''):
         # prepare page token
         if not page_token:
@@ -143,117 +146,6 @@ class Client(object):
 
     def get_guide_tv(self):
         return self._perform_tv_request(method='POST', path='guide')
-
-    def decipher_signature(self, signature):
-        def _aJ(a, b):
-            return a[::-1]
-
-        def _KO(a, b):
-            del a[:b]
-            return a
-
-        def _Gs(a, b):
-            c = a[0]
-            a[0] = a[b % len(a)]
-            a[b] = c
-            return a
-
-        a = list(signature)  # a = a.split("");
-        a = _KO(a, 2)
-        a = _aJ(a, 52)
-        a = _KO(a, 3)
-        a = _aJ(a, 7)
-        a = _KO(a, 3)
-        a = _aJ(a, 4)
-        a = _Gs(a, 2)
-
-        return ''.join(a)
-
-    # TODO: can be improved
-    def get_best_fitting_video_stream(self, video_id, video_height):
-        streams = self.get_video_streams_tv(video_id)
-
-        result = None
-        last_size = 0
-        for stream in streams:
-            size = stream['format']['height']
-
-            if size >= last_size and size <= video_height:
-                last_size = size
-                result = stream
-                pass
-            pass
-
-        return result
-
-    def get_video_streams_tv(self, video_id):
-        headers = {'Host': 'www.youtube.com',
-                   'Connection': 'keep-alive',
-                   'User-Agent': 'Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/39.0.2171.36 Safari/537.36',
-                   'Accept': '*/*',
-                   'DNT': '1',
-                   'Referer': 'https://www.youtube.com/tv',
-                   'Accept-Encoding': 'gzip, deflate',
-                   'Accept-Language': 'en-US,en;q=0.8,de;q=0.6'}
-
-        params = {'html5': '1',
-                  'video_id': video_id,
-                  'hl': self._language,
-                  'c': 'TVHTML5',
-                  'cver': '4',
-                  'cbr': 'Chrome',
-                  'cbrver': '39.0.2171.36',
-                  'cos': 'Windows',
-                  'cosver': '6.1',
-                  'ps': 'leanback',
-                  'el': 'leanback'}
-
-        url = 'https://www.youtube.com/get_video_info'
-
-        result = requests.get(url, params=params, headers=headers, verify=False, allow_redirects=True)
-
-        stream_list = []
-
-        data = result.text
-        params = dict(urlparse.parse_qsl(data))
-
-        # prepare format list
-        old_fmt_list = params['fmt_list']
-        old_fmt_list = old_fmt_list.split(',')
-        itag_dict = {}
-        for item in old_fmt_list:
-            data = item.split('/')
-
-            size = data[1].split('x')
-            itag_dict[data[0]] = {'width': int(size[0]),
-                                  'height': int(size[1])}
-            pass
-
-        # prepare stream map
-        old_url_encoded_fmt_stream_map = params['url_encoded_fmt_stream_map']
-        old_url_encoded_fmt_stream_map = old_url_encoded_fmt_stream_map.split(',')
-        for item in old_url_encoded_fmt_stream_map:
-            stream_map = dict(urlparse.parse_qsl(item))
-
-            url = stream_map['url']
-            if 'sig' in stream_map:
-                url += '&signature=%s' % stream_map['sig']
-            elif 's' in stream_map:
-                signature = self.decipher_signature(stream_map['s'])
-                url += '&signature=%s' % signature
-                url += '&alr=yes&ratebypass=yes&c=TVHTML5&cver=4&gir=yes&keepalive=yes'
-                pass
-
-            mime = stream_map['type'].split(';')[0]
-            url += '&mime=%s' % mime
-
-            video_stream = {'url': url,
-                            'format': itag_dict[stream_map['itag']]}
-
-            stream_list.append(video_stream)
-            pass
-
-        return stream_list
 
     def _perform_v3_request(self, method='GET', headers=None, path=None, post_data=None, params=None,
                             allow_redirects=True):

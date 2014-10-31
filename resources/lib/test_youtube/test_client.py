@@ -81,24 +81,6 @@ class TestClient(unittest.TestCase):
         json_data = client.get_playlists_v3('UCLx053rWZxCiYWsBETgdKrQ')
         pass
 
-    def test_get_best_fitting_video_stream(self):
-        client = Client()
-
-        # free
-        stream = client.get_best_fitting_video_stream('Y0noFhiUh1U', 576)
-        stream = client.get_best_fitting_video_stream('Y0noFhiUh1U', 720)
-        pass
-
-    def test_get_video_streams_tv(self):
-        client = Client()
-
-        # vevo
-        streams = client.get_video_streams_tv('O-zpOMYRi0w')
-
-        # free
-        streams = client.get_video_streams_tv('Y0noFhiUh1U')
-        pass
-
     def test_get_videos_v3(self):
         client = Client()
 
@@ -119,7 +101,7 @@ class TestClient(unittest.TestCase):
         pass
 
     def test_get_channel_sections_v3(self):
-        client = Client()
+        client = Client(language='de-DE')
 
         # 'Lazy Game Reviews'
         json_data = client.get_channel_sections_v3(channel_id='UCLx053rWZxCiYWsBETgdKrQ')
@@ -144,7 +126,7 @@ class TestClient(unittest.TestCase):
         pass
 
     def test_get_guide_v3(self):
-        client = Client()
+        client = Client(language='de-DE')
 
         json_data = client.get_guide_v3()
         pass
