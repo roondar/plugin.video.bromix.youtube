@@ -53,6 +53,62 @@ class VideoInfoExtractor(object):
         self._youtube_client = youtube_client
         pass
 
+    def _parse_java_script(self, java_script):
+        def _get_helper_function(java_script, namespace):
+            match = re.search('var %s={(?P<class_functions>.*?})};' % namespace, java_script)
+            class_functions = match.group('class_functions')
+
+            class_functions = class_functions.split('},')
+            for class_function in class_functions:
+                # normalize function
+                if not class_function.endswith('}'):
+                    class_function += '}'
+                    pass
+                match = re.match('(?P<name>[^:]*):function\((?P<parameter>[^)]*)\)\{(?P<body>[^}]+)\}', class_function)
+                name = match.group('name')
+                parameter = match.group('parameter')
+                body = match.group('body').split(';')
+                pass
+            pass
+
+        # first find the name of the cipher function
+        match = re.search("signature=(?P<function_name>[$a-zA-Z]+)\([^)]\)", java_script)
+        if not match:
+            raise Exception('Could not find cipher function')
+
+        function_name = match.group('function_name')
+
+        # get the function body
+        match = re.search('function %s\((?P<parameter_name>[^)]+?)\){(?P<function_body>[^}]+?)}' % function_name,
+                          java_script)
+        if not match:
+            raise Exception('Could not find function body and parameter name')
+
+        function_body = match.group('function_body')
+        parameter_name = match.group('parameter_name')
+        function_body = function_body.split(';')
+
+        new_function_body = []
+        for line in function_body:
+            line = re.sub('%s[' ']*=[' ']*%s.split\(""\)' % (parameter_name, parameter_name),
+                          '%s = list(%s)' % (parameter_name, parameter_name), line)
+
+            line = re.sub('return %s.join\(""\)' % parameter_name,
+                          "return ''.join(%s)" % parameter_name, line)
+
+            match = re.match('(?P<namespace>[a-zA-Z]+)\.(?P<function_name>[a-zA-Z]+)(?P<parameter>\((.*)\))', line)
+            if match:
+                namespace = match.group('namespace')
+                function_name = match.group('function_name')
+                parameter = match.group('parameter')
+
+                # ToDo: collect namespace and function name...after this call the helper_function to extract the other methods
+                _get_helper_function(java_script, namespace)
+                pass
+            new_function_body.append(line)
+            pass
+        pass
+
     # TODO: can be improved
     def get_best_fitting_video_stream(self, video_id, video_height):
         streams = self._get_stream_infos_web(video_id)

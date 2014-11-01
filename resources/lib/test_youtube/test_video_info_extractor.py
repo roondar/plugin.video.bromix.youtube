@@ -9,6 +9,17 @@ class TestVideoStreamExtractor(unittest.TestCase):
         self._client = Client()
         pass
 
+    def test_parse_java_script(self):
+        vie = VideoInfoExtractor(self._client)
+
+        java_script = ''
+        with open ("html5player.js", "r") as java_script_file:
+            java_script = java_script_file.read()
+            pass
+
+        vie._parse_java_script(java_script)
+        pass
+
     def test_get_best_fitting_video_stream(self):
         vie = VideoInfoExtractor(self._client)
 
