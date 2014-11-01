@@ -1,4 +1,4 @@
-from resources.lib.youtube import VideoInfoExtractor, Client
+from resources.lib.youtube import VideoInfo, Client
 
 __author__ = 'bromix'
 
@@ -9,19 +9,8 @@ class TestVideoStreamExtractor(unittest.TestCase):
         self._client = Client()
         pass
 
-    def test_parse_java_script(self):
-        vie = VideoInfoExtractor(self._client)
-
-        java_script = ''
-        with open ("html5player.js", "r") as java_script_file:
-            java_script = java_script_file.read()
-            pass
-
-        vie._parse_java_script(java_script)
-        pass
-
     def test_get_best_fitting_video_stream(self):
-        vie = VideoInfoExtractor(self._client)
+        vie = VideoInfo(self._client)
 
         # free
         stream = vie.get_best_fitting_video_stream('Y0noFhiUh1U', 576)
@@ -29,7 +18,7 @@ class TestVideoStreamExtractor(unittest.TestCase):
         pass
 
     def test_video_with_signature(self):
-        vie = VideoInfoExtractor(self._client)
+        vie = VideoInfo(self._client)
 
         # vevo
         streams_tv = vie._get_stream_infos_tv('O-zpOMYRi0w')
@@ -37,7 +26,7 @@ class TestVideoStreamExtractor(unittest.TestCase):
         pass
 
     def test_video_without_signature(self):
-        vie = VideoInfoExtractor(self._client)
+        vie = VideoInfo(self._client)
 
         # free
         streams_tv = vie._get_stream_infos_tv('Y0noFhiUh1U')

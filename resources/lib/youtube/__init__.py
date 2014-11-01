@@ -1,3 +1,3 @@
 from provider import Provider
 from client import Client
-from video_info_extractor import VideoInfoExtractor
+from video_info import VideoInfo

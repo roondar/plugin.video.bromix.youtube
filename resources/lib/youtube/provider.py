@@ -1,4 +1,5 @@
 from functools import partial
+import os
 from resources.lib import kodimon
 from resources.lib.kodimon import DirectoryItem
 from resources.lib.kodimon.helper.function_cache import FunctionCache
@@ -86,8 +87,12 @@ class Provider(kodimon.AbstractProvider):
 
         vq = self.get_settings().get_video_quality()
 
-        from . import VideoInfoExtractor
-        vie = VideoInfoExtractor(self._client)
+        #from ..kodimon import debug_here
+        #debug_here()
+
+        from . import VideoInfo
+        cache_folder = os.path.join(self.get_plugin().get_data_path(), 'yt_signatures')
+        vie = VideoInfo(self._client, cache_folder=cache_folder)
         video_stream = vie.get_best_fitting_video_stream(video_id, vq)
 
         item = kodimon.VideoItem(video_id, video_stream['url'])
