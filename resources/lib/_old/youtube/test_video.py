@@ -1,7 +1,9 @@
 # -*- coding: utf-8 -*-
 
 import time
-import video
+
+from resources.lib._old.youtube import video
+
 
 if __name__ == "__main__":
     """normal video - no age-restriction, no signature"""

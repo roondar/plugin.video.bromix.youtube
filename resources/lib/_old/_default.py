@@ -3,7 +3,7 @@
 import os
 import re
 import hashlib
-from bromixbmc.search_history import SeachHistory
+
 
 try:
     from xml.etree import ElementTree as ET
@@ -83,8 +83,7 @@ if oldHash!=currentHash:
 
 __YT_CANNEL_ID__ = __plugin__.getSettingAsString('yt_channel_id', '')
 
-import youtube.video
-from youtube import YouTubeClient
+from resources.lib._old.youtube import YouTubeClient
 __client__ = YouTubeClient(username = __ACCESS_USERNAME__,
                            password = __ACCESS_PASSWORD__,
                            cachedToken = __plugin__.getSettingAsString('oauth2_access_token', None),
@@ -835,7 +834,7 @@ def removeSubscription(channelId):
 def play(videoId):
     allow3D = __plugin__.getSettingAsBool('allow3D', False)
     quality = __plugin__.getSettingAsInt('videoQuality', mapping={0:576, 1:720, 2:1080})
-    stream = youtube.video.getBestFittingVideoStreamInfo(videoId=videoId, size=quality, allow3D=allow3D)
+    stream = resources.lib._old.youtube.video.getBestFittingVideoStreamInfo(videoId=videoId, size=quality, allow3D=allow3D)
     if stream!=None:
         url = stream.getUrl()
         if url!=None:

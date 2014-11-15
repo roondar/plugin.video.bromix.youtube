@@ -1,9 +1,6 @@
 # -*- coding: utf-8 -*-
 
-import time
-
-import client
-from youtube.client import YouTubeClient
+from resources.lib._old.youtube.client import YouTubeClient
 
 if __name__ == "__main__":
     #local_time = time.localtime()
