@@ -1,70 +1,51 @@
-from resources.lib import kodimon
-from resources.lib._old_youtube import Provider
+from resources.lib.youtube import Provider
 
 __author__ = 'bromix'
+
+from resources.lib import kodion
 
 import unittest
 
 
 class TestProvider(unittest.TestCase):
-    def setUp(self):
-        pass
-
-    def test_channel_playlists(self):
+    def test_on_search_playlist(self):
         provider = Provider()
 
-        # 'Lazy Game Reviews'
-        result = provider.navigate('/channel/UCLx053rWZxCiYWsBETgdKrQ/playlists/')
-
-        items = result[0]
-        kodimon.print_items(items)
-        pass
-
-    def test_channel(self):
-        provider = Provider()
-
-        # 'Lazy Game Reviews'
-        result = provider.navigate('/channel/UCLx053rWZxCiYWsBETgdKrQ/')
-
-        items = result[0]
-        kodimon.print_items(items)
-        pass
-
-    def test_playlist_items(self):
-        provider = Provider()
-
-        result = provider.navigate('/playlist/PL024E341A0495DF9F/')
-
-        items = result[0]
-        kodimon.print_items(items)
-        pass
-
-    def test_search(self):
-        provider = Provider()
-
-        path = '/%s/query/' % provider.PATH_SEARCH
-        result = provider.navigate(path, {'q': 'lgr'})
-
-        items = result[0]
-        kodimon.print_items(items)
-        pass
-
-    def test_on_guide(self):
-        provider = Provider()
-        result = provider.navigate('/guide/')
-
+        path = kodion.utils.create_path(kodion.constants.paths.SEARCH, 'query')
+        context = kodion.Context(path=path, params={'q': 'lgr', 'search_type': 'playlist'})
+        result = provider.navigate(context)
         items = result[0]
         self.assertGreater(len(items), 0)
+        kodion.utils.print_items(items)
 
-        kodimon.print_items(items)
+        context = kodion.Context(path=path, params={'q': 'lgr', 'search_type': 'playlist', 'page_token': 'CDIQAA'})
+        result = provider.navigate(context)
+        items = result[0]
+        self.assertGreater(len(items), 0)
+        kodion.utils.print_items(items)
+        pass
+
+    def test_on_search_video(self):
+        provider = Provider()
+
+        path = kodion.utils.create_path(kodion.constants.paths.SEARCH, 'query')
+        context = kodion.Context(path=path, params={'q': 'lgr'})
+        result = provider.navigate(context)
+        items = result[0]
+        self.assertGreater(len(items), 0)
+        kodion.utils.print_items(items)
         pass
 
     def test_on_root(self):
         provider = Provider()
-        result = provider.navigate('/')
+
+        context = kodion.Context(path='/')
+        result = provider.navigate(context)
 
         items = result[0]
         self.assertGreater(len(items), 0)
+
+        kodion.utils.print_items(items)
         pass
 
     pass

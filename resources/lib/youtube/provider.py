@@ -34,13 +34,19 @@ class Provider(kodion.AbstractProvider):
         page = int(context.get_param('page', 1))
 
         if page == 1 and search_type == 'video':
+            channel_params = {}
+            channel_params.update(context.get_params())
+            channel_params['search_type'] = 'channel'
             channel_item = DirectoryItem('_Channels',
-                                         context.create_uri([context.get_path()], {'search_type': 'channel'}))
+                                         context.create_uri([context.get_path()], channel_params))
             channel_item.set_fanart(self._get_fanart(context))
             result.append(channel_item)
 
+            playlist_params = {}
+            playlist_params.update(context.get_params())
+            playlist_params['search_type'] = 'playlist'
             playlist_item = DirectoryItem('_Playlists',
-                                          context.create_uri([context.get_path()], {'search_type': 'playlist'}))
+                                          context.create_uri([context.get_path()], playlist_params))
             playlist_item.set_fanart(self._get_fanart(context))
             result.append(playlist_item)
             pass

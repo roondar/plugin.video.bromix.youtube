@@ -55,10 +55,12 @@ def _process_search_list_response(provider, context, json_data):
         yt_kind = yt_item.get('kind', '')
         if yt_kind == 'youtube#searchResult':
             yt_kind = yt_item.get('id', {}).get('kind', '')
+
+            # video
             if yt_kind == 'youtube#video':
                 video_id = yt_item['id']['videoId']
-                snippet = yt_item.get('snippet', {})
-                title = snippet['title']  # should crash if the API is not conform!
+                snippet = yt_item['snippet']
+                title = snippet['title']
                 image = snippet.get('thumbnails', {}).get('medium', {}).get('url', '')
                 video_item = items.VideoItem(title,
                                              context.create_uri(['play'], {'video_id': video_id}),
@@ -66,6 +68,31 @@ def _process_search_list_response(provider, context, json_data):
                 video_item.set_fanart(provider._get_fanart(context))
                 result.append(video_item)
                 video_id_dict[video_id] = video_item
+                pass
+            # playlist
+            elif yt_kind == 'youtube#playlist':
+                playlist_id = yt_item['id']['playlistId']
+                snippet = yt_item['snippet']
+                title = snippet['title']
+                image = snippet.get('thumbnails', {}).get('medium', {}).get('url', '')
+
+                playlist_item = items.DirectoryItem('[PL]' + title,
+                                                    context.create_uri(['playlist', playlist_id]),
+                                                    image=image)
+                playlist_item.set_fanart(provider._get_fanart(context))
+                result.append(playlist_item)
+                pass
+            elif yt_kind == 'youtube#channel':
+                channel_id = yt_item['id']['channelId']
+                snippet = yt_item['snippet']
+                title = snippet['title']
+                image = snippet.get('thumbnails', {}).get('medium', {}).get('url', '')
+
+                channel_item = items.DirectoryItem('[CH]' + title,
+                                                   context.create_uri(['channel', channel_id]),
+                                                   image=image)
+                channel_item.set_fanart(provider._get_fanart(context))
+                result.append(channel_item)
                 pass
             else:
                 raise kodion.KodimonException("Unknown kind '%s'" % yt_kind)
@@ -95,9 +122,11 @@ def response_to_items(provider, context, json_data):
         new_params.update(context.get_params())
         new_params['page_token'] = yt_next_page_token
 
-        current_page = int(context.get_param('page', 1))
-        next_page_item = items.create_next_page_item(context, current_page)
-        next_page_item.set_fanart(provider._get_fanart(context))
+        new_context = context.clone(new_params=new_params)
+
+        current_page = int(new_context.get_param('page', 1))
+        next_page_item = items.create_next_page_item(new_context, current_page)
+        next_page_item.set_fanart(provider._get_fanart(new_context))
         result.append(next_page_item)
         pass
 

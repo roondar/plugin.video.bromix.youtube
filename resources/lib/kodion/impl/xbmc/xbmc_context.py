@@ -14,7 +14,7 @@ from .xbmc_system_version import XbmcSystemVersion
 
 
 class XbmcContext(AbstractContext):
-    def __init__(self, path=u'/', params=None, plugin_name=u'', plugin_id=u''):
+    def __init__(self, path='/', params=None, plugin_name=u'', plugin_id=u'', override=True):
         AbstractContext.__init__(self, path, params, plugin_name, plugin_id)
 
         if plugin_id:
@@ -31,20 +31,22 @@ class XbmcContext(AbstractContext):
         Also we extract the path and parameters - man, that would be so simple with the normal url-parsing routines.
         """
         # first the path of the uri
-        self._uri = sys.argv[0]
-        comps = urlparse.urlparse(self._uri)
-        self._path = urllib.unquote(comps[2]).decode('utf-8')
+        if override:
+            self._uri = sys.argv[0]
+            comps = urlparse.urlparse(self._uri)
+            self._path = urllib.unquote(comps.path).decode('utf-8')
 
-        # after that try to get the params
-        params = sys.argv[2][1:]
-        if len(params) > 0:
-            self._uri = self._uri+'?'+params
+            # after that try to get the params
+            params = sys.argv[2][1:]
+            if len(params) > 0:
+                self._uri = self._uri + '?' + params
 
-            self._params = {}
-            params = dict(urlparse.parse_qsl(params))
-            for _param in params:
-                item = params[_param]
-                self._params[_param] = item.decode('utf-8')
+                self._params = {}
+                params = dict(urlparse.parse_qsl(params))
+                for _param in params:
+                    item = params[_param]
+                    self._params[_param] = item.decode('utf-8')
+                    pass
                 pass
             pass
 
@@ -111,6 +113,7 @@ class XbmcContext(AbstractContext):
             new_params = self.get_params()
             pass
 
-        return XbmcContext(path=new_path, params=new_params, plugin_name=self._plugin_name, plugin_id=self._plugin_id)
+        return XbmcContext(path=new_path, params=new_params, plugin_name=self._plugin_name, plugin_id=self._plugin_id,
+                           override=False)
 
     pass
