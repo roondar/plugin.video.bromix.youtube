@@ -1,4 +1,4 @@
-from resources.lib.youtube import VideoInfo, Client
+from resources.lib._old_youtube import VideoInfo, Client
 
 __author__ = 'bromix'
 

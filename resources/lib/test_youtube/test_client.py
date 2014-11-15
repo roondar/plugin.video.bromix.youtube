@@ -1,13 +1,24 @@
-from resources.lib.youtube import Client
+from resources.lib.youtube import YouTubeClient
 
 __author__ = 'bromix'
 
 import unittest
 
+
 class TestClient(unittest.TestCase):
-    def setUp(self):
+    def test_get_videos(self):
+        client = YouTubeClient()
+
+        json_data = client.get_videos(['vyD70Huufco', 'AFdezM3_m-c'])
         pass
 
+    def test_search(self):
+        client = YouTubeClient()
+
+        json_data = client.search(q='batman')
+        pass
+
+    # ===============================
     def test_get_playlist_items(self):
         client = Client()
 
@@ -18,18 +29,6 @@ class TestClient(unittest.TestCase):
         client = Client()
 
         json_data = client.get_playlists_v3('UCLx053rWZxCiYWsBETgdKrQ')
-        pass
-
-    def test_get_videos_v3(self):
-        client = Client()
-
-        json_data = client.get_videos_v3(['vyD70Huufco', 'AFdezM3_m-c'])
-        pass
-
-    def test_search_v3(self):
-        client = Client()
-
-        json_data = client.search_v3(q='batman')
         pass
 
     def test_get_what_to_watch_tv(self):
@@ -61,7 +60,7 @@ class TestClient(unittest.TestCase):
         json_data = client.get_channels_v3(channel_id='UCLx053rWZxCiYWsBETgdKrQ')
 
         # 'Popular on YouTube', 'Sport'
-        json_data = client.get_channels_v3(channel_id=['UCF0pVplsI8R5kcAqgtoRqoA','UCEgdi0XIXXZ-qJOFPf4JSKw'])
+        json_data = client.get_channels_v3(channel_id=['UCF0pVplsI8R5kcAqgtoRqoA', 'UCEgdi0XIXXZ-qJOFPf4JSKw'])
         pass
 
     def test_get_guide_v3(self):

@@ -351,18 +351,18 @@ def _listResult(jsonData, nextPageParams={}, pageIndex=1, mine=False, fanart=__F
         videoIds = []
         for item in items:
             kind = item.get('kind', '')
-            if kind=='youtube#searchResult':
+            if kind=='_old_youtube#searchResult':
                 _id = item.get('id', {})
                 videoId = _id.get('videoId', None)
                 if videoId!=None:
                     videoIds.append(videoId)
-            elif kind=='youtube#playlistItem':
+            elif kind=='_old_youtube#playlistItem':
                 snippet = item.get('snippet', {})
                 resourceId = snippet.get('resourceId', {})
                 videoId = resourceId.get('videoId', None)
                 if videoId!=None:
                     videoIds.append(videoId)
-            elif kind=='youtube#activity':
+            elif kind=='_old_youtube#activity':
                 contentDetails = item.get('contentDetails', {})
                 upload = contentDetails.get('upload', {})
                 videoId = upload.get('videoId', None)
@@ -380,8 +380,8 @@ def _listResult(jsonData, nextPageParams={}, pageIndex=1, mine=False, fanart=__F
             snippet = item.get('snippet', None)
             publishedAt = snippet.get('publishedAt', '')
             
-            # a special kind of youtube category
-            if kind=='youtube#guideCategory' and snippet!=None:
+            # a special kind of _old_youtube category
+            if kind=='_old_youtube#guideCategory' and snippet!=None:
                 _id = item.get('id', None)
                 title = snippet.get('title', None)
                 
@@ -391,7 +391,7 @@ def _listResult(jsonData, nextPageParams={}, pageIndex=1, mine=False, fanart=__F
                     __plugin__.addDirectory(name=title, params=params, thumbnailImage=__ICON_FALLBACK__, fanart=fanart)
                     pass
                 pass
-            elif kind=='youtube#activity' and snippet!=None:
+            elif kind=='_old_youtube#activity' and snippet!=None:
                 title = snippet.get('title', None)
                 description = snippet.get('description', '')
                 contentDetails = item.get('contentDetails', {})
@@ -410,7 +410,7 @@ def _listResult(jsonData, nextPageParams={}, pageIndex=1, mine=False, fanart=__F
                                channelName=videoInfo.get('channelName', ''))
                     pass
                 pass
-            elif kind=='youtube#subscription' and snippet!=None:
+            elif kind=='_old_youtube#subscription' and snippet!=None:
                 title = snippet.get('title', None)
                 subscriptionId = item.get('id', None)
                 thumbnailImage = _getBestThumbnailImage(item)
@@ -429,7 +429,7 @@ def _listResult(jsonData, nextPageParams={}, pageIndex=1, mine=False, fanart=__F
                     __plugin__.addDirectory(name=title, params=params, thumbnailImage=thumbnailImage, fanart=fanart, contextMenu=contextMenu)
                     pass
                 pass
-            elif kind=='youtube#searchResult' and snippet!=None:
+            elif kind=='_old_youtube#searchResult' and snippet!=None:
                 _id = item.get('id', {})
                 kind = _id.get('kind', None)
                 if kind!=None:
@@ -437,7 +437,7 @@ def _listResult(jsonData, nextPageParams={}, pageIndex=1, mine=False, fanart=__F
                     description = snippet.get('description', '')
                     thumbnailImage = _getBestThumbnailImage(item)
                     
-                    if kind=='youtube#channel':
+                    if kind=='_old_youtube#channel':
                         channelId = _id.get('channelId', None)
                         if title!=None and channelId!=None:
                             params = {'action': __ACTION_SHOW_CHANNEL__,
@@ -451,14 +451,14 @@ def _listResult(jsonData, nextPageParams={}, pageIndex=1, mine=False, fanart=__F
                             
                             __plugin__.addDirectory(name="[B]"+title+"[/B]", params=params, thumbnailImage=thumbnailImage, fanart=fanart, contextMenu=contextMenu)
                             pass
-                    elif kind=='youtube#playlist':
+                    elif kind=='_old_youtube#playlist':
                         playlistId = _id.get('playlistId', None)
                         if title!=None and playlistId!=None:
                             params = {'action': __ACTION_SHOW_PLAYLIST__,
                                       'id': playlistId}
                             __plugin__.addDirectory(name="[B]"+title+"[/B]", params=params, thumbnailImage=thumbnailImage, fanart=fanart)
                         pass
-                    elif kind=='youtube#video':
+                    elif kind=='_old_youtube#video':
                         videoId = _id.get('videoId', '')
                         
                         videoInfo = videoInfos.get(videoId, {})
@@ -473,7 +473,7 @@ def _listResult(jsonData, nextPageParams={}, pageIndex=1, mine=False, fanart=__F
                                    channelId=videoInfo.get('channelId', None))
                     pass
                 pass
-            elif kind=='youtube#channel' and snippet!=None:
+            elif kind=='_old_youtube#channel' and snippet!=None:
                 title = snippet.get('title', None)
                 channelId = item.get('id', None)
                 
@@ -490,7 +490,7 @@ def _listResult(jsonData, nextPageParams={}, pageIndex=1, mine=False, fanart=__F
                     
                     __plugin__.addDirectory(name="[B]"+title+"[/B]", params=params, thumbnailImage=thumbnailImage, fanart=fanart, contextMenu=contextMenu)
                     pass
-            elif kind=='youtube#playlist' and snippet!=None:
+            elif kind=='_old_youtube#playlist' and snippet!=None:
                 title = snippet.get('title')
                 playlistId = item.get('id')
                 thumbnailImage = _getBestThumbnailImage(item)
@@ -509,7 +509,7 @@ def _listResult(jsonData, nextPageParams={}, pageIndex=1, mine=False, fanart=__F
                     pass
 
                 __plugin__.addDirectory(name=title, params=params, thumbnailImage=thumbnailImage, fanart=fanart, contextMenu=contextMenu)
-            elif kind=='youtube#playlistItem' and snippet!=None:
+            elif kind=='_old_youtube#playlistItem' and snippet!=None:
                 title = snippet.get('title')
                 description = snippet.get('description')
                 
@@ -734,7 +734,7 @@ def showMySubscriptions(pageIndex=1, startIndex=None):
     xmlns:openSearch=http://a9.com/-/spec/opensearch/1.1/
     xmlns:gd=http://schemas.google.com/g/2005
     xmlns:gml=http://www.opengis.net/gml
-    xmlns:yt=http://gdata.youtube.com/schemas/2007
+    xmlns:yt=http://gdata._old_youtube.com/schemas/2007
     xmlns:georss=http://www.georss.org/georss
     """
     __plugin__.setContent('episodes')
@@ -756,7 +756,7 @@ def showMySubscriptions(pageIndex=1, startIndex=None):
             try:
                 mediaGroup = entry.find('{http://search.yahoo.com/mrss/}group')
                 if mediaGroup!=None:
-                    videoId = unicode(mediaGroup.find('{http://gdata.youtube.com/schemas/2007}videoid').text)
+                    videoId = unicode(mediaGroup.find('{http://gdata._old_youtube.com/schemas/2007}videoid').text)
                     videoIds.append(videoId)
                     pass
                 pass
@@ -772,7 +772,7 @@ def showMySubscriptions(pageIndex=1, startIndex=None):
                 title = unicode(entry.find('{http://www.w3.org/2005/Atom}title').text)
                 mediaGroup = entry.find('{http://search.yahoo.com/mrss/}group')
                 if mediaGroup!=None:
-                    videoId = unicode(mediaGroup.find('{http://gdata.youtube.com/schemas/2007}videoid').text)
+                    videoId = unicode(mediaGroup.find('{http://gdata._old_youtube.com/schemas/2007}videoid').text)
                     videoInfo = videoInfos.get(videoId, {})
                     
                     _listVideo(title=title,

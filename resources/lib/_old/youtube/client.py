@@ -87,12 +87,12 @@ class YouTubeClient(object):
                   #'google_play_services_version': '5084034',
                   #'accountType' : 'HOSTED_OR_GOOGLE',
                   'Email': self._Username,
-                  #'service': 'oauth2:https://www.googleapis.com/auth/youtube https://www.googleapis.com/auth/plus.me https://www.googleapis.com/auth/emeraldsea.mobileapps.doritos.cookie https://www.googleapis.com/auth/plus.stream.read https://www.googleapis.com/auth/plus.stream.write https://www.googleapis.com/auth/plus.pages.manage',
-                  'service': 'oauth2:https://www.googleapis.com/auth/youtube https://www.googleapis.com/auth/youtube.readonly https://www.googleapis.com/auth/youtube.upload',
+                  #'service': 'oauth2:https://www.googleapis.com/auth/_old_youtube https://www.googleapis.com/auth/plus.me https://www.googleapis.com/auth/emeraldsea.mobileapps.doritos.cookie https://www.googleapis.com/auth/plus.stream.read https://www.googleapis.com/auth/plus.stream.write https://www.googleapis.com/auth/plus.pages.manage',
+                  'service': 'oauth2:https://www.googleapis.com/auth/_old_youtube https://www.googleapis.com/auth/_old_youtube.readonly https://www.googleapis.com/auth/_old_youtube.upload',
                   'source': 'android',
                   #'androidId': '3b7ee32203b0465cb586551ee989b5ae',
-                  'app': 'com.google.android.youtube',
-                  #'callerPkg' : 'com.google.android.youtube',
+                  'app': 'com.google.android._old_youtube',
+                  #'callerPkg' : 'com.google.android._old_youtube',
                   'Passwd' : self._Password
                   }
     
@@ -104,7 +104,7 @@ class YouTubeClient(object):
             url = 'https://android.clients.google.com/auth'
             request = urllib2.Request(url, data=params) 
             #request.add_header('device', '3b7ee32203b0465cb586551ee989b5ae')
-            request.add_header('app', 'com.google.android.youtube')
+            request.add_header('app', 'com.google.android._old_youtube')
             request.add_header('User-Agent', 'GoogleAuth/1.4 (GT-I9100 KTU84P) (GT-I9100 KTU84P)')
             request.add_header('content-type', 'application/x-www-form-urlencoded')
             request.add_header('Host', 'android.clients.google.com')
@@ -127,7 +127,7 @@ class YouTubeClient(object):
         return result
     
     def _createUrlV3(self, command, params={}):
-        url = 'https://www.googleapis.com/youtube/v3/%s' % (command)
+        url = 'https://www.googleapis.com/_old_youtube/v3/%s' % (command)
         
         _params = {}
         _params.update(params)
@@ -329,8 +329,8 @@ class YouTubeClient(object):
         params = {'part': 'snippet',
                   'access_token': self.AccessToken}
         
-        jsonData = {'kind': 'youtube#subscription',
-                    'snippet':{'resourceId': {'kind': 'youtube#channel',
+        jsonData = {'kind': '_old_youtube#subscription',
+                    'snippet':{'resourceId': {'kind': '_old_youtube#channel',
                                               'channelId': channelId}
                                }
                     }
@@ -400,9 +400,9 @@ class YouTubeClient(object):
                   'mine': 'true',
                   'access_token': self.AccessToken}
         
-        jsonData = {'kind': 'youtube#playlistItem',
+        jsonData = {'kind': '_old_youtube#playlistItem',
                     'snippet':{'playlistId': playlistId,
-                               'resourceId': {'kind': 'youtube#video',
+                               'resourceId': {'kind': '_old_youtube#video',
                                               'videoId': videoId}
                                }
                     }
@@ -479,7 +479,7 @@ class YouTubeClient(object):
         return self._executeApiV3('search', params)
     
     def _createUrlV2(self, url, params={}):
-        url = 'https://gdata.youtube.com/%s' % (url)
+        url = 'https://gdata._old_youtube.com/%s' % (url)
         
         _params = {}
         _params.update(params)
@@ -495,7 +495,7 @@ class YouTubeClient(object):
                 self._updateToken()
                 params['access_token'] = self.AccessToken
                 
-        headers = {'Host': 'gdata.youtube.com',
+        headers = {'Host': 'gdata._old_youtube.com',
                    'X-GData-Key': 'key=%s' % (__YOUTUBE_API_KEY__),
                    'GData-Version': '2',
                    'User-Agent': 'Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/37.0.2062.58 Safari/537.36'}

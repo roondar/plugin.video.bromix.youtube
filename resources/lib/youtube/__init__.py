@@ -1,3 +1,4 @@
-from provider import Provider
-from client import Client
-from video_info import VideoInfo
+__author__ = 'bromix'
+
+from .provider import Provider
+from .youtube_client import YouTubeClient

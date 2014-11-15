@@ -1,5 +1,5 @@
 from resources.lib import kodimon
-from resources.lib.youtube import Provider
+from resources.lib._old_youtube import Provider
 
 __author__ = 'bromix'
 
