@@ -8,67 +8,6 @@ class TestClient(unittest.TestCase):
     def setUp(self):
         pass
 
-    def test_sig(self):
-        """
-        a = a.split("");
-        gk.KO(a, 2);
-        gk.aJ(a, 52);
-        gk.KO(a, 3);
-        gk.aJ(a, 7);
-        gk.KO(a, 3);
-        gk.aJ(a, 4);
-        gk.Gs(a, 2);
-        return a.join("")
-
-
-        {aJ: function(a) {
-            a.reverse()
-        },KO: function(a, b) {
-            a.splice(0, b)
-        },Gs: function(a, b) {
-            var c = a[0];
-            a[0] = a[b % a.length];
-            a[b] = c
-
-        :return:
-        """
-
-        def _aJ(a, b):
-            return a[::-1]
-
-        def _KO(a, b):
-            del a[:b]
-            return a
-
-        def _Gs(a, b):
-            c = a[0]
-            a[0] = a[b % len(a)]
-            a[b] = c
-            return a
-
-        sig_in = 'F1F16F1637D0E442F002A929015EA750047F101830867.325D777D3C576FEFC4222C17CBBEAAED0B28DD8ED8E'
-        a = list(sig_in)  # a = a.split("");
-        a = _KO(a, 2)
-        a = _aJ(a, 52)
-        a = _KO(a, 3)
-        a = _aJ(a, 7)
-        a = _KO(a, 3)
-        a = _aJ(a, 4)
-        a = _Gs(a, 2)
-
-        signature = ''.join(a)
-
-        """
-        alr: "yes"
-        mime: "video%2Fmp4"
-        ratebypass: "yes"
-        signature: "D8ED82B0DEAAEBBC71C2224CFEF675C3D777D523.768038101F740057AE510929A200F244E0D7361F"
-        __proto__: Object
-        """
-
-        self.assertEqual('D8ED82B0DEAAEBBC71C2224CFEF675C3D777D523.768038101F740057AE510929A200F244E0D7361F', signature)
-        pass
-
     def test_get_playlist_items(self):
         client = Client()
 
