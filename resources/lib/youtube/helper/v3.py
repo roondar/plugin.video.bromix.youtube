@@ -49,14 +49,16 @@ def _update_channel_infos(provider, context, channel_id_dict):
     yt_items = json_data.get('items', [])
     for yt_item in yt_items:
         channel_id = yt_item['id']  # crash if not conform
-        channel_item = channel_id_dict[channel_id]
 
         images = yt_item.get('brandingSettings', {}).get('image', {})
         banners = ['bannerTvMediumImageUrl', 'bannerTvLowImageUrl', 'bannerTvImageUrl']
         for banner in banners:
             image = images.get(banner, '')
             if image:
-                channel_item.set_fanart(image)
+                channel_items = channel_id_dict[channel_id]
+                for channel_item in channel_items:
+                    channel_item.set_fanart(image)
+                    pass
                 break
             pass
         pass
@@ -92,6 +94,11 @@ def _process_search_list_response(provider, context, json_data):
                 video_item.set_fanart(provider._get_fanart(context))
                 result.append(video_item)
                 video_id_dict[video_id] = video_item
+
+                channel_id = snippet['channelId']
+                if not channel_id in channel_item_dict:
+                    channel_item_dict[channel_id] = []
+                channel_item_dict[channel_id].append(video_item)
                 pass
             # playlist
             elif yt_kind == 'youtube#playlist':
@@ -105,6 +112,10 @@ def _process_search_list_response(provider, context, json_data):
                                                     image=image)
                 playlist_item.set_fanart(provider._get_fanart(context))
                 result.append(playlist_item)
+                channel_id = snippet['channelId']
+                if not channel_id in channel_item_dict:
+                    channel_item_dict[channel_id] = []
+                channel_item_dict[channel_id].append(playlist_item)
                 pass
             elif yt_kind == 'youtube#channel':
                 channel_id = yt_item['id']['channelId']
@@ -117,7 +128,10 @@ def _process_search_list_response(provider, context, json_data):
                                                    image=image)
                 channel_item.set_fanart(provider._get_fanart(context))
                 result.append(channel_item)
-                channel_item_dict[channel_id] = channel_item
+
+                if not channel_id in channel_item_dict:
+                    channel_item_dict[channel_id] = []
+                channel_item_dict[channel_id].append(channel_item)
                 pass
             else:
                 raise kodion.KodimonException("Unknown kind '%s'" % yt_kind)

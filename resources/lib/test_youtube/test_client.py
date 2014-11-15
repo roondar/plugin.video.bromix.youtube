@@ -22,7 +22,8 @@ class TestClient(unittest.TestCase):
         client = YouTubeClient()
 
         #json_data = client.search(q='batman')
-        json_data = client.search(q='batman', search_type='channel')
+        #json_data = client.search(q='batman', search_type='channel')
+        json_data = client.search(q='batman', search_type='playlist')
         pass
 
     # ===============================
