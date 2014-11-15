@@ -40,9 +40,33 @@ def _update_video_infos(provider, context, video_id_dict):
 
     pass
 
+def _update_channel_infos(provider, context, channel_id_dict):
+    channel_ids = list(channel_id_dict.keys())
+    if len(channel_ids) == 0:
+        return
+
+    json_data = provider._get_client(context).get_channels(channel_ids)
+    yt_items = json_data.get('items', [])
+    for yt_item in yt_items:
+        channel_id = yt_item['id']  # crash if not conform
+        channel_item = channel_id_dict[channel_id]
+
+        images = yt_item.get('brandingSettings', {}).get('image', {})
+        banners = ['bannerTvMediumImageUrl', 'bannerTvLowImageUrl', 'bannerTvImageUrl']
+        for banner in banners:
+            image = images.get(banner, '')
+            if image:
+                channel_item.set_fanart(image)
+                break
+            pass
+        pass
+
+    pass
+
 
 def _process_search_list_response(provider, context, json_data):
     video_id_dict = {}
+    channel_item_dict = {}
 
     result = []
 
@@ -93,6 +117,7 @@ def _process_search_list_response(provider, context, json_data):
                                                    image=image)
                 channel_item.set_fanart(provider._get_fanart(context))
                 result.append(channel_item)
+                channel_item_dict[channel_id] = channel_item
                 pass
             else:
                 raise kodion.KodimonException("Unknown kind '%s'" % yt_kind)
@@ -102,6 +127,7 @@ def _process_search_list_response(provider, context, json_data):
         pass
 
     _update_video_infos(provider, context, video_id_dict)
+    _update_channel_infos(provider, context, channel_item_dict)
     return result
 
 

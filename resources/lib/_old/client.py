@@ -284,21 +284,6 @@ class YouTubeClient(object):
         jsonData['items'] = sortedItems
         return jsonData
     
-    def getChannels(self, channelId=None, mine=None, nextPageToken=None):
-        params = {'part': 'snippet,contentDetails,brandingSettings'}
-        
-        if channelId!=None:
-            params['id'] = channelId
-            
-        if mine!=None and mine==True:
-            params['mine'] = 'true'
-            params['access_token'] = self.AccessToken
-            
-        if nextPageToken!=None:
-            params['pageToken'] = nextPageToken
-
-        return self._executeApiV3('channels', params)
-    
     def _createUrlV2(self, url, params={}):
         url = 'https://gdata._old_youtube.com/%s' % (url)
         

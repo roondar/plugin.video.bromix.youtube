@@ -18,6 +18,20 @@ class YouTubeClient(object):
         self._max_results = items_per_page
         pass
 
+    def get_channels(self, channel_id):
+        """
+        Returns a collection of zero or more channel resources that match the request criteria.
+        :param channel_id: list or comma-separated list of the YouTube channel ID(s)
+        :return:
+        """
+        if isinstance(channel_id, list):
+            channel_id = ','.join(channel_id)
+            pass
+
+        params = {'part': 'snippet,contentDetails,brandingSettings',
+                  'id': channel_id}
+        return self._perform_v3_request(method='GET', path='channels', params=params)
+
     def get_videos(self, video_id):
         """
         Returns a list of videos that match the API request parameters

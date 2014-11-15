@@ -43,6 +43,7 @@ def _update_video_infos(provider, video_item_dict):
 
 def _process_playlist_item_response(provider, path, params, json_data):
     video_item_dict = {}
+
     result = []
 
     items = json_data.get('items', [])
