@@ -1,3 +1,5 @@
+from resources.lib.youtube.helper.channel_manager import ChannelManager
+
 __author__ = 'bromix'
 
 from resources.lib import kodion
@@ -9,7 +11,7 @@ def _update_video_infos(provider, context, video_id_dict):
     if len(video_ids) == 0:
         return
 
-    json_data = provider._get_client(context).get_videos(video_ids)
+    json_data = provider.get_client(context).get_videos(video_ids)
     yt_items = json_data.get('items', [])
     for yt_item in yt_items:
         video_id = yt_item['id']  # crash if not conform
@@ -40,29 +42,25 @@ def _update_video_infos(provider, context, video_id_dict):
 
     pass
 
+
 def _update_channel_infos(provider, context, channel_id_dict):
     channel_ids = list(channel_id_dict.keys())
     if len(channel_ids) == 0:
         return
 
-    json_data = provider._get_client(context).get_channels(channel_ids)
-    yt_items = json_data.get('items', [])
-    for yt_item in yt_items:
-        channel_id = yt_item['id']  # crash if not conform
+    channel_manager = ChannelManager(context, provider.get_client(context))
+    fanarts = channel_manager.get_fanarts(channel_ids)
 
-        images = yt_item.get('brandingSettings', {}).get('image', {})
-        banners = ['bannerTvMediumImageUrl', 'bannerTvLowImageUrl', 'bannerTvImageUrl']
-        for banner in banners:
-            image = images.get(banner, '')
-            if image:
-                channel_items = channel_id_dict[channel_id]
-                for channel_item in channel_items:
-                    channel_item.set_fanart(image)
-                    pass
-                break
+    for channel_id in channel_ids:
+        channel_items = channel_id_dict[channel_id]
+        for channel_item in channel_items:
+            # only set not empty fanarts
+            fanart = fanarts.get(channel_id, '')
+            if fanart:
+                channel_item.set_fanart(fanart)
+                pass
             pass
         pass
-
     pass
 
 
@@ -91,7 +89,7 @@ def _process_search_list_response(provider, context, json_data):
                 video_item = items.VideoItem(title,
                                              context.create_uri(['play'], {'video_id': video_id}),
                                              image=image)
-                video_item.set_fanart(provider._get_fanart(context))
+                video_item.set_fanart(provider.get_fanart(context))
                 result.append(video_item)
                 video_id_dict[video_id] = video_item
 
@@ -110,7 +108,7 @@ def _process_search_list_response(provider, context, json_data):
                 playlist_item = items.DirectoryItem('[PL]' + title,
                                                     context.create_uri(['playlist', playlist_id]),
                                                     image=image)
-                playlist_item.set_fanart(provider._get_fanart(context))
+                playlist_item.set_fanart(provider.get_fanart(context))
                 result.append(playlist_item)
                 channel_id = snippet['channelId']
                 if not channel_id in channel_item_dict:
@@ -126,7 +124,7 @@ def _process_search_list_response(provider, context, json_data):
                 channel_item = items.DirectoryItem('[CH]' + title,
                                                    context.create_uri(['channel', channel_id]),
                                                    image=image)
-                channel_item.set_fanart(provider._get_fanart(context))
+                channel_item.set_fanart(provider.get_fanart(context))
                 result.append(channel_item)
 
                 if not channel_id in channel_item_dict:
@@ -166,7 +164,7 @@ def response_to_items(provider, context, json_data):
 
         current_page = int(new_context.get_param('page', 1))
         next_page_item = items.create_next_page_item(new_context, current_page)
-        next_page_item.set_fanart(provider._get_fanart(new_context))
+        next_page_item.set_fanart(provider.get_fanart(new_context))
         result.append(next_page_item)
         pass
 

@@ -14,14 +14,14 @@ class Provider(kodion.AbstractProvider):
         self._client = None
         pass
 
-    def _get_client(self, context):
+    def get_client(self, context):
         if not self._client:
             self._client = YouTubeClient()
             pass
 
         return self._client
 
-    def _get_fanart(self, context):
+    def get_fanart(self, context):
         return context.create_resource_path('media', 'fanart.jpg')
 
     def on_search(self, search_text, context, re_match):
@@ -39,7 +39,7 @@ class Provider(kodion.AbstractProvider):
             channel_params['search_type'] = 'channel'
             channel_item = DirectoryItem('_Channels',
                                          context.create_uri([context.get_path()], channel_params))
-            channel_item.set_fanart(self._get_fanart(context))
+            channel_item.set_fanart(self.get_fanart(context))
             result.append(channel_item)
 
             playlist_params = {}
@@ -47,11 +47,11 @@ class Provider(kodion.AbstractProvider):
             playlist_params['search_type'] = 'playlist'
             playlist_item = DirectoryItem('_Playlists',
                                           context.create_uri([context.get_path()], playlist_params))
-            playlist_item.set_fanart(self._get_fanart(context))
+            playlist_item.set_fanart(self.get_fanart(context))
             result.append(playlist_item)
             pass
 
-        json_data = context.get_function_cache().get(FunctionCache.ONE_MINUTE * 10, self._get_client(context).search,
+        json_data = context.get_function_cache().get(FunctionCache.ONE_MINUTE * 10, self.get_client(context).search,
                                                      q=search_text, search_type=search_type, page_token=page_token)
         result.extend(v3.response_to_items(self, context, json_data))
 

@@ -111,7 +111,7 @@ class Storage(object):
                 self._remove(item[0])
                 pass
 
-            self.sync()
+            #self.sync()
             pass
         pass
 
