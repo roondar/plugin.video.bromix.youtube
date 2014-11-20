@@ -1,5 +1,5 @@
 __all__ = ['SearchHistory', 'FavoriteList', 'WatchLaterList', 'FunctionCache', 'AccessManager',
-           'strip_html_from_text', 'create_path', 'create_uri_path', 'strip_html_from_text']
+           'strip_html_from_text', 'create_path', 'create_uri_path']
 
 from .methods import *
 

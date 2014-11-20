@@ -6,6 +6,7 @@ try:
     import cPickle as pickle
 except ImportError:
     import pickle
+
     pass
 
 __author__ = 'bromix'
@@ -16,7 +17,7 @@ class Storage(object):
         self._tablename = 'storage'
         self._filename = filename
         if not self._filename.endswith('.sqlite'):
-            self._filename = self._filename+'.sqlite'
+            self._filename = self._filename + '.sqlite'
             pass
         self._file = None
         self._cursor = None
@@ -45,8 +46,10 @@ class Storage(object):
                 os.makedirs(path)
                 pass
 
-            self._file = sqlite3.connect(self._filename, detect_types=sqlite3.PARSE_DECLTYPES, timeout=1)
+            self._file = sqlite3.connect(self._filename, check_same_thread=False, detect_types=sqlite3.PARSE_DECLTYPES,
+                                         timeout=1)
             self._cursor = self._file.cursor()
+            self._cursor.execute('PRAGMA journal_mode=MEMORY')
             self._create_table()
         pass
 
@@ -83,6 +86,7 @@ class Storage(object):
         self._open()
         query = 'CREATE TABLE IF NOT EXISTS %s (key TEXT PRIMARY KEY, time TIMESTAMP, value BLOB)' % self._tablename
         self._cursor.execute(query)
+        self.sync()
         pass
 
     def sync(self):
@@ -100,6 +104,7 @@ class Storage(object):
         query = 'REPLACE INTO %s (key,time,value) VALUES(?,?,?)' % self._tablename
         self._cursor.execute(query, [item_id, now, _encode(item)])
         self._optimize_item_count()
+        self.sync()
         pass
 
     def _optimize_item_count(self):
@@ -110,8 +115,7 @@ class Storage(object):
             for item in result:
                 self._remove(item[0])
                 pass
-
-            #self.sync()
+            self.sync()
             pass
         pass
 
@@ -121,7 +125,6 @@ class Storage(object):
         self._cursor.execute(query)
         self.sync()
         self._create_table()
-        self.sync()
         pass
 
     def _is_empty(self):
@@ -171,6 +174,7 @@ class Storage(object):
         self._open()
         query = 'DELETE FROM %s WHERE key = ?' % self._tablename
         self._cursor.execute(query, [item_id])
+        self.sync()
         pass
 
     pass

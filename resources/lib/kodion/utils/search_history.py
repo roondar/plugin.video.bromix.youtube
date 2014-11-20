@@ -36,6 +36,7 @@ class SearchHistory(Storage):
 
     def update(self, search_text):
         self._set(self._make_id(search_text), search_text)
+        self.sync()
         pass
 
     pass

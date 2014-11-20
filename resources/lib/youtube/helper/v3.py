@@ -1,3 +1,4 @@
+import re
 from resources.lib.youtube.helper.resource_manager import ResourceManager
 
 __author__ = 'bromix'
@@ -11,14 +12,34 @@ def _update_video_infos(provider, context, video_id_dict):
     if len(video_ids) == 0:
         return
 
-    channel_manager = ResourceManager(context, provider.get_client(context))
-    video_data = channel_manager.get_videos(video_ids)
+    video_data = provider.get_resource_manager(context).get_videos(video_ids)
 
     for key in video_data.keys():
         yt_item = video_data[key]
         video_item = video_id_dict[key]
 
         snippet = yt_item['snippet']  # crash if not conform
+
+        # try to set season and episode
+        video_item.set_season(1)
+        video_item.set_episode(1)
+        season_episode_regex = ['Part (?P<episode>\d+)',
+                                '#(?P<episode>\d+)',
+                                'Ep.(?P<episode>\d+)',
+                                '\[(?P<episode>\d+)\]',
+                                'S(?P<season>\d+)E(?P<episode>\d+)']
+        for regex in season_episode_regex:
+            re_match = re.search(regex, video_item.get_name())
+            if re_match:
+                if 'season' in re_match.groupdict():
+                    video_item.set_season(int(re_match.group('season')))
+                    pass
+
+                if 'episode' in re_match.groupdict():
+                    video_item.set_episode(int(re_match.group('episode')))
+                    pass
+                break
+            pass
 
         # plot
         description = kodion.utils.strip_html_from_text(snippet['description'])
@@ -49,8 +70,7 @@ def _update_channel_infos(provider, context, channel_id_dict):
     if len(channel_ids) == 0:
         return
 
-    channel_manager = ResourceManager(context, provider.get_client(context))
-    fanarts = channel_manager.get_fanarts(channel_ids)
+    fanarts = provider.get_resource_manager(context).get_fanarts(channel_ids)
 
     for channel_id in channel_ids:
         channel_items = channel_id_dict[channel_id]

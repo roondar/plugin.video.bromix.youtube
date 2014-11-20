@@ -1,8 +1,11 @@
 import urllib
 import urlparse
 import re
+
 import requests
-from resources.lib._old_youtube.signature import Cipher, JsonScriptEngine
+
+from resources.lib._old.signature import Cipher, JsonScriptEngine
+
 
 __author__ = 'bromix'
 

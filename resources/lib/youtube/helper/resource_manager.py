@@ -39,14 +39,15 @@ class ResourceManager(object):
             pass
 
         if len(channel_ids_to_update) > 0:
-            json_data = self._youtube_client.get_channels(channel_ids_to_update)
+            json_data = self._context.get_function_cache().get(FunctionCache.ONE_DAY, self._youtube_client.get_channels,
+                                                               channel_ids_to_update)
             yt_items = json_data.get('items', [])
             for yt_item in yt_items:
                 channel_id = unicode(yt_item['id'])
                 self._channel_data[channel_id] = yt_item
 
                 # this will cache the channel data
-                result[channel_id] = self._context.get_function_cache().get(FunctionCache.ONE_DAY*3,
+                result[channel_id] = self._context.get_function_cache().get(FunctionCache.ONE_DAY,
                                                                             self._get_channel_data, channel_id)
                 pass
             pass
@@ -71,15 +72,16 @@ class ResourceManager(object):
             pass
 
         if len(video_ids_to_update) > 0:
-            json_data = self._youtube_client.get_videos(video_ids_to_update)
+            json_data = self._context.get_function_cache().get(FunctionCache.ONE_DAY, self._youtube_client.get_videos,
+                                                               video_ids_to_update)
             yt_items = json_data.get('items', [])
             for yt_item in yt_items:
                 video_id = unicode(yt_item['id'])
                 self._video_data[video_id] = yt_item
 
                 # this will cache the channel data
-                result[video_id] = self._context.get_function_cache().get(FunctionCache.ONE_DAY*3,
-                                                                            self._get_video_data, video_id)
+                result[video_id] = self._context.get_function_cache().get(FunctionCache.ONE_DAY,
+                                                                          self._get_video_data, video_id)
                 pass
             pass
 
