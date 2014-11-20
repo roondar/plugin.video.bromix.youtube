@@ -26,22 +26,6 @@ class Client(object):
     def get_language(self):
         return self._language
 
-    def get_playlist_items_v3(self, playlist_id, page_token=''):
-        # prepare page token
-        if not page_token:
-            page_token = ''
-            pass
-
-        # prepare params
-        params = {'part': 'snippet',
-                  'maxResults': str(self._max_results),
-                  'playlistId': playlist_id}
-        if page_token:
-            params['pageToken'] = page_token
-            pass
-
-        return self._perform_v3_request(method='GET', path='playlistItems', params=params)
-
     def get_playlists_v3(self, channel_id, page_token=''):
         # prepare page token
         if not page_token:

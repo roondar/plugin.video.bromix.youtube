@@ -6,6 +6,12 @@ import unittest
 
 
 class TestClient(unittest.TestCase):
+    def test_get_playlist_items(self):
+        client = YouTubeClient()
+
+        json_data = client.get_playlist_items(u'UUDbAn9LEzqONk__uXA6a9jQ')
+        pass
+
     def test_get_channels(self):
         client = YouTubeClient()
 
@@ -27,12 +33,6 @@ class TestClient(unittest.TestCase):
         pass
 
     # ===============================
-    def test_get_playlist_items(self):
-        client = Client()
-
-        json_data = client.get_playlist_items_v3('PL024E341A0495DF9F')
-        pass
-
     def test_get_playlists(self):
         client = Client()
 

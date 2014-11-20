@@ -18,6 +18,10 @@ class FunctionCache(Storage):
         self._enabled = True
         pass
 
+    def clear(self):
+        self._clear()
+        pass
+
     def enabled(self):
         """
         Enables the caching

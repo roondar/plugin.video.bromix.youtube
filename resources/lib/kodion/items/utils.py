@@ -13,7 +13,7 @@ from .image_item import ImageItem
 def create_search_item(context, alt_name=None, image=u''):
     name = alt_name
     if not name:
-        name = '[B]' + context.localize(constants.localize.SEARCH_NEW) + '[/B]'
+        name = '[B]' + context.localize(constants.localize.SEARCH) + '[/B]'
         pass
 
     search_item = DirectoryItem(name,

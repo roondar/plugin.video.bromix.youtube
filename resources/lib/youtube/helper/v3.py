@@ -1,4 +1,4 @@
-from resources.lib.youtube.helper.channel_manager import ChannelManager
+from resources.lib.youtube.helper.resource_manager import ResourceManager
 
 __author__ = 'bromix'
 
@@ -48,7 +48,7 @@ def _update_channel_infos(provider, context, channel_id_dict):
     if len(channel_ids) == 0:
         return
 
-    channel_manager = ChannelManager(context, provider.get_client(context))
+    channel_manager = ResourceManager(context, provider.get_client(context))
     fanarts = channel_manager.get_fanarts(channel_ids)
 
     for channel_id in channel_ids:
@@ -147,7 +147,7 @@ def response_to_items(provider, context, json_data):
     result = []
 
     kind = json_data.get('kind', '')
-    if kind == 'youtube#searchListResponse':
+    if kind == u'youtube#searchListResponse' or kind == u'youtube#playlistItemListResponse':
         result.extend(_process_search_list_response(provider, context, json_data))
         pass
     else:

@@ -28,4 +28,8 @@
     <string id="30108">Remove</string>
     <string id="30109">Latest Videos</string>
     <string id="30110">New Search</string>
+
+    <!-- YouTube -->
+    <string id="30500">Channels</string>
+    <string id="30501">Playlists</string>
 </strings>
