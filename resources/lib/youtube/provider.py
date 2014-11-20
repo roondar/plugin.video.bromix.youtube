@@ -27,6 +27,33 @@ class Provider(kodion.AbstractProvider):
     def get_fanart(self, context):
         return context.create_resource_path('media', 'fanart.jpg')
 
+    @kodion.RegisterProviderPath('^/playlist/(?P<playlist_id>.*)/$')
+    def _on_playlist(self, context, re_match):
+        result = []
+
+        playlist_id = re_match.group('playlist_id')
+        page = int(context.get_param('page', 1))
+        page_token = context.get_param('page_token', '')
+
+        json_data = self.get_client(context).get_playlist_items(playlist_id, page_token)
+        result.extend(v3.response_to_items(self, context, json_data))
+
+        return result
+
+    @kodion.RegisterProviderPath('^/channel/(?P<channel_id>.*)/playlists/$')
+    def _on_channel_playlists(self, context, re_match):
+        result = []
+
+        channel_id = re_match.group('channel_id')
+        page = int(context.get_param('page', 1))
+        page_token = context.get_param('page_token', '')
+
+        json_data = context.get_function_cache().get(FunctionCache.ONE_HOUR, self.get_client(context).get_playlists,
+                                                     channel_id, page_token)
+        result.extend(v3.response_to_items(self, context, json_data))
+
+        return result
+
     @kodion.RegisterProviderPath('^/channel/(?P<channel_id>.*)/$')
     def _on_channel(self, context, re_match):
         resource_manager = ResourceManager(context, self.get_client(context))
@@ -39,7 +66,7 @@ class Provider(kodion.AbstractProvider):
         page_token = context.get_param('page_token', '')
 
         if page == 1:
-            playlists_item = DirectoryItem(context.localize(self._local_map['youtube.playlists']),
+            playlists_item = DirectoryItem('[B]'+context.localize(self._local_map['youtube.playlists'])+'[/B]',
                                            context.create_uri(['channel', channel_id, 'playlists']))
             playlists_item.set_fanart(channel_fanarts.get(channel_id, self.get_fanart(context)))
             result.append(playlists_item)
@@ -48,7 +75,7 @@ class Provider(kodion.AbstractProvider):
         playlists = resource_manager.get_related_playlists(channel_id)
         upload_playlist = playlists.get('uploads', '')
         if upload_playlist:
-            json_data = context.get_function_cache().get(FunctionCache.ONE_MINUTE*5,
+            json_data = context.get_function_cache().get(FunctionCache.ONE_MINUTE * 5,
                                                          self.get_client(context).get_playlist_items, upload_playlist,
                                                          page_token)
             result.extend(v3.response_to_items(self, context, json_data))
@@ -69,7 +96,7 @@ class Provider(kodion.AbstractProvider):
             channel_params = {}
             channel_params.update(context.get_params())
             channel_params['search_type'] = 'channel'
-            channel_item = DirectoryItem('[B]'+context.localize(self._local_map['youtube.channels'])+'[/B]',
+            channel_item = DirectoryItem('[B]' + context.localize(self._local_map['youtube.channels']) + '[/B]',
                                          context.create_uri([context.get_path()], channel_params))
             channel_item.set_fanart(self.get_fanart(context))
             result.append(channel_item)
@@ -77,7 +104,7 @@ class Provider(kodion.AbstractProvider):
             playlist_params = {}
             playlist_params.update(context.get_params())
             playlist_params['search_type'] = 'playlist'
-            playlist_item = DirectoryItem('[B]'+context.localize(self._local_map['youtube.playlists'])+'[/B]',
+            playlist_item = DirectoryItem('[B]' + context.localize(self._local_map['youtube.playlists']) + '[/B]',
                                           context.create_uri([context.get_path()], playlist_params))
             playlist_item.set_fanart(self.get_fanart(context))
             result.append(playlist_item)

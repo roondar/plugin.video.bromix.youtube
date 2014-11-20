@@ -18,6 +18,22 @@ class YouTubeClient(object):
         self._max_results = items_per_page
         pass
 
+    def get_playlists(self, channel_id, page_token=''):
+        # prepare page token
+        if not page_token:
+            page_token = ''
+            pass
+
+        # prepare params
+        params = {'part': 'snippet,contentDetails',
+                  'maxResults': str(self._max_results),
+                  'channelId': channel_id}
+        if page_token:
+            params['pageToken'] = page_token
+            pass
+
+        return self._perform_v3_request(method='GET', path='playlists', params=params)
+
     def get_playlist_items(self, playlist_id, page_token=''):
         # prepare page token
         if not page_token:

@@ -78,7 +78,23 @@ def _process_list_response(provider, context, json_data):
 
     for yt_item in yt_items:
         yt_kind = yt_item.get('kind', '')
-        if yt_kind == u'youtube#playlistItem':
+        if yt_kind == u'youtube#playlist':
+            playlist_id = yt_item['id']
+            snippet = yt_item['snippet']
+            title = snippet['title']
+            image = snippet.get('thumbnails', {}).get('medium', {}).get('url', '')
+
+            playlist_item = items.DirectoryItem('[PL]' + title,
+                                                context.create_uri(['playlist', playlist_id]),
+                                                image=image)
+            playlist_item.set_fanart(provider.get_fanart(context))
+            result.append(playlist_item)
+            channel_id = snippet['channelId']
+            if not channel_id in channel_item_dict:
+                channel_item_dict[channel_id] = []
+            channel_item_dict[channel_id].append(playlist_item)
+            pass
+        elif yt_kind == u'youtube#playlistItem':
             snippet = yt_item['snippet']
             video_id = snippet['resourceId']['videoId']
             title = snippet['title']
@@ -165,7 +181,7 @@ def response_to_items(provider, context, json_data):
     result = []
 
     kind = json_data.get('kind', '')
-    if kind == u'youtube#searchListResponse' or kind == u'youtube#playlistItemListResponse':
+    if kind == u'youtube#searchListResponse' or kind == u'youtube#playlistItemListResponse' or kind == u'youtube#playlistListResponse':
         result.extend(_process_list_response(provider, context, json_data))
         pass
     else:
