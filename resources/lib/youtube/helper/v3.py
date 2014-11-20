@@ -11,11 +11,12 @@ def _update_video_infos(provider, context, video_id_dict):
     if len(video_ids) == 0:
         return
 
-    json_data = provider.get_client(context).get_videos(video_ids)
-    yt_items = json_data.get('items', [])
-    for yt_item in yt_items:
-        video_id = yt_item['id']  # crash if not conform
-        video_item = video_id_dict[video_id]
+    channel_manager = ResourceManager(context, provider.get_client(context))
+    video_data = channel_manager.get_videos(video_ids)
+
+    for key in video_data.keys():
+        yt_item = video_data[key]
+        video_item = video_id_dict[key]
 
         snippet = yt_item['snippet']  # crash if not conform
 
@@ -64,7 +65,7 @@ def _update_channel_infos(provider, context, channel_id_dict):
     pass
 
 
-def _process_search_list_response(provider, context, json_data):
+def _process_list_response(provider, context, json_data):
     video_id_dict = {}
     channel_item_dict = {}
 
@@ -77,7 +78,24 @@ def _process_search_list_response(provider, context, json_data):
 
     for yt_item in yt_items:
         yt_kind = yt_item.get('kind', '')
-        if yt_kind == 'youtube#searchResult':
+        if yt_kind == u'youtube#playlistItem':
+            snippet = yt_item['snippet']
+            video_id = snippet['resourceId']['videoId']
+            title = snippet['title']
+            image = snippet.get('thumbnails', {}).get('medium', {}).get('url', '')
+            video_item = items.VideoItem(title,
+                                         context.create_uri(['play'], {'video_id': video_id}),
+                                         image=image)
+            video_item.set_fanart(provider.get_fanart(context))
+            result.append(video_item)
+            video_id_dict[video_id] = video_item
+
+            channel_id = snippet['channelId']
+            if not channel_id in channel_item_dict:
+                channel_item_dict[channel_id] = []
+            channel_item_dict[channel_id].append(video_item)
+            pass
+        elif yt_kind == 'youtube#searchResult':
             yt_kind = yt_item.get('id', {}).get('kind', '')
 
             # video
@@ -148,7 +166,7 @@ def response_to_items(provider, context, json_data):
 
     kind = json_data.get('kind', '')
     if kind == u'youtube#searchListResponse' or kind == u'youtube#playlistItemListResponse':
-        result.extend(_process_search_list_response(provider, context, json_data))
+        result.extend(_process_list_response(provider, context, json_data))
         pass
     else:
         raise kodion.KodimonException("Unknown kind '%s'" % kind)

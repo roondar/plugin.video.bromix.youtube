@@ -48,7 +48,7 @@ class Provider(kodion.AbstractProvider):
         playlists = resource_manager.get_related_playlists(channel_id)
         upload_playlist = playlists.get('uploads', '')
         if upload_playlist:
-            json_data = context.get_function_cache().get(FunctionCache.ONE_DAY,
+            json_data = context.get_function_cache().get(FunctionCache.ONE_MINUTE*5,
                                                          self.get_client(context).get_playlist_items, upload_playlist,
                                                          page_token)
             result.extend(v3.response_to_items(self, context, json_data))
@@ -57,7 +57,7 @@ class Provider(kodion.AbstractProvider):
         return result
 
     def on_search(self, search_text, context, re_match):
-        # self._set_default_content_type_and_sort_methods()
+        context.set_content_type(kodion.constants.content_type.EPISODES)
 
         result = []
 
@@ -69,7 +69,7 @@ class Provider(kodion.AbstractProvider):
             channel_params = {}
             channel_params.update(context.get_params())
             channel_params['search_type'] = 'channel'
-            channel_item = DirectoryItem('_Channels',
+            channel_item = DirectoryItem('[B]'+context.localize(self._local_map['youtube.channels'])+'[/B]',
                                          context.create_uri([context.get_path()], channel_params))
             channel_item.set_fanart(self.get_fanart(context))
             result.append(channel_item)
@@ -77,7 +77,7 @@ class Provider(kodion.AbstractProvider):
             playlist_params = {}
             playlist_params.update(context.get_params())
             playlist_params['search_type'] = 'playlist'
-            playlist_item = DirectoryItem('_Playlists',
+            playlist_item = DirectoryItem('[B]'+context.localize(self._local_map['youtube.playlists'])+'[/B]',
                                           context.create_uri([context.get_path()], playlist_params))
             playlist_item.set_fanart(self.get_fanart(context))
             result.append(playlist_item)
