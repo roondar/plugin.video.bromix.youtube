@@ -1,8 +1,10 @@
-import re
-from resources.lib.youtube.helper.resource_manager import ResourceManager
+from resources.lib.kodion.items import utils
 
 __author__ = 'bromix'
 
+import re
+
+from resources.lib.kodion.utils import build_in_functions
 from resources.lib import kodion
 from resources.lib.kodion import items, iso8601
 
@@ -60,6 +62,19 @@ def _update_video_infos(provider, context, video_id_dict):
         thumbnails = snippet.get('thumbnails', {})
         image = thumbnails.get('standard', {}).get('url', video_item.get_image())
         video_item.set_image(image)
+
+        # update context menu
+        channel_id = snippet.get('channelId', '')
+        channel_name = snippet.get('channelTitle', '')
+        if channel_id and channel_name:
+            # only if we are not in the channel provide to jump to the channel
+            if kodion.utils.create_path('channel', channel_id) != context.get_path():
+                menu = [(context.localize(provider.LOCAL_MAP['youtube.go_to_channel']).replace("%CHANNEL%",
+                                                                                               '[B]%s[/B]' % channel_name),
+                         'Container.Update(%s)' % context.create_uri(['channel', channel_id]))]
+                video_item.set_context_menu(menu)
+                pass
+            pass
         pass
 
     pass

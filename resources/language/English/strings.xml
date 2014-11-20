@@ -32,4 +32,5 @@
     <!-- YouTube -->
     <string id="30500">Channels</string>
     <string id="30501">Playlists</string>
+    <string id="30502">Go to %CHANNEL%</string>
 </strings>

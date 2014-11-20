@@ -8,11 +8,12 @@ from .helper import v3, ResourceManager
 
 
 class Provider(kodion.AbstractProvider):
+    LOCAL_MAP = {'youtube.channels': 30500,
+                 'youtube.playlists': 30501,
+                 'youtube.go_to_channel': 30502}
+
     def __init__(self):
         kodion.AbstractProvider.__init__(self)
-
-        self._local_map = {'youtube.channels': 30500,
-                           'youtube.playlists': 30501}
 
         self._client = None
         self._resource_manager = None
@@ -80,7 +81,7 @@ class Provider(kodion.AbstractProvider):
         page_token = context.get_param('page_token', '')
 
         if page == 1:
-            playlists_item = DirectoryItem('[B]' + context.localize(self._local_map['youtube.playlists']) + '[/B]',
+            playlists_item = DirectoryItem('[B]' + context.localize(self.LOCAL_MAP['youtube.playlists']) + '[/B]',
                                            context.create_uri(['channel', channel_id, 'playlists']))
             playlists_item.set_fanart(channel_fanarts.get(channel_id, self.get_fanart(context)))
             result.append(playlists_item)
@@ -110,7 +111,7 @@ class Provider(kodion.AbstractProvider):
             channel_params = {}
             channel_params.update(context.get_params())
             channel_params['search_type'] = 'channel'
-            channel_item = DirectoryItem('[B]' + context.localize(self._local_map['youtube.channels']) + '[/B]',
+            channel_item = DirectoryItem('[B]' + context.localize(self.LOCAL_MAP['youtube.channels']) + '[/B]',
                                          context.create_uri([context.get_path()], channel_params))
             channel_item.set_fanart(self.get_fanart(context))
             result.append(channel_item)
@@ -118,7 +119,7 @@ class Provider(kodion.AbstractProvider):
             playlist_params = {}
             playlist_params.update(context.get_params())
             playlist_params['search_type'] = 'playlist'
-            playlist_item = DirectoryItem('[B]' + context.localize(self._local_map['youtube.playlists']) + '[/B]',
+            playlist_item = DirectoryItem('[B]' + context.localize(self.LOCAL_MAP['youtube.playlists']) + '[/B]',
                                           context.create_uri([context.get_path()], playlist_params))
             playlist_item.set_fanart(self.get_fanart(context))
             result.append(playlist_item)
