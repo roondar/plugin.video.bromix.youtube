@@ -2,7 +2,6 @@ import json
 
 __author__ = 'bromix'
 
-
 from .. import constants
 from .video_item import VideoItem
 from .directory_item import DirectoryItem
@@ -19,8 +18,9 @@ def create_search_item(context, alt_name=None, image=u''):
     search_item = DirectoryItem(name,
                                 context.create_uri([constants.paths.SEARCH, 'list']),
                                 image=image)
+    search_item.set_fanart(context.get_fanart())
     return search_item
-    pass
+
 
 def create_next_page_item(context, current_page):
     new_params = {}
@@ -31,9 +31,9 @@ def create_next_page_item(context, current_page):
         name %= current_page + 1
         pass
 
-    from . import DirectoryItem
-
-    return DirectoryItem(name, context.create_uri(context.get_path(), new_params))
+    next_page_item = DirectoryItem(name, context.create_uri(context.get_path(), new_params))
+    next_page_item.set_fanart(context.get_fanart())
+    return next_page_item
 
 
 def from_json(json_data):

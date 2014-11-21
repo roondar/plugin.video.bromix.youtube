@@ -38,8 +38,6 @@ class MockRunner(AbstractProviderRunner):
         else:
             # handle exception
             pass
-
-        provider.shut_down()
         pass
 
     pass

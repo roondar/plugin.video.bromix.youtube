@@ -113,7 +113,14 @@ class XbmcContext(AbstractContext):
             new_params = self.get_params()
             pass
 
-        return XbmcContext(path=new_path, params=new_params, plugin_name=self._plugin_name, plugin_id=self._plugin_id,
-                           override=False)
+        new_context = XbmcContext(path=new_path, params=new_params, plugin_name=self._plugin_name,
+                                  plugin_id=self._plugin_id, override=False)
+        new_context._function_cache = self._function_cache
+        new_context._search_history = self._search_history
+        new_context._favorite_list = self._favorite_list
+        new_context._watch_later_list = self._watch_later_list
+        new_context._access_manager = self._access_manager
+
+        return new_context
 
     pass

@@ -35,11 +35,8 @@ class AbstractProvider(object):
 
         pass
 
-    def shut_down(self):
-        self._search = None
-        self._cache = None
-        self._watch_later_list = None
-        pass
+    def get_alternative_fanart(self, context):
+        return context.get_fanart()
 
     def register_path(self, re_path, method_name):
         """
@@ -229,7 +226,7 @@ class AbstractProvider(object):
             search_item = items.DirectoryItem('[B]' + context.localize(constants.localize.SEARCH_NEW) + '[/B]',
                                               context.create_uri([constants.paths.SEARCH, 'new']),
                                               image=context.create_resource_path('media/search.png'))
-            search_item.set_fanart(context.get_fanart())
+            search_item.set_fanart(self.get_alternative_fanart(context))
             result.append(search_item)
 
             for search in search_history.list():
@@ -242,7 +239,7 @@ class AbstractProvider(object):
                 search_item = items.DirectoryItem(search,
                                                   context.create_uri([constants.paths.SEARCH, 'query'], {'q': search}),
                                                   image=context.create_resource_path('media/search.png'))
-                search_item.set_fanart(context.get_fanart())
+                search_item.set_fanart(self.get_alternative_fanart(context))
                 context_menu = [(context.localize(constants.localize.SEARCH_REMOVE),
                                  build_in_functions.run_plugin_remove_from_search_history(context, search_item))]
                 search_item.set_context_menu(context_menu)

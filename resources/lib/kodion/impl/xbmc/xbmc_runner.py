@@ -56,8 +56,6 @@ class XbmcRunner(AbstractProviderRunner):
         else:
             # handle exception
             pass
-
-        provider.shut_down()
         pass
 
     def _set_resolved_url(self, context, base_item, succeeded=True):

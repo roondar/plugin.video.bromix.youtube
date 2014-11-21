@@ -32,6 +32,9 @@ class Provider(kodion.AbstractProvider):
             pass
         return self._resource_manager
 
+    def get_alternative_fanart(self, context):
+        return self.get_fanart(context)
+
     def get_fanart(self, context):
         return context.create_resource_path('media', 'fanart.jpg')
 
@@ -82,7 +85,8 @@ class Provider(kodion.AbstractProvider):
 
         if page == 1:
             playlists_item = DirectoryItem('[B]' + context.localize(self.LOCAL_MAP['youtube.playlists']) + '[/B]',
-                                           context.create_uri(['channel', channel_id, 'playlists']))
+                                           context.create_uri(['channel', channel_id, 'playlists']),
+                                           image=context.create_resource_path('media', 'playlist.png'))
             playlists_item.set_fanart(channel_fanarts.get(channel_id, self.get_fanart(context)))
             result.append(playlists_item)
             pass
@@ -112,7 +116,8 @@ class Provider(kodion.AbstractProvider):
             channel_params.update(context.get_params())
             channel_params['search_type'] = 'channel'
             channel_item = DirectoryItem('[B]' + context.localize(self.LOCAL_MAP['youtube.channels']) + '[/B]',
-                                         context.create_uri([context.get_path()], channel_params))
+                                         context.create_uri([context.get_path()], channel_params),
+                                         image=context.create_resource_path('media', 'channel.png'))
             channel_item.set_fanart(self.get_fanart(context))
             result.append(channel_item)
 
@@ -120,7 +125,8 @@ class Provider(kodion.AbstractProvider):
             playlist_params.update(context.get_params())
             playlist_params['search_type'] = 'playlist'
             playlist_item = DirectoryItem('[B]' + context.localize(self.LOCAL_MAP['youtube.playlists']) + '[/B]',
-                                          context.create_uri([context.get_path()], playlist_params))
+                                          context.create_uri([context.get_path()], playlist_params),
+                                          image=context.create_resource_path('media', 'playlist.png'))
             playlist_item.set_fanart(self.get_fanart(context))
             result.append(playlist_item)
             pass
@@ -136,6 +142,8 @@ class Provider(kodion.AbstractProvider):
 
         # search
         search_item = kodion.items.create_search_item(context)
+        search_item.set_image(context.create_resource_path('media', 'search.png'))
+        search_item.set_fanart(self.get_fanart(context))
         result.append(search_item)
 
         return result
