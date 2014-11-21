@@ -81,6 +81,7 @@ def _update_video_infos(provider, context, video_id_dict):
 
 
 def _update_channel_infos(provider, context, channel_id_dict):
+    # at least we need one channel id
     channel_ids = list(channel_id_dict.keys())
     if len(channel_ids) == 0:
         return

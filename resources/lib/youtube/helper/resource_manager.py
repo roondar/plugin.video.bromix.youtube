@@ -9,6 +9,7 @@ class ResourceManager(object):
         self._youtube_client = youtube_client
         self._channel_data = {}
         self._video_data = {}
+        self._enable_channel_fanart = context.get_settings().get_bool('youtube.channel.fanart.show', True)
         pass
 
     def clear(self):
@@ -100,6 +101,9 @@ class ResourceManager(object):
         return playlists
 
     def get_fanarts(self, channel_ids):
+        if not self._enable_channel_fanart:
+            return {}
+
         result = self._update_channels(channel_ids)
 
         # transform
