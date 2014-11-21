@@ -10,6 +10,10 @@ class WatchLaterList(Storage):
         Storage.__init__(self, filename)
         pass
 
+    def __del__(self):
+        Storage.__del__(self)
+        pass
+
     def clear(self):
         self._clear()
         pass
@@ -25,6 +29,8 @@ class WatchLaterList(Storage):
 
         def _sort(video_item):
             return video_item.get_date()
+
+        self.sync()
 
         sorted_list = sorted(result, key=_sort, reverse=False)
         return sorted_list

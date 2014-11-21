@@ -19,7 +19,7 @@ class MockContext(AbstractContext):
                                    5001: u'MOCK Plugin'}
 
         self._ui = None
-        self._system_version = MockSystemVersion(0,0, 'Kodion Test System')
+        self._system_version = MockSystemVersion(0, 0, 'Kodion Test System')
         pass
 
     def get_system_version(self):
@@ -65,6 +65,15 @@ class MockContext(AbstractContext):
             new_params = self.get_params()
             pass
 
-        return MockContext(path=new_path, params=new_params, plugin_name=self._plugin_name, plugin_id=self._plugin_id)
+        new_context = MockContext(path=new_path, params=new_params, plugin_name=self._plugin_name,
+                                  plugin_id=self._plugin_id)
+
+        new_context._function_cache = self._function_cache
+        new_context._search_history = self._search_history
+        new_context._favorite_list = self._favorite_list
+        new_context._watch_later_list = self._watch_later_list
+        new_context._access_manager = self._access_manager
+
+        return new_context
 
     pass

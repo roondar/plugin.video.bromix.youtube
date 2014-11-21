@@ -7,6 +7,10 @@ class SearchHistory(Storage):
         Storage.__init__(self, filename, max_item_count=max_items)
         pass
 
+    def __del__(self):
+        Storage.__del__(self)
+        pass
+
     def is_empty(self):
         return self._is_empty()
 
@@ -36,7 +40,6 @@ class SearchHistory(Storage):
 
     def update(self, search_text):
         self._set(self._make_id(search_text), search_text)
-        self.sync()
         pass
 
     pass

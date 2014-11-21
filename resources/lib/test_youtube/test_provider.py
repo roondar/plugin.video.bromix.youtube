@@ -45,7 +45,7 @@ class TestProvider(unittest.TestCase):
         self.assertGreater(len(items), 0)
         kodion.utils.print_items(items)
 
-        context = kodion.Context(path=path, params={'q': 'lgr', 'search_type': 'playlist', 'page_token': 'CDIQAA'})
+        context = context.clone(new_path=path, new_params={'q': 'lgr', 'search_type': 'playlist', 'page_token': 'CDIQAA'})
         result = provider.navigate(context)
         items = result[0]
         self.assertGreater(len(items), 0)

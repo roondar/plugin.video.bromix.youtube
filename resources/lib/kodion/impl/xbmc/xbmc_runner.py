@@ -83,7 +83,6 @@ class XbmcRunner(AbstractProviderRunner):
 
         # only set fanart is enabled
         settings = context.get_settings()
-
         if directory_item.get_fanart() and settings.show_fanart():
             item.setProperty(u'fanart_image', directory_item.get_fanart())
             pass

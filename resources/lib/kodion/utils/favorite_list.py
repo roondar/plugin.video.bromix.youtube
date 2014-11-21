@@ -9,6 +9,10 @@ class FavoriteList(Storage):
         Storage.__init__(self, filename)
         pass
 
+    def __del__(self):
+        Storage.__del__(self)
+        pass
+
     def clear(self):
         self._clear()
         pass
