@@ -1,4 +1,4 @@
-from resources.lib._old.signature import Cipher, JsonScriptEngine
+from resources.lib.youtube.helper.signature import Cipher, JsonScriptEngine
 
 __author__ = 'bromix'
 
@@ -16,7 +16,7 @@ class TestCipher(unittest.TestCase):
             java_script = java_script_file.read()
             pass
 
-        json_script = cipher.load_java_script(java_script)
+        json_script = cipher._load_java_script(java_script)
         jse = JsonScriptEngine(json_script)
         signature = jse.execute('299D15DC85986F6D8B7BC0E5655F758E6F14B1E33.50BCBEAE15DA02F131DAA96B640C57AAABAB20E20E2')
         pass

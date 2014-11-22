@@ -7,6 +7,7 @@ from .youtube_client import YouTubeClient
 from .helper import v3, ResourceManager
 from .youtube_exception import YouTubeException
 
+
 class Provider(kodion.AbstractProvider):
     LOCAL_MAP = {'youtube.channels': 30500,
                  'youtube.playlists': 30501,
@@ -107,12 +108,12 @@ class Provider(kodion.AbstractProvider):
         vq = context.get_settings().get_video_quality()
 
         def _compare(item):
-            return vq-item['format']['height']
+            return vq - item['format']['height']
 
         video_id = re_match.group('video_id')
 
         try:
-            video_streams = self.get_client(context).get_video_streams(video_id)
+            video_streams = self.get_client(context).get_video_streams(context, video_id)
             video_stream = kodion.utils.find_best_fit(video_streams, _compare)
             video_item = VideoItem(video_id,
                                    video_stream['url'])

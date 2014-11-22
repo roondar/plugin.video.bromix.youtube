@@ -29,6 +29,8 @@ class JsonScriptEngine(object):
             if method:
                 _signature = method(*params)
                 pass
+            else:
+                raise Exception("Unknown method '%s'" % func)
             pass
 
         return _signature

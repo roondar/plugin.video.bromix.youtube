@@ -1,3 +1,4 @@
+from resources.lib import kodion
 from resources.lib.youtube import YouTubeClient
 
 __author__ = 'bromix'
@@ -9,9 +10,14 @@ class TestClient(unittest.TestCase):
     def test_get_video_streams(self):
         client = YouTubeClient()
 
-        # VEVO
-        streams = client.get_video_streams('NmugSMBh_iI')
-        #streams = client.get_video_streams('XbiH6pQI7pU')
+        context = kodion.Context()
+
+        # VEVO (Restricted)
+        streams = client.get_video_streams(context, 'O-zpOMYRi0w')
+        #streams = client.get_video_streams(context, 'NmugSMBh_iI')
+
+        # VEVO Gema
+        #streams = client.get_video_streams(context, 'XbiH6pQI7pU')
         pass
 
     def test_get_playlists(self):

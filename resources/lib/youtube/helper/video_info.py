@@ -1,14 +1,13 @@
+__author__ = 'bromix'
+
 import urllib
 import urlparse
 import re
 
 import requests
 
-from resources.lib._old.signature import Cipher, JsonScriptEngine
-from resources.lib.kodion.exceptions import KodimonException
 from ..youtube_exception import YouTubeException
-
-__author__ = 'bromix'
+from .signature.cipher import Cipher
 
 
 class VideoInfo(object):
@@ -47,31 +46,15 @@ class VideoInfo(object):
                         '248': {'format': 'WEB', 'width': 1920, 'height': 1080, 'VOX': True},
                         '264': {'format': 'MP4', 'width': 1920, 'height': 1080, 'VOX': True}}
 
-    def __init__(self, youtube_client):
+    def __init__(self, context, youtube_client):
+        self._context = context
         self._youtube_client = youtube_client
         pass
-
-    # TODO: can be improved
-    def get_best_fitting_video_stream(self, video_id, video_height):
-        streams = self.load_stream_infos(video_id)
-
-        result = None
-        last_size = 0
-        for stream in streams:
-            size = stream['format']['height']
-
-            if size >= last_size and size <= video_height:
-                last_size = size
-                result = stream
-                pass
-            pass
-
-        return result
 
     def load_stream_infos(self, video_id):
         return self._method_get_video_info(video_id)
 
-    def _get_stream_infos_web(self, video_id):
+    def _method_watch(self, video_id, reason=u''):
         stream_list = []
 
         headers = {'Host': 'www.youtube.com',
@@ -127,8 +110,10 @@ class VideoInfo(object):
 
         re_match = re.match('.+\"js\": \"(?P<js>.+?)\".+', html)
         js = ''
+        cipher = None
         if re_match:
             js = re_match.group('js').replace('\\', '').strip('//')
+            cipher = Cipher(self._context, java_script_url=js)
             pass
 
         re_match = re.match('.+\"url_encoded_fmt_stream_map\": \"(?P<url_encoded_fmt_stream_map>.+?)\".+', html)
@@ -145,10 +130,8 @@ class VideoInfo(object):
 
                     signature = ''
                     if attr.get('s', ''):
-                        cipher = Cipher(cache_folder=self._cache_folder)
-                        json_script = cipher.load_url(js)
-                        jse = JsonScriptEngine(json_script)
-                        signature = jse.execute(attr.get('s', ''))
+                        signature = cipher.get_signature(attr['s'])
+                        pass
                     elif attr.get('sig', ''):
                         signature = attr.get('sig', '')
                         pass
@@ -166,6 +149,10 @@ class VideoInfo(object):
                     pass
                 pass
             pass
+
+        # this is a reason from get_video_info. We should at least display the reason why the video couldn't be loaded
+        if len(stream_list) == 0 and reason:
+            raise YouTubeException(reason)
 
         return stream_list
 
@@ -204,7 +191,7 @@ class VideoInfo(object):
         params = dict(urlparse.parse_qsl(data))
 
         if params.get('status', '') == 'fail':
-            raise YouTubeException(params.get('reason', 'Unknown'))
+            return self._method_watch(video_id, reason=params.get('reason', 'UNKNOWN'))
 
         itag_map = {}
         itag_map.update(self.DEFAULT_ITAG_MAP)
@@ -231,7 +218,7 @@ class VideoInfo(object):
                 url += '&signature=%s' % stream_map['sig']
             elif 's' in stream_map:
                 # fuck!!! in this case we must call the web page
-                return self._get_stream_infos_web(video_id)
+                return self._method_watch(video_id)
 
             video_stream = {'url': url,
                             'format': itag_map[stream_map['itag']]}

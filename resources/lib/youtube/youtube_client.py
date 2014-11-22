@@ -11,7 +11,7 @@ from .helper.video_info import VideoInfo
 class YouTubeClient(object):
     YOUTUBE_TV_KEY = 'AIzaSyAd-YEOqZz9nXVzGtn3KWzYLbLaajhqIDA'
 
-    def __init__(self, key='', language='de-DE', items_per_page=50):
+    def __init__(self, key='', language='en-US', items_per_page=50):
         self._key = self.YOUTUBE_TV_KEY
         if key:
             self._key = key
@@ -25,8 +25,8 @@ class YouTubeClient(object):
     def get_language(self):
         return self._language
 
-    def get_video_streams(self, video_id):
-        video_info = VideoInfo(self)
+    def get_video_streams(self, context, video_id):
+        video_info = VideoInfo(context, self)
         return video_info.load_stream_infos(video_id)
 
     def get_playlists(self, channel_id, page_token=''):

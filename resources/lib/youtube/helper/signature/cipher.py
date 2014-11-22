@@ -1,19 +1,35 @@
-import hashlib
 import json
 import os
 import re
+
 import requests
+
+from resources.lib.kodion.utils import FunctionCache
+from .json_script_engine import JsonScriptEngine
 
 __author__ = 'bromix'
 
 
 class Cipher(object):
-    def __init__(self, cache_folder=''):
-        self._cache_folder = cache_folder
-        self._java_script = ''
+    def __init__(self, context, java_script_url):
+        self._context = context
+        self._java_script_url = java_script_url
 
         self._object_cache = {}
         pass
+
+    def get_signature(self, signature):
+        function_cache = self._context.get_function_cache()
+        json_script = function_cache.get_cached_only(self._load_json_script, self._java_script_url)
+        if not json_script:
+            json_script = function_cache.get(FunctionCache.ONE_DAY, self._load_json_script, self._java_script_url)
+            pass
+
+        if json_script:
+            json_script_engine = JsonScriptEngine(json_script)
+            return json_script_engine.execute(signature)
+
+        return u''
 
     def _cache_json_script(self, json_script, md5_hash):
         if self._cache_folder:
@@ -28,31 +44,7 @@ class Cipher(object):
             pass
         pass
 
-    def _load_cached_json_script(self, md5_hash):
-        if self._cache_folder:
-            if not os.path.exists(self._cache_folder):
-                os.makedirs(self._cache_folder)
-                pass
-
-            filename = md5_hash + '.jsonscript'
-            filename = os.path.join(self._cache_folder, filename)
-            if os.path.exists(filename):
-                with open(filename) as data_file:
-                    return json.load(data_file)
-                pass
-            pass
-
-        return None
-
-    def load_url(self, java_script_url):
-        md5 = hashlib.md5()
-        md5.update(java_script_url)
-        md5_hash = md5.hexdigest()
-
-        json_script = self._load_cached_json_script(md5_hash)
-        if json_script is not None:
-            return json_script
-
+    def _load_json_script(self, java_script_url):
         headers = {'Connection': 'keep-alive',
                    'User-Agent': 'Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/39.0.2171.36 Safari/537.36',
                    'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8',
@@ -68,18 +60,14 @@ class Cipher(object):
         result = requests.get(url, headers=headers, verify=False, allow_redirects=True)
         java_script = result.text
 
-        json_script = self.load_java_script(java_script)
-        self._cache_json_script(json_script, md5_hash)
-        return json_script
+        return self._load_java_script(java_script)
 
-    def load_java_script(self, java_script):
-        self._java_script = java_script
-
-        function_name = self._find_signature_function_name()
+    def _load_java_script(self, java_script):
+        function_name = self._find_signature_function_name(java_script)
         if not function_name:
             raise Exception('Signature function not found')
 
-        function = self._find_function_body(function_name)
+        function = self._find_function_body(function_name, java_script)
         function_parameter = function[0].split(',')
         function_body = function[1].split(';')
 
@@ -118,7 +106,7 @@ class Cipher(object):
                     pass
 
                 # get function from object
-                function = self._get_object_function(object_name, function_name)
+                function = self._get_object_function(object_name, function_name, java_script)
 
                 # try to find known functions and convert them to our json_script
                 slice_match = re.match('[a-zA-Z]+.slice\((?P<a>\d+),[a-zA-Z]+\)', function['body'][0])
@@ -155,29 +143,29 @@ class Cipher(object):
 
         return json_script
 
-    def _find_signature_function_name(self):
+    def _find_signature_function_name(self, java_script):
         #match = re.search('signature\s?=\s?(?P<name>[a-zA-Z]+)\([^)]+\)', self._java_script)
-        match = re.search('set..signature..(?P<name>[$a-zA-Z]+)\([^)]\)', self._java_script)
+        match = re.search('set..signature..(?P<name>[$a-zA-Z]+)\([^)]\)', java_script)
         if match:
             return match.group('name')
 
         return ''
 
-    def _find_function_body(self, function_name):
+    def _find_function_body(self, function_name, java_script):
         match = re.search('function\s+%s\((?P<parameter>[^)]+)\)\s?\{\s?(?P<body>[^}]+)\s?\}' % function_name,
-                          self._java_script)
+                          java_script)
         if match:
             return match.group('parameter'), match.group('body')
 
         return '', ''
 
-    def _find_object_body(self, object_name):
-        match = re.search('var %s={(?P<object_body>.*?})};' % object_name, self._java_script)
+    def _find_object_body(self, object_name, java_script):
+        match = re.search('var %s={(?P<object_body>.*?})};' % object_name, java_script)
         if match:
             return match.group('object_body')
         return ''
 
-    def _get_object_function(self, object_name, function_name):
+    def _get_object_function(self, object_name, function_name, java_script):
         if not object_name in self._object_cache:
             self._object_cache[object_name] = {}
         else:
@@ -185,7 +173,7 @@ class Cipher(object):
                 return self._object_cache[object_name][function_name]
             pass
 
-        _object_body = self._find_object_body(object_name)
+        _object_body = self._find_object_body(object_name, java_script)
         _object_body = _object_body.split('},')
         for _function in _object_body:
             if not _function.endswith('}'):
