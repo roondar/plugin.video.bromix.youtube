@@ -5,7 +5,7 @@ from resources.lib.kodion.utils import FunctionCache
 from resources.lib.kodion.items import *
 from .youtube_client import YouTubeClient
 from .helper import v3, ResourceManager
-
+from .youtube_exception import YouTubeException
 
 class Provider(kodion.AbstractProvider):
     LOCAL_MAP = {'youtube.channels': 30500,
@@ -111,12 +111,19 @@ class Provider(kodion.AbstractProvider):
 
         video_id = re_match.group('video_id')
 
-        video_streams = self.get_client(context).get_video_streams(video_id)
-        video_stream = kodion.utils.find_best_fit(video_streams, _compare)
+        try:
+            video_streams = self.get_client(context).get_video_streams(video_id)
+            video_stream = kodion.utils.find_best_fit(video_streams, _compare)
+            video_item = VideoItem(video_id,
+                                   video_stream['url'])
+            return video_item
+        except YouTubeException, ex:
+            message = ex.get_message()
+            message = kodion.utils.strip_html_from_text(message)
+            context.get_ui().show_notification(message, time_milliseconds=30000)
+            pass
 
-        video_item = VideoItem(video_id,
-                               video_stream['url'])
-        return video_item
+        return False
 
     def on_search(self, search_text, context, re_match):
         self._set_content_type(context, kodion.constants.content_type.EPISODES)

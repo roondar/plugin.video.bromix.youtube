@@ -33,7 +33,7 @@ class XbmcContextUI(AbstractContextUI):
             _image = self._context.get_icon()
             pass
 
-        xbmc.executebuiltin('Notification(%s, %s, %d, %s)' % (_header, message, time_milliseconds, _image))
+        xbmc.executebuiltin("Notification(%s, %s, %d, %s)" % (_header, message.replace(',', ' '), time_milliseconds, _image))
         pass
 
     def open_settings(self):

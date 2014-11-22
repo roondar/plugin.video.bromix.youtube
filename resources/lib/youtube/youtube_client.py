@@ -1,3 +1,5 @@
+from resources.lib.kodion.exceptions import KodimonException
+
 __author__ = 'bromix'
 
 import json
@@ -5,10 +7,11 @@ import requests
 
 from .helper.video_info import VideoInfo
 
+
 class YouTubeClient(object):
     YOUTUBE_TV_KEY = 'AIzaSyAd-YEOqZz9nXVzGtn3KWzYLbLaajhqIDA'
 
-    def __init__(self, key='', language='en-US', items_per_page=50):
+    def __init__(self, key='', language='de-DE', items_per_page=50):
         self._key = self.YOUTUBE_TV_KEY
         if key:
             self._key = key

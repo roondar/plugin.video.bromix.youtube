@@ -6,6 +6,14 @@ import unittest
 
 
 class TestClient(unittest.TestCase):
+    def test_get_video_streams(self):
+        client = YouTubeClient()
+
+        # VEVO
+        streams = client.get_video_streams('NmugSMBh_iI')
+        #streams = client.get_video_streams('XbiH6pQI7pU')
+        pass
+
     def test_get_playlists(self):
         client = YouTubeClient()
 

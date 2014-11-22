@@ -5,7 +5,8 @@ import re
 import requests
 
 from resources.lib._old.signature import Cipher, JsonScriptEngine
-
+from resources.lib.kodion.exceptions import KodimonException
+from ..youtube_exception import YouTubeException
 
 __author__ = 'bromix'
 
@@ -177,7 +178,9 @@ class VideoInfo(object):
                    'Referer': 'https://www._old_youtube.com/tv',
                    'Accept-Encoding': 'gzip, deflate',
                    'Accept-Language': 'en-US,en;q=0.8,de;q=0.6'}
-
+        params = {'video_id': video_id,
+                  'hl': self._youtube_client.get_language()}
+        """
         params = {'html5': '1',
                   'video_id': video_id,
                   'hl': self._youtube_client.get_language(),
@@ -189,6 +192,7 @@ class VideoInfo(object):
                   'cosver': '6.1',
                   'ps': 'leanback',
                   'el': 'leanback'}
+        """
 
         url = 'https://www.youtube.com/get_video_info'
 
@@ -198,6 +202,9 @@ class VideoInfo(object):
 
         data = result.text
         params = dict(urlparse.parse_qsl(data))
+
+        if params.get('status', '') == 'fail':
+            raise YouTubeException(params.get('reason', 'Unknown'))
 
         itag_map = {}
         itag_map.update(self.DEFAULT_ITAG_MAP)
