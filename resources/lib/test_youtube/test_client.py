@@ -12,8 +12,11 @@ class TestClient(unittest.TestCase):
 
         context = kodion.Context()
 
+        # Restricted?
+        #streams = client.get_video_streams(context, 'U4DbJWA9JEw')
+
         # VEVO (Restricted)
-        streams = client.get_video_streams(context, 'O-zpOMYRi0w')
+        #streams = client.get_video_streams(context, 'O-zpOMYRi0w')
         #streams = client.get_video_streams(context, 'NmugSMBh_iI')
 
         # VEVO Gema
