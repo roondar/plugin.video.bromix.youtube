@@ -1,9 +1,36 @@
 __author__ = 'bromix'
 
-__all__ = ['create_path', 'create_uri_path', 'strip_html_from_text', 'print_items']
+__all__ = ['create_path', 'create_uri_path', 'strip_html_from_text', 'print_items', 'find_best_fit']
 
 import urllib
 import re
+
+
+def find_best_fit(data, compare_method=None):
+    result = None
+
+    last_fit = -1
+    if isinstance(data, dict):
+        for key in data.keys():
+            item = data[key]
+            fit = abs(compare_method(item))
+            if last_fit == -1 or fit < last_fit:
+                last_fit = fit
+                result = item
+                pass
+            pass
+        pass
+    elif isinstance(data, list):
+        for item in data:
+            fit = abs(compare_method(item))
+            if last_fit == -1 or fit < last_fit:
+                last_fit = fit
+                result = item
+                pass
+            pass
+        pass
+
+    return result
 
 
 def create_path(*args):

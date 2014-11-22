@@ -46,21 +46,13 @@ class VideoInfo(object):
                         '248': {'format': 'WEB', 'width': 1920, 'height': 1080, 'VOX': True},
                         '264': {'format': 'MP4', 'width': 1920, 'height': 1080, 'VOX': True}}
 
-    """
-    name of the method
-    signature = (?P<signature>.+\(.?\))
-
-
-    """
-
-    def __init__(self, youtube_client, cache_folder=''):
+    def __init__(self, youtube_client):
         self._youtube_client = youtube_client
-        self._cache_folder = cache_folder
         pass
 
     # TODO: can be improved
     def get_best_fitting_video_stream(self, video_id, video_height):
-        streams = self.get_stream_infos(video_id)
+        streams = self.load_stream_infos(video_id)
 
         result = None
         last_size = 0
@@ -75,21 +67,13 @@ class VideoInfo(object):
 
         return result
 
-    def get_stream_infos(self, video_id):
-        methods = [self._get_stream_infos_tv, self._get_stream_infos_web]
-
-        for method in methods:
-            streams = method(video_id)
-            if streams is not None:
-                return streams
-            pass
-
-        return {}
+    def load_stream_infos(self, video_id):
+        return self._method_get_video_info(video_id)
 
     def _get_stream_infos_web(self, video_id):
         stream_list = []
 
-        headers = {'Host': 'www._old_youtube.com',
+        headers = {'Host': 'www.youtube.com',
                    'Connection': 'keep-alive',
                    'User-Agent': 'Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/39.0.2171.36 Safari/537.36',
                    'Accept': '*/*',
@@ -100,7 +84,7 @@ class VideoInfo(object):
 
         params = {'v': video_id}
 
-        url = 'https://www._old_youtube.com/watch'
+        url = 'https://www.youtube.com/watch'
 
         result = requests.get(url, params=params, headers=headers, verify=False, allow_redirects=True)
         html = result.text
@@ -184,8 +168,8 @@ class VideoInfo(object):
 
         return stream_list
 
-    def _get_stream_infos_tv(self, video_id):
-        headers = {'Host': 'www._old_youtube.com',
+    def _method_get_video_info(self, video_id):
+        headers = {'Host': 'www.youtube.com',
                    'Connection': 'keep-alive',
                    'User-Agent': 'Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/39.0.2171.36 Safari/537.36',
                    'Accept': '*/*',
@@ -206,7 +190,7 @@ class VideoInfo(object):
                   'ps': 'leanback',
                   'el': 'leanback'}
 
-        url = 'https://www._old_youtube.com/get_video_info'
+        url = 'https://www.youtube.com/get_video_info'
 
         result = requests.get(url, params=params, headers=headers, verify=False, allow_redirects=True)
 
@@ -243,8 +227,6 @@ class VideoInfo(object):
                 return self._get_stream_infos_web(video_id)
 
             video_stream = {'url': url,
-                            'dashmpd': params['dashmpd'],
-                            'probe_url': params['probe_url'],
                             'format': itag_map[stream_map['itag']]}
 
             stream_list.append(video_stream)

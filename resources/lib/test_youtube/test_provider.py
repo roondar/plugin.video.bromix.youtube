@@ -8,6 +8,15 @@ import unittest
 
 
 class TestProvider(unittest.TestCase):
+    def test_play(self):
+        provider = Provider()
+
+        path = kodion.utils.create_path('play', 'puMYeBRTsHs')
+        context = kodion.Context(path=path)
+        result = provider.navigate(context)
+        items = result[0]
+        pass
+
     def test_on_channel_playlists(self):
         provider = Provider()
 

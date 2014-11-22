@@ -21,7 +21,7 @@ class TestVideoStreamExtractor(unittest.TestCase):
         vie = VideoInfo(self._client)
 
         # vevo
-        streams_tv = vie._get_stream_infos_tv('O-zpOMYRi0w')
+        streams_tv = vie._method_get_video_info('O-zpOMYRi0w')
         streams_web = vie._get_stream_infos_web('O-zpOMYRi0w')
         pass
 
@@ -29,7 +29,7 @@ class TestVideoStreamExtractor(unittest.TestCase):
         vie = VideoInfo(self._client)
 
         # free
-        streams_tv = vie._get_stream_infos_tv('Y0noFhiUh1U')
+        streams_tv = vie._method_get_video_info('Y0noFhiUh1U')
         streams_web = vie._get_stream_infos_web('Y0noFhiUh1U')
         pass
 

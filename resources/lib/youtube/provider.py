@@ -102,6 +102,22 @@ class Provider(kodion.AbstractProvider):
 
         return result
 
+    @kodion.RegisterProviderPath('^/play/(?P<video_id>.*)/$')
+    def _on_play(self, context, re_match):
+        vq = context.get_settings().get_video_quality()
+
+        def _compare(item):
+            return vq-item['format']['height']
+
+        video_id = re_match.group('video_id')
+
+        video_streams = self.get_client(context).get_video_streams(video_id)
+        video_stream = kodion.utils.find_best_fit(video_streams, _compare)
+
+        video_item = VideoItem(video_id,
+                               video_stream['url'])
+        return video_item
+
     def on_search(self, search_text, context, re_match):
         self._set_content_type(context, kodion.constants.content_type.EPISODES)
 

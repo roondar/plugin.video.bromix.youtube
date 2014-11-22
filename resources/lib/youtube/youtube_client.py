@@ -1,8 +1,9 @@
+__author__ = 'bromix'
+
 import json
 import requests
 
-__author__ = 'bromix'
-
+from .helper.video_info import VideoInfo
 
 class YouTubeClient(object):
     YOUTUBE_TV_KEY = 'AIzaSyAd-YEOqZz9nXVzGtn3KWzYLbLaajhqIDA'
@@ -17,6 +18,13 @@ class YouTubeClient(object):
         self._country = language.split('-')[1]
         self._max_results = items_per_page
         pass
+
+    def get_language(self):
+        return self._language
+
+    def get_video_streams(self, video_id):
+        video_info = VideoInfo(self)
+        return video_info.load_stream_infos(video_id)
 
     def get_playlists(self, channel_id, page_token=''):
         # prepare page token

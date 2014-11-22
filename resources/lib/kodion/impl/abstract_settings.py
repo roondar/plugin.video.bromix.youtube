@@ -60,7 +60,7 @@ class AbstractSettings(object):
         return self.get_int(constants.setting.ITEMS_PER_PAGE, 50, lambda x: (x + 1) * 5)
 
     def get_video_quality(self):
-        vq_dict = {0: 576,
+        vq_dict = {0: 480,
                    1: 720,
                    2: 1080,
                    3: 2160}
