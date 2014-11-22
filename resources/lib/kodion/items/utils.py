@@ -9,6 +9,25 @@ from .audio_item import AudioItem
 from .image_item import ImageItem
 
 
+def create_search_history_item(context, text):
+    search_history_item = DirectoryItem(text,
+                                        context.create_uri([constants.paths.SEARCH, 'query'], {'q': text}),
+                                        image=context.create_resource_path('media/search.png'))
+    search_history_item.set_fanart(context.get_fanart())
+    context_menu = [(context.localize(constants.localize.SEARCH_REMOVE),
+                     'RunPlugin(%s)' % context.create_uri([constants.paths.SEARCH, 'remove'], params={'q': text}))]
+    search_history_item.set_context_menu(context_menu)
+    return search_history_item
+
+
+def create_new_search_item(context):
+    new_search_item = DirectoryItem('[B]' + context.localize(constants.localize.SEARCH_NEW) + '[/B]',
+                                    context.create_uri([constants.paths.SEARCH, 'new']),
+                                    image=context.create_resource_path('media/search.png'))
+    new_search_item.set_fanart(context.get_fanart())
+    return new_search_item
+
+
 def create_search_item(context, alt_name=None, image=u''):
     name = alt_name
     if not name:
@@ -72,6 +91,10 @@ def from_json(json_data):
     if isinstance(json_data, basestring):
         json_data = json.loads(json_data)
     return _from_json(json_data)
+
+
+def to_jsons(base_item):
+    return json.dumps(to_json(base_item))
 
 
 def to_json(base_item):

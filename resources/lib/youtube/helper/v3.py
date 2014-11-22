@@ -4,7 +4,6 @@ __author__ = 'bromix'
 
 import re
 
-from resources.lib.kodion.utils import build_in_functions
 from resources.lib import kodion
 from resources.lib.kodion import items, iso8601
 
