@@ -94,6 +94,10 @@ class YouTubeClient(object):
                                                 'videoId': video_id}}}
         return self._perform_v3_request(method='POST', path='playlistItems', params=params, post_data=post_data)
 
+    def remove_video_from_playlist(self, playlist_id, playlist_item_id):
+        params = {'id': playlist_item_id}
+        return self._perform_v3_request(method='DELETE', path='playlistItems', params=params)
+
     def unsubscribe(self, subscription_id):
         params = {'id': subscription_id}
         return self._perform_v3_request(method='DELETE', path='subscriptions', params=params)

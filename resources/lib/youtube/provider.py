@@ -22,7 +22,8 @@ class Provider(kodion.AbstractProvider):
                  'youtube.liked.videos': 30508,
                  'youtube.history': 30509,
                  'youtube.my_subscriptions': 30510,
-                 'youtube.like': 30511}
+                 'youtube.like': 30511,
+                 'youtube.remove': 30108}
 
     def __init__(self):
         kodion.AbstractProvider.__init__(self)
@@ -176,6 +177,10 @@ class Provider(kodion.AbstractProvider):
 
         if method == 'add':
             self.get_client(context).add_video_to_playlist(playlist_id=playlist_id, video_id=video_id)
+            pass
+        elif method == 'remove':
+            self.get_client(context).remove_video_from_playlist(playlist_id=playlist_id, playlist_item_id=video_id)
+            context.get_ui().refresh_container()
             pass
 
         return True

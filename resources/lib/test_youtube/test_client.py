@@ -7,10 +7,11 @@ import unittest
 
 
 class TestClient(unittest.TestCase):
+    """
     def test_login(self):
         client = YouTubeClient()
 
-        token, expires = client.authenticate('bromixbromix@gmail.com', 'lzZcnn0xMC1zCBuAU83g')
+        token, expires = client.authenticate('bromixbromix@gmail.com', '')
         client = YouTubeClient(access_token=token)
         json_data = client.get_uploaded_videos_of_subscriptions()
         #json_data = client.get_activities(channel_id='home')
@@ -21,6 +22,7 @@ class TestClient(unittest.TestCase):
 
         token, expires = client.authenticate('bromixbromix@gmail.com', '')
         pass
+    """
 
     def test_get_video_streams(self):
         client = YouTubeClient()

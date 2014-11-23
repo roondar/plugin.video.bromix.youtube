@@ -1,9 +1,8 @@
-from resources.lib.youtube.helper.signature import Cipher, JsonScriptEngine
-
 __author__ = 'bromix'
 
 import unittest
 
+"""
 class TestCipher(unittest.TestCase):
     def setUp(self):
         pass
@@ -21,3 +20,4 @@ class TestCipher(unittest.TestCase):
         signature = jse.execute('299D15DC85986F6D8B7BC0E5655F758E6F14B1E33.50BCBEAE15DA02F131DAA96B640C57AAABAB20E20E2')
         pass
     pass
+"""

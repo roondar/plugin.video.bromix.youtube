@@ -6,10 +6,14 @@ from resources.lib.youtube.helper import resource_manager
 __author__ = 'bromix'
 
 
-def update_video_infos(provider, context, video_id_dict):
+def update_video_infos(provider, context, video_id_dict, playlist_item_id_dict=None):
     video_ids = list(video_id_dict.keys())
     if len(video_ids) == 0:
         return
+
+    if not playlist_item_id_dict:
+        playlist_item_id_dict = {}
+        pass
 
     resource_manager = provider.get_resource_manager(context)
     video_data = resource_manager.get_videos(video_ids)
@@ -105,6 +109,17 @@ def update_video_infos(provider, context, video_id_dict):
                     context_menu.append((context.localize(provider.LOCAL_MAP['youtube.like']),
                                          'RunPlugin(%s)' % context.create_uri(
                                              ['playlist', my_related_playlists['likes'], 'add', video_id])))
+                    pass
+
+                playlist_match = re.match('^/channel/mine/playlist/(?P<playlist_id>.*)/$', context.get_path())
+                if playlist_match:
+                    playlist_id = playlist_match.group('playlist_id')
+                    playlist_item_id = playlist_item_id_dict.get(video_id, '')
+                    if playlist_item_id:
+                        context_menu.append((context.localize(provider.LOCAL_MAP['youtube.remove']),
+                                             'RunPlugin(%s)' % context.create_uri(
+                                                 ['playlist', playlist_id, 'remove', playlist_item_id])))
+                        pass
                     pass
                 pass
 

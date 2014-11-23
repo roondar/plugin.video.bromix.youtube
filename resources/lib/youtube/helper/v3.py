@@ -4,9 +4,11 @@ from resources.lib import kodion
 from resources.lib.kodion import items
 from . import utils
 
+
 def _process_list_response(provider, context, json_data):
     video_id_dict = {}
     channel_item_dict = {}
+    playlist_item_id_dict = {}
 
     result = []
 
@@ -43,6 +45,10 @@ def _process_list_response(provider, context, json_data):
             image = snippet.get('thumbnails', {}).get('medium', {}).get('url', '')
 
             channel_id = snippet['channelId']
+            # we correct the channel id here so we know where we are
+            if context.get_path() == '/channel/mine/playlists/':
+                channel_id = 'mine'
+                pass
             subscription_item = items.DirectoryItem(title,
                                                     context.create_uri(
                                                         ['channel', channel_id, 'playlist', playlist_id]),
@@ -56,6 +62,10 @@ def _process_list_response(provider, context, json_data):
         elif yt_kind == u'youtube#playlistItem':
             snippet = yt_item['snippet']
             video_id = snippet['resourceId']['videoId']
+
+            # store the id of the playlistItem - for deleting this item we need this item
+            playlist_item_id_dict[video_id] = yt_item['id']
+
             title = snippet['title']
             image = snippet.get('thumbnails', {}).get('medium', {}).get('url', '')
             video_item = items.VideoItem(title,
@@ -136,7 +146,7 @@ def _process_list_response(provider, context, json_data):
             raise kodion.KodimonException("Unknown kind '%s'" % yt_kind)
         pass
 
-    utils.update_video_infos(provider, context, video_id_dict)
+    utils.update_video_infos(provider, context, video_id_dict, playlist_item_id_dict)
     utils.update_channel_infos(provider, context, channel_item_dict)
     return result
 
