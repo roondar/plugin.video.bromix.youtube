@@ -1,5 +1,5 @@
 1.0.0~alpha20 (2014-10-23)
-FIX: merge
+FIX: Git merge with master
 
 1.0.0~alpha19 (2014-10-23)
 UPD: complete rewrite
