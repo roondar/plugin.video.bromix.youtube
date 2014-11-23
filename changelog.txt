@@ -1,4 +1,5 @@
-1.0.0~alpha19 (2014-10-19)
+1.0.0~alpha19 (2014-10-23)
+UPD: complete rewrite
 UPD: switch to kodimon
 
 1.0.0~alpha18 (2014-08-31)
