@@ -12,7 +12,8 @@ class TestClient(unittest.TestCase):
 
         token, expires = client.authenticate('bromixbromix@gmail.com', 'lzZcnn0xMC1zCBuAU83g')
         client = YouTubeClient(access_token=token)
-        json_data = client.get_channels(channel_id='mine')
+        #json_data = client.get_uploaded_videos_of_subscriptions()
+        json_data = client.get_activities(channel_id='home')
         pass
 
     def test_authenticate(self):

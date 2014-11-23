@@ -76,6 +76,14 @@ class YouTubeClient(object):
         video_info = VideoInfo(context, self)
         return video_info.load_stream_infos(video_id)
 
+    def get_uploaded_videos_of_subscriptions(self, start_index=0):
+        params = {'max-results': str(self._max_results),
+                  'alt': 'json'}
+        if start_index>0:
+            params['start-index'] = str(start_index)
+            pass
+        return self._perform_v2_request(method='GET', path='feeds/api/users/default/newsubscriptionvideos', params=params)
+
     def unsubscribe(self, subscription_id):
         params = {'id': subscription_id}
         return self._perform_v3_request(method='DELETE', path='subscriptions', params=params)
@@ -110,8 +118,25 @@ class YouTubeClient(object):
 
         return self._perform_v3_request(method='GET', path='subscriptions', params=params)
 
+    def get_activities(self, channel_id, page_token=''):
+        params = {'part': 'snippet,contentDetails',
+                  'maxResults': str(self._max_results)}
+        if channel_id =='home':
+            params['home'] = 'true'
+            pass
+        elif channel_id == 'mine':
+            params['mine'] = 'true'
+            pass
+        else:
+            params['channelId'] = channel_id
+            pass
+        if page_token:
+            params['pageToken'] = page_token
+            pass
+
+        return self._perform_v3_request(method='GET', path='activities', params=params)
+
     def get_playlists(self, channel_id, page_token=''):
-        # prepare params
         params = {'part': 'snippet,contentDetails',
                   'maxResults': str(self._max_results)}
         if channel_id != 'mine':
@@ -235,6 +260,53 @@ class YouTubeClient(object):
         result = None
         if method == 'GET':
             result = requests.get(_url, params=_params, headers=_headers, verify=False, allow_redirects=allow_redirects)
+        elif method == 'POST':
+            _headers['content-type'] = 'application/json'
+            result = requests.post(_url, data=json.dumps(post_data), params=_params, headers=_headers, verify=False,
+                                   allow_redirects=allow_redirects)
+        elif method == 'PUT':
+            result = requests.put(_url, data=json.dumps(_post_data), params=_params, headers=_headers, verify=False,
+                                  allow_redirects=allow_redirects)
+        elif method == 'DELETE':
+            result = requests.delete(_url, params=_params, headers=_headers, verify=False,
+                                     allow_redirects=allow_redirects)
+            pass
+
+        if result is None:
+            return {}
+
+        if method != 'DELETE':
+            return result.json()
+        pass
+
+    def _perform_v2_request(self, method='GET', headers=None, path=None, post_data=None, params=None,
+                            allow_redirects=True):
+        # params
+        if not params:
+            params = {}
+            pass
+        _params = {'key': self._key}
+        _params.update(params)
+
+        # headers
+        if not headers:
+            headers = {}
+            pass
+        _headers = {'Host': 'gdata.youtube.com',
+                    'X-GData-Key': 'key=%s' % self._key,
+                    'GData-Version': '2',
+                    'User-Agent': 'Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/39.0.2171.36 Safari/537.36'}
+        if self._access_token:
+            _headers['Authorization'] = 'Bearer %s' % self._access_token
+            pass
+        _headers.update(headers)
+
+        # url
+        url = 'https://gdata.youtube.com/%s/' % path.strip('/')
+
+        result = None
+        if method == 'GET':
+            result = requests.get(url, params=_params, headers=_headers, verify=False, allow_redirects=allow_redirects)
         elif method == 'POST':
             _headers['content-type'] = 'application/json'
             result = requests.post(_url, data=json.dumps(post_data), params=_params, headers=_headers, verify=False,

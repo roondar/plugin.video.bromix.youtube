@@ -15,7 +15,10 @@ class Provider(kodion.AbstractProvider):
                  'youtube.subscriptions': 30504,
                  'youtube.unsubscribe': 30505,
                  'youtube.subscribe': 30506,
-                 'youtube.my_channel': 30507}
+                 'youtube.my_channel': 30507,
+                 'youtube.watch_later': 30107,
+                 'youtube.liked.videos': 30508,
+                 'youtube.history': 30509}
 
     def __init__(self):
         kodion.AbstractProvider.__init__(self)
@@ -28,7 +31,7 @@ class Provider(kodion.AbstractProvider):
     def get_client(self, context):
         # set the items per page (later)
         items_per_page = context.get_settings().get_items_per_page()
-        #TODO: get language or region to configure the client correctly
+        # TODO: get language or region to configure the client correctly
 
         access_manager = context.get_access_manager()
         access_token = access_manager.get_access_token()
@@ -219,6 +222,8 @@ class Provider(kodion.AbstractProvider):
         return result
 
     def on_root(self, context, re_match):
+        resource_manager = self.get_resource_manager(context)
+
         result = []
 
         # search
@@ -230,12 +235,51 @@ class Provider(kodion.AbstractProvider):
         # subscriptions
         self.get_client(context)
         if self._is_logged_in:
+            playlists = resource_manager.get_related_playlists(channel_id='mine')
+
             # my channel
             my_channel_item = DirectoryItem(context.localize(self.LOCAL_MAP['youtube.my_channel']),
                                             context.create_uri(['channel', 'mine']),
                                             image=context.create_resource_path('media', 'channel.png'))
             my_channel_item.set_fanart(self.get_fanart(context))
             result.append(my_channel_item)
+
+            # watch later
+            if 'watchLater' in playlists:
+                watch_later_item = DirectoryItem(context.localize(self.LOCAL_MAP['youtube.watch_later']),
+                                                 context.create_uri(
+                                                     ['channel', 'mine', 'playlist', playlists['watchLater']]),
+                                                 context.create_resource_path('media', 'watch_later.png'))
+                watch_later_item.set_fanart(self.get_fanart(context))
+                result.append(watch_later_item)
+                pass
+
+            # liked videos
+            if 'likes' in playlists:
+                liked_videos_item = DirectoryItem(context.localize(self.LOCAL_MAP['youtube.liked.videos']),
+                                                  context.create_uri(
+                                                      ['channel', 'mine', 'playlist', playlists['likes']]),
+                                                  context.create_resource_path('media', 'likes.png'))
+                liked_videos_item.set_fanart(self.get_fanart(context))
+                result.append(liked_videos_item)
+                pass
+
+            # history
+            if 'watchHistory' in playlists:
+                watch_history_item = DirectoryItem(context.localize(self.LOCAL_MAP['youtube.history']),
+                                                   context.create_uri(
+                                                       ['channel', 'mine', 'playlist', playlists['watchHistory']]),
+                                                   context.create_resource_path('media', 'history.png'))
+                watch_history_item.set_fanart(self.get_fanart(context))
+                result.append(watch_history_item)
+                pass
+
+            # (my playlists)
+            playlists_item = DirectoryItem(context.localize(self.LOCAL_MAP['youtube.playlists']),
+                                           context.create_uri(['channel', 'mine', 'playlists']),
+                                           context.create_resource_path('media', 'playlist.png'))
+            playlists_item.set_fanart(self.get_fanart(context))
+            result.append(playlists_item)
 
             # subscriptions
             subscriptions_item = DirectoryItem(context.localize(self.LOCAL_MAP['youtube.subscriptions']),
