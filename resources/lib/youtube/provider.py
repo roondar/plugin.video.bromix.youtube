@@ -1,10 +1,12 @@
+from resources.lib.youtube.helper import v2
+
 __author__ = 'bromix'
 
 from resources.lib import kodion
 from resources.lib.kodion.utils import FunctionCache
 from resources.lib.kodion.items import *
 from .youtube_client import YouTubeClient
-from .helper import v3, ResourceManager
+from .helper import v3, v2, ResourceManager
 from .youtube_exceptions import YouTubeException, LoginException
 
 
@@ -18,7 +20,8 @@ class Provider(kodion.AbstractProvider):
                  'youtube.my_channel': 30507,
                  'youtube.watch_later': 30107,
                  'youtube.liked.videos': 30508,
-                 'youtube.history': 30509}
+                 'youtube.history': 30509,
+                 'youtube.my_subscriptions': 30510}
 
     def __init__(self):
         kodion.AbstractProvider.__init__(self)
@@ -175,6 +178,17 @@ class Provider(kodion.AbstractProvider):
             pass
         return True
 
+    @kodion.RegisterProviderPath('^/my_subscriptions/$')
+    def _on_mysubscriptions(self, context, re_match):
+        self._set_content_type(context, kodion.constants.content_type.EPISODES)
+
+        result = []
+
+        json_data = self.get_client(context).get_uploaded_videos_of_subscriptions()
+        result.extend(v2.response_to_items(self, context, json_data))
+
+        return result
+
     @kodion.RegisterProviderPath('^/subscriptions/$')
     def _on_subscriptions(self, context, re_match):
         result = []
@@ -222,9 +236,19 @@ class Provider(kodion.AbstractProvider):
         return result
 
     def on_root(self, context, re_match):
+        self.get_client(context)
         resource_manager = self.get_resource_manager(context)
 
         result = []
+
+        if self._is_logged_in:
+            # my subscription
+            my_subscriptions_item = DirectoryItem(context.localize(self.LOCAL_MAP['youtube.my_subscriptions']),
+                                                  context.create_uri(['my_subscriptions']),
+                                                  context.create_resource_path('media', 'new_uploads.png'))
+            my_subscriptions_item.set_fanart(self.get_fanart(context))
+            result.append(my_subscriptions_item)
+            pass
 
         # search
         search_item = kodion.items.create_search_item(context)
@@ -233,7 +257,6 @@ class Provider(kodion.AbstractProvider):
         result.append(search_item)
 
         # subscriptions
-        self.get_client(context)
         if self._is_logged_in:
             playlists = resource_manager.get_related_playlists(channel_id='mine')
 
