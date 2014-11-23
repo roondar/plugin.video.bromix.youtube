@@ -1,42 +1,21 @@
 <?xml version="1.0" encoding="utf-8" standalone="yes"?>
 <settings>
-	<!-- General -->
-	<category label="30514">
-		<setting id="username" type="text" label="30512" />
-	    <setting id="password" type="text" option="hidden" label="30513" />
-	    <setting type="sep" />
-		<setting id="showFanart" type="bool" label="30500" default="true"/>
-		<setting id="showUploadInfo" type="bool" label="30520" default="true"/>
-		<setting type="sep" />
-		<setting id="resultPerPage" type="enum" label="30510" values="5|10|15|20|25|30|35|40|45|50" default="9" />
-	</category>
-	
-	<!-- Playback -->
-	<category label="30518">
-		<setting id="videoQuality" type="enum" label="30501" lvalues="30502|30503|30504" default="1" />
-		<setting id="allow3D" type="bool" label="30519" default="false" />
-		<setting type="sep" />
-		<setting id="automaticWatchLater" type="bool" label="30522" default="true" />
-	</category>
-	
-	<!-- Search -->
-	<category label="30000">
-		<setting id="search.history.size" type="enum" label="30523" values="0|10|20|30|40|50" default="5" />
-		<setting type="sep" />
-		<setting id="search.find.videos" type="bool" label="30515" default="true"/>
-		<setting id="search.find.channels" type="bool" label="30516" default="true"/>
-		<setting id="search.find.playlists" type="bool" label="30517" default="false"/>
-	</category>
-	
-	<!-- Menu -->
-	<category label="30524">
-		<setting id="menu.root.my_channel.show" type="bool" label="30525" default="true" />
-		<setting id="menu.root.history.show" type="bool" label="30521" default="true" />
-		<setting id="menu.root.watch_later.show" type="bool" label="30526" default="true" />
-		<setting id="menu.root.playlists.show" type="bool" label="30527" default="true" />
-		<setting id="menu.root.liked_videos.show" type="bool" label="30528" default="true" />
-		<setting id="menu.root.browse_channels.show" type="bool" label="30529" default="true" />
-		<setting type="sep" />
-		<setting id="menu.channel.playlists.show" type="bool" label="30511" default="true"/>
-	</category>
+    <!-- kodion General -->
+    <category label="30000">
+
+        <!-- kodion Login -->
+        <setting id="kodion.login.username" type="text" label="30001"/>
+        <setting id="kodion.login.password" type="text" label="30002" option="hidden"/>
+        <setting type="sep" />
+
+        <!-- kodion Visual -->
+        <setting id="kodion.video.quality" type="enum" label="30010" lvalues="30011|30012" default="1" />
+        <setting type="sep" />
+        <setting id="kodion.fanart.show" type="bool" label="30021" default="true"/>
+        <setting id="youtube.channel.fanart.show" type="bool" label="30503" enable="eq(-1,true)" default="true"/>
+        <setting id="kodion.content.max_per_page" type="enum" label="30022" values="5|10|15|20|25|30|35|40|45|50" default="9" />
+        <setting type="sep" />
+        <setting id="kodion.search.size" type="enum" label="30023" values="0|10|20|30|40|50" default="5" />
+        <setting id="kodion.cache.size" type="slider" label="30024" values="1|2|20|30|40|50" default="5" range="1,25" option="int"/>
+    </category>
 </settings>

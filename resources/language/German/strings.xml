@@ -1,50 +1,45 @@
 <?xml version="1.0" encoding="utf-8" standalone="yes"?>
 <strings>
-	<!-- Global strings -->
-	<string id="30000">Suche</string>
-	<string id="30001">Kanäle finden</string>
-	<string id="30002">Nächste Seite</string>
-	<string id="30003">Playlists</string>
-	<string id="30004">ABOS</string>
-	<string id="30005">Später ansehen</string>
-	<string id="30006">Verlauf</string>
-	<string id="30007">Meine Abos</string>
-	<string id="30008">Veröffentlicht am</string>
-	<string id="30009">Kanal</string>
-	<string id="30010">Mein Kanal</string>
-	<string id="30011">Videos mit positiven Bewertungen</string>
-	<string id="30012">[B]Entfernen[/B]</string>
-	<string id="30013">Neue Suche...</string>
-	<string id="30014">Positiv bewerten</string>
-	<string id="30015">Abonieren</string>
-	<string id="30016">Abmelden</string>
-	<string id="30017">[B]Gehe zu[/B] '%s'</string>
-	
-	<!-- Settings -->
-	<string id="30500">Fanart anzeigen</string>
-	<string id="30501">Video Quality</string>
-	<string id="30502">SD</string>
-	<string id="30503">HD (720p)</string>
-	<string id="30504">Full HD (1080p)</string>
-	
-	<string id="30510">Einträge pro Seite</string>
-	<string id="30511">'Playlists' eines Kanals anzeigen</string>
-	<string id="30512">Benutzername</string>
-	<string id="30513">Passwort</string>
-	<string id="30514">Allgemein</string>
-	<string id="30515">Suche nach Videos</string>
-	<string id="30516">Suche nach Kanälen</string>
-	<string id="30517">Suche nach Playlisten</string>
-	<string id="30518">Wiedergabe</string>
-	<string id="30519">3D zulassen</string>
-	<string id="30520">Upload-Info in der Beschreibung anzeigen</string>
-	<string id="30521">'Verlauf' anzeigen</string>
-	<string id="30522">Automatisches Entfernen aus 'Später ansehen'</string>
-	<string id="30523">Größe der Suchhistorie</string>
-	<string id="30524">Menüeinträge</string>
-	<string id="30525">'Mein Kanal' anzeigen</string>
-	<string id="30526">'Später ansehen' anzeigen</string>
-	<string id="30527">'Playlists' anzeigen</string>
-	<string id="30528">'Videos mit positiven Bewertungen' anzeigen</string>
-	<string id="30529">'Kanäle finden' anzeigen</string>
+    <!-- Kodimon Settings -->
+    <string id="30000">Allgemein</string>
+    <string id="30001">Benutzername</string>
+    <string id="30002">Passwort</string>
+
+    <string id="30010">Video Qualität</string>
+    <string id="30011">SD</string>
+	<string id="30012">HD</string>
+	<string id="30013">Full HD</string>
+    <string id="30014">Ultra HD</string>
+    <string id="30020">Allow 3D</string>
+    <string id="30021">Fanart anzeigen</string>
+    <string id="30022">Einträge pro Seite</string>
+    <string id="30023">Größe der Suchhistorie</string>
+    <string id="30024">Cache-Größe (MB)</string>
+
+    <!-- Kodimon Common -->
+    <string id="30100">Favoriten</string>
+    <string id="30101">Zu Addon Favs hinzufügen</string>
+    <string id="30102">Suche</string>
+    <string id="30103">Mediathek</string>
+    <string id="30104">Highlights</string>
+    <string id="30105">Archiv</string>
+    <string id="30106">Nächste Seite (%d)</string>
+    <string id="30107">Später ansehen</string>
+    <string id="30108">Entfernen</string>
+    <string id="30109">Neueste Videos</string>
+    <string id="30110">Neue Suche</string>
+
+    <!-- YouTube -->
+    <string id="30500">Kanäle</string>
+    <string id="30501">Playlisten</string>
+    <string id="30502">Zu %CHANNEL%</string>
+    <string id="30503">Kanal-Fanart anzeigen</string>
+    <string id="30504">ABOS</string>
+    <string id="30505">Abmelden</string>
+    <string id="30506">Abonieren</string>
+    <string id="30507">Mein Kanal</string>
+    <string id="30508">Liked Videos</string>
+    <string id="30509">Verlauf</string>
+    <string id="30510">Meine abos</string>
+    <string id="30511">Gefällt mir</string>
 </strings>
