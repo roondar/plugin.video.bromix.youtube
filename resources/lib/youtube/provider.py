@@ -243,9 +243,10 @@ class Provider(kodion.AbstractProvider):
 
         if self._is_logged_in:
             # my subscription
-            my_subscriptions_item = DirectoryItem(context.localize(self.LOCAL_MAP['youtube.my_subscriptions']),
-                                                  context.create_uri(['my_subscriptions']),
-                                                  context.create_resource_path('media', 'new_uploads.png'))
+            my_subscriptions_item = DirectoryItem(
+                '[B]' + context.localize(self.LOCAL_MAP['youtube.my_subscriptions']) + '[/B]',
+                context.create_uri(['my_subscriptions']),
+                context.create_resource_path('media', 'new_uploads.png'))
             my_subscriptions_item.set_fanart(self.get_fanart(context))
             result.append(my_subscriptions_item)
             pass
