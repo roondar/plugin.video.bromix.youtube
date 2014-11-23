@@ -1,4 +1,4 @@
-from resources.lib.youtube import Provider
+from resources.lib.youtube import Provider, YouTubeClient
 
 __author__ = 'bromix'
 
@@ -8,6 +8,16 @@ import unittest
 
 
 class TestProvider(unittest.TestCase):
+    def test_subscriptions(self):
+        provider = Provider()
+        path = kodion.utils.create_path('subscriptions')
+        context = kodion.Context(path=path)
+        context.get_settings().set_string(kodion.constants.setting.LOGIN_USERNAME, 'bromixbromix@gmail.com')
+        context.get_settings().set_string(kodion.constants.setting.LOGIN_PASSWORD, 'lzZcnn0xMC1zCBuAU83g')
+        result = provider.navigate(context)
+        items = result[0]
+        pass
+
     def test_play(self):
         provider = Provider()
 

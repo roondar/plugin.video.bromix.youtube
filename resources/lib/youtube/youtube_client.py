@@ -1,4 +1,6 @@
+import urlparse
 from resources.lib.kodion.exceptions import KodimonException
+from resources.lib.youtube.youtube_exceptions import LoginException
 
 __author__ = 'bromix'
 
@@ -11,7 +13,7 @@ from .helper.video_info import VideoInfo
 class YouTubeClient(object):
     YOUTUBE_TV_KEY = 'AIzaSyAd-YEOqZz9nXVzGtn3KWzYLbLaajhqIDA'
 
-    def __init__(self, key='', language='en-US', items_per_page=50):
+    def __init__(self, key='', language='en-US', items_per_page=50, access_token=''):
         self._key = self.YOUTUBE_TV_KEY
         if key:
             self._key = key
@@ -19,8 +21,50 @@ class YouTubeClient(object):
 
         self._language = language
         self._country = language.split('-')[1]
+        self._access_token = access_token
         self._max_results = items_per_page
         pass
+
+    def authenticate(self, username, password):
+        headers = {'device': '38c6ee9a82b8b10a',
+                   'app': 'com.google.android.youtube',
+                   'User-Agent': 'GoogleAuth/1.4 (GT-I9100 KTU84Q)',
+                   'content-type': 'application/x-www-form-urlencoded',
+                   'Host': 'android.clients.google.com',
+                   'Connection': 'Keep-Alive',
+                   'Accept-Encoding': 'gzip'}
+
+        post_data = {'device_country': 'de',
+                     'operatorCountry': 'de',
+                     'lang': 'en_US',
+                     'sdk_version': '19',
+                     #'google_play_services_version': '6188034',
+                     'accountType': 'HOSTED_OR_GOOGLE',
+                     'Email': username.encode('utf-8'),
+                     'service': 'oauth2:https://www.googleapis.com/auth/youtube https://www.googleapis.com/auth/youtube.force-ssl https://www.googleapis.com/auth/plus.me https://www.googleapis.com/auth/emeraldsea.mobileapps.doritos.cookie https://www.googleapis.com/auth/plus.stream.read https://www.googleapis.com/auth/plus.stream.write https://www.googleapis.com/auth/plus.pages.manage https://www.googleapis.com/auth/identity.plus.page.impersonation',
+                     'source': 'android',
+                     'androidId': '38c6ee9a82b8b10a',
+                     'app': 'com.google.android.youtube',
+                     #'client_sig': '24bb24c05e47e0aefa68a58a766179d9b613a600',
+                     'callerPkg': 'com.google.android.youtube',
+                     #'callerSig': '24bb24c05e47e0aefa68a58a766179d9b613a600',
+                     'Passwd': password.encode('utf-8')}
+
+        # url
+        url = 'https://android.clients.google.com/auth'
+
+        result = requests.post(url, data=post_data, headers=headers, verify=False)
+        if result.status_code != requests.codes.ok:
+            raise LoginException('Login Failed')
+
+        lines = result.text.replace('\n', '&')
+        params = dict(urlparse.parse_qsl(lines))
+        token = params.get('Auth', '')
+        expires = int(params.get('Expiry', -1))
+        if not token or expires == -1:
+            raise LoginException('Failed to get token')
+
+        return token, expires
 
     def get_language(self):
         return self._language
@@ -29,12 +73,34 @@ class YouTubeClient(object):
         video_info = VideoInfo(context, self)
         return video_info.load_stream_infos(video_id)
 
-    def get_playlists(self, channel_id, page_token=''):
-        # prepare page token
-        if not page_token:
-            page_token = ''
+    def unsubscribe(self, subscription_id):
+        params = {'id': subscription_id}
+        return self._perform_v3_request(method='DELETE', path='subscriptions', params=params)
+
+    def get_subscription(self, channel_id, order='alphabetical', page_token=''):
+        """
+
+        :param channel_id: [channel-id|'mine']
+        :param order: ['alphabetical'|'relevance'|'unread']
+        :param page_token:
+        :return:
+        """
+        params = {'part': 'snippet,contentDetails',
+                  'maxResults': str(self._max_results),
+                  'order': order}
+        if channel_id == 'mine':
+            params['mine'] = 'true'
+            pass
+        else:
+            params['channelId'] = channel_id
+            pass
+        if page_token:
+            params['pageToken'] = page_token
             pass
 
+        return self._perform_v3_request(method='GET', path='subscriptions', params=params)
+
+    def get_playlists(self, channel_id, page_token=''):
         # prepare params
         params = {'part': 'snippet,contentDetails',
                   'maxResults': str(self._max_results),
@@ -46,11 +112,6 @@ class YouTubeClient(object):
         return self._perform_v3_request(method='GET', path='playlists', params=params)
 
     def get_playlist_items(self, playlist_id, page_token=''):
-        # prepare page token
-        if not page_token:
-            page_token = ''
-            pass
-
         # prepare params
         params = {'part': 'snippet',
                   'maxResults': str(self._max_results),
@@ -143,13 +204,9 @@ class YouTubeClient(object):
         _headers = {'Host': 'www.googleapis.com',
                     'User-Agent': 'Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/39.0.2171.36 Safari/537.36',
                     'X-JavaScript-User-Agent': 'Google APIs Explorer'}
-
-        # postdata - IS ALWAYS JSON!
-        if not post_data:
-            post_data = {}
+        if self._access_token:
+            _headers['Authorization'] = 'Bearer %s' % self._access_token
             pass
-        _post_data = {}
-        _post_data.update(post_data)
 
         _headers.update(headers)
 
@@ -166,13 +223,15 @@ class YouTubeClient(object):
             result = requests.put(_url, data=json.dumps(_post_data), params=_params, headers=_headers, verify=False,
                                   allow_redirects=allow_redirects)
         elif method == 'DELETE':
-            result = requests.delete(_url, data=json.dumps(_post_data), params=_params, headers=_headers, verify=False,
+            result = requests.delete(_url, params=_params, headers=_headers, verify=False,
                                      allow_redirects=allow_redirects)
             pass
 
         if result is None:
             return {}
 
-        return result.json()
+        if method != 'DELETE':
+            return result.json()
+        pass
 
     pass

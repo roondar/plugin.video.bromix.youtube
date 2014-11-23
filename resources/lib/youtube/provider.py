@@ -5,24 +5,50 @@ from resources.lib.kodion.utils import FunctionCache
 from resources.lib.kodion.items import *
 from .youtube_client import YouTubeClient
 from .helper import v3, ResourceManager
-from .youtube_exception import YouTubeException
+from .youtube_exceptions import YouTubeException, LoginException
 
 
 class Provider(kodion.AbstractProvider):
     LOCAL_MAP = {'youtube.channels': 30500,
                  'youtube.playlists': 30501,
-                 'youtube.go_to_channel': 30502}
+                 'youtube.go_to_channel': 30502,
+                 'youtube.subscriptions': 30504,
+                 'youtube.unsubscribe': 30505}
 
     def __init__(self):
         kodion.AbstractProvider.__init__(self)
 
         self._client = None
         self._resource_manager = None
+        self._is_logged_in = False
         pass
 
     def get_client(self, context):
+        items_per_page = context.get_settings().get_items_per_page()
+
+        access_manager = context.get_access_manager()
+        access_token = access_manager.get_access_token()
+        if access_manager.is_new_login_credential() or not access_token or access_manager.is_access_token_expired():
+            access_manager.update_access_token('')  # in case of an old access_token
+            self._client = None
+            pass
+
         if not self._client:
-            self._client = YouTubeClient()
+            if access_manager.has_login_credentials():
+                username, password = access_manager.get_login_credentials()
+                access_token = access_manager.get_access_token()
+
+                # create a new access_token
+                if not access_token:
+                    access_token, expires = YouTubeClient().authenticate(username, password)
+                    access_manager.update_access_token(access_token, expires)
+                    pass
+
+                self._is_logged_in = access_token != ''
+                self._client = YouTubeClient(items_per_page=items_per_page, access_token=access_token)
+            else:
+                self._client = YouTubeClient(items_per_page=items_per_page)
+                pass
             pass
 
         return self._client
@@ -62,7 +88,6 @@ class Provider(kodion.AbstractProvider):
         result = []
 
         channel_id = re_match.group('channel_id')
-        page = int(context.get_param('page', 1))
         page_token = context.get_param('page_token', '')
 
         json_data = context.get_function_cache().get(FunctionCache.ONE_HOUR, self.get_client(context).get_playlists,
@@ -126,6 +151,28 @@ class Provider(kodion.AbstractProvider):
 
         return False
 
+    @kodion.RegisterProviderPath('^/subscription/(?P<method>.*)/(?P<subscription_id>.*)/$')
+    def _on_subscription(self, context, re_match):
+        method = re_match.group('method')
+        subscription_id = re_match.group('subscription_id')
+
+        if method == 'remove':
+            self.get_client(context).unsubscribe(subscription_id)
+            context.get_ui().refresh_container()
+            pass
+        return True
+
+    @kodion.RegisterProviderPath('^/subscriptions/$')
+    def _on_subscriptions(self, context, re_match):
+        result = []
+
+        page_token = context.get_param('page_token', '')
+        json_data = context.get_function_cache().get(FunctionCache.ONE_MINUTE, self.get_client(context).get_subscription,
+                                                     'mine', page_token=page_token)
+        result.extend(v3.response_to_items(self, context, json_data))
+
+        return result
+
     def on_search(self, search_text, context, re_match):
         self._set_content_type(context, kodion.constants.content_type.EPISODES)
 
@@ -170,6 +217,17 @@ class Provider(kodion.AbstractProvider):
         search_item.set_fanart(self.get_fanart(context))
         result.append(search_item)
 
+        # subscriptions
+        self.get_client(context)
+        if self._is_logged_in:
+            # subscriptions
+            subscriptions_item = DirectoryItem(context.localize(self.LOCAL_MAP['youtube.subscriptions']),
+                                               context.create_uri(['subscriptions']),
+                                               image=context.create_resource_path('media', 'channel.png'))
+            subscriptions_item.set_fanart(self.get_fanart(context))
+            result.append(subscriptions_item)
+            pass
+
         return result
 
     def _set_content_type(self, context, content_type):
@@ -178,4 +236,12 @@ class Provider(kodion.AbstractProvider):
             pass
         pass
 
+    def handle_exception(self, context, exception_to_handle):
+        if isinstance(exception_to_handle, LoginException):
+            context.get_access_manager().update_access_token('')
+            context.get_ui().show_notification('Login Failed')
+            context.get_ui().open_settings()
+            return False
+
+        return True
     pass

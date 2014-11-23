@@ -239,7 +239,7 @@ class AbstractProvider(object):
 
         return False
 
-    def handle_exception(self, exception_to_handle):
+    def handle_exception(self, context, exception_to_handle):
         return True
 
     pass

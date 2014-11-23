@@ -6,7 +6,7 @@ import re
 
 import requests
 
-from ..youtube_exception import YouTubeException
+from ..youtube_exceptions import YouTubeException
 from .signature.cipher import Cipher
 
 

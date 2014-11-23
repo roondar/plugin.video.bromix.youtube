@@ -60,7 +60,7 @@ class AbstractSettings(object):
         return self.get_int(constants.setting.ITEMS_PER_PAGE, 50, lambda x: (x + 1) * 5)
 
     def get_video_quality(self):
-        vq_dict = {0: 480,
+        vq_dict = {0: 480,  # 576 seems not to work well
                    1: 720,
                    2: 1080,
                    3: 2160}
@@ -71,6 +71,6 @@ class AbstractSettings(object):
         return self.get_bool(constants.setting.SHOW_FANART, True)
 
     def get_search_history_size(self):
-        return self.get_int(constants.setting.SEARCH_SIZE, 50, lambda x: x*10)
+        return self.get_int(constants.setting.SEARCH_SIZE, 50, lambda x: x * 10)
 
     pass

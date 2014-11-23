@@ -28,7 +28,8 @@ def _update_video_infos(provider, context, video_id_dict):
                                 '#(?P<episode>\d+)',
                                 'Ep.(?P<episode>\d+)',
                                 '\[(?P<episode>\d+)\]',
-                                'S(?P<season>\d+)E(?P<episode>\d+)']
+                                'S(?P<season>\d+)E(?P<episode>\d+)',
+                                'Season (?P<season>\d+)(.*)+Episode (?P<episode>\d+)']
         for regex in season_episode_regex:
             re_match = re.search(regex, video_item.get_name())
             if re_match:
@@ -113,27 +114,46 @@ def _process_list_response(provider, context, json_data):
 
     for yt_item in yt_items:
         yt_kind = yt_item.get('kind', '')
-        if yt_kind == u'youtube#playlist':
+        if yt_kind == u'youtube#subscription':
+            snippet = yt_item['snippet']
+            image = snippet.get('thumbnails', {}).get('high', {}).get('url', '')
+            channel_id = snippet['resourceId']['channelId']
+            subscription_item = items.DirectoryItem(snippet['title'],
+                                                    context.create_uri(['channel', channel_id]),
+                                                    image=image)
+            subscription_item.set_fanart(provider.get_fanart(context))
+
+            subscription_id = yt_item['id']
+            context_unsubscribe = (context.localize(provider.LOCAL_MAP['youtube.unsubscribe']),
+                                   'RunPlugin(%s)' % context.create_uri(['subscription', 'remove', subscription_id]))
+            subscription_item.set_context_menu([context_unsubscribe])
+            result.append(subscription_item)
+
+            if not channel_id in channel_item_dict:
+                channel_item_dict[channel_id] = []
+            channel_item_dict[channel_id].append(subscription_item)
+            pass
+        elif yt_kind == u'youtube#playlist':
             playlist_id = yt_item['id']
             snippet = yt_item['snippet']
             title = snippet['title']
-            image = snippet.get('thumbnails', {}).get('medium', {}).get('url', '')
+            image = snippet.get('thumbnails', {}).get('high', {}).get('url', '')
 
-            playlist_item = items.DirectoryItem('[PL]' + title,
-                                                context.create_uri(['playlist', playlist_id]),
-                                                image=image)
-            playlist_item.set_fanart(provider.get_fanart(context))
-            result.append(playlist_item)
+            subscription_item = items.DirectoryItem('[PL]' + title,
+                                                    context.create_uri(['playlist', playlist_id]),
+                                                    image=image)
+            subscription_item.set_fanart(provider.get_fanart(context))
+            result.append(subscription_item)
             channel_id = snippet['channelId']
             if not channel_id in channel_item_dict:
                 channel_item_dict[channel_id] = []
-            channel_item_dict[channel_id].append(playlist_item)
+            channel_item_dict[channel_id].append(subscription_item)
             pass
         elif yt_kind == u'youtube#playlistItem':
             snippet = yt_item['snippet']
             video_id = snippet['resourceId']['videoId']
             title = snippet['title']
-            image = snippet.get('thumbnails', {}).get('medium', {}).get('url', '')
+            image = snippet.get('thumbnails', {}).get('high', {}).get('url', '')
             video_item = items.VideoItem(title,
                                          context.create_uri(['play', video_id]),
                                          image=image)
@@ -154,7 +174,7 @@ def _process_list_response(provider, context, json_data):
                 video_id = yt_item['id']['videoId']
                 snippet = yt_item['snippet']
                 title = snippet['title']
-                image = snippet.get('thumbnails', {}).get('medium', {}).get('url', '')
+                image = snippet.get('thumbnails', {}).get('high', {}).get('url', '')
                 video_item = items.VideoItem(title,
                                              context.create_uri(['play', video_id]),
                                              image=image)
@@ -172,23 +192,23 @@ def _process_list_response(provider, context, json_data):
                 playlist_id = yt_item['id']['playlistId']
                 snippet = yt_item['snippet']
                 title = snippet['title']
-                image = snippet.get('thumbnails', {}).get('medium', {}).get('url', '')
+                image = snippet.get('thumbnails', {}).get('high', {}).get('url', '')
 
-                playlist_item = items.DirectoryItem('[PL]' + title,
-                                                    context.create_uri(['playlist', playlist_id]),
-                                                    image=image)
-                playlist_item.set_fanart(provider.get_fanart(context))
-                result.append(playlist_item)
+                subscription_item = items.DirectoryItem('[PL]' + title,
+                                                        context.create_uri(['playlist', playlist_id]),
+                                                        image=image)
+                subscription_item.set_fanart(provider.get_fanart(context))
+                result.append(subscription_item)
                 channel_id = snippet['channelId']
                 if not channel_id in channel_item_dict:
                     channel_item_dict[channel_id] = []
-                channel_item_dict[channel_id].append(playlist_item)
+                channel_item_dict[channel_id].append(subscription_item)
                 pass
             elif yt_kind == 'youtube#channel':
                 channel_id = yt_item['id']['channelId']
                 snippet = yt_item['snippet']
                 title = snippet['title']
-                image = snippet.get('thumbnails', {}).get('medium', {}).get('url', '')
+                image = snippet.get('thumbnails', {}).get('high', {}).get('url', '')
 
                 channel_item = items.DirectoryItem('[CH]' + title,
                                                    context.create_uri(['channel', channel_id]),
@@ -216,7 +236,8 @@ def response_to_items(provider, context, json_data):
     result = []
 
     kind = json_data.get('kind', '')
-    if kind == u'youtube#searchListResponse' or kind == u'youtube#playlistItemListResponse' or kind == u'youtube#playlistListResponse':
+    if kind == u'youtube#searchListResponse' or kind == u'youtube#playlistItemListResponse' or \
+                    kind == u'youtube#playlistListResponse' or kind == u'youtube#subscriptionListResponse':
         result.extend(_process_list_response(provider, context, json_data))
         pass
     else:

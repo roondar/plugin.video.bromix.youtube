@@ -73,18 +73,18 @@ class AccessManager(object):
         if expires == -1:
             return False
 
-        now = time.time()
+        now = int(time.time())
         return expires <= now
 
-    def update_access_token(self, access_token, time_in_seconds=None):
+    def update_access_token(self, access_token, unix_timestamp=None):
         """
         Updates the old access token with the new one.
         :param access_token:
         :return:
         """
         self._settings.set_string(constants.setting.ACCESS_TOKEN, access_token)
-        if time_in_seconds is not None:
-            self._settings.set_int(constants.setting.ACCESS_TOKEN_EXPIRES, int(time_in_seconds))
+        if unix_timestamp is not None:
+            self._settings.set_int(constants.setting.ACCESS_TOKEN_EXPIRES, int(unix_timestamp))
             pass
         pass
 
