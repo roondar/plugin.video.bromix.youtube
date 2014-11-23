@@ -113,8 +113,13 @@ class YouTubeClient(object):
     def get_playlists(self, channel_id, page_token=''):
         # prepare params
         params = {'part': 'snippet,contentDetails',
-                  'maxResults': str(self._max_results),
-                  'channelId': channel_id}
+                  'maxResults': str(self._max_results)}
+        if channel_id != 'mine':
+            params['channelId'] = channel_id
+            pass
+        else:
+            params['mine'] = 'true'
+            pass
         if page_token:
             params['pageToken'] = page_token
             pass
