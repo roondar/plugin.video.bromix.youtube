@@ -274,7 +274,7 @@ class Provider(kodion.AbstractProvider):
                 result.append(watch_history_item)
                 pass
 
-            # (my playlists)
+            # (my) playlists
             playlists_item = DirectoryItem(context.localize(self.LOCAL_MAP['youtube.playlists']),
                                            context.create_uri(['channel', 'mine', 'playlists']),
                                            context.create_resource_path('media', 'playlist.png'))
