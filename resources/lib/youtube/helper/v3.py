@@ -139,12 +139,13 @@ def _process_list_response(provider, context, json_data):
             title = snippet['title']
             image = snippet.get('thumbnails', {}).get('medium', {}).get('url', '')
 
+            channel_id = snippet['channelId']
             subscription_item = items.DirectoryItem('[PL]' + title,
-                                                    context.create_uri(['playlist', playlist_id]),
+                                                    context.create_uri(
+                                                        ['channel', channel_id, 'playlist', playlist_id]),
                                                     image=image)
             subscription_item.set_fanart(provider.get_fanart(context))
             result.append(subscription_item)
-            channel_id = snippet['channelId']
             if not channel_id in channel_item_dict:
                 channel_item_dict[channel_id] = []
             channel_item_dict[channel_id].append(subscription_item)
@@ -194,12 +195,13 @@ def _process_list_response(provider, context, json_data):
                 title = snippet['title']
                 image = snippet.get('thumbnails', {}).get('medium', {}).get('url', '')
 
+                channel_id = snippet['channelId']
                 subscription_item = items.DirectoryItem('[PL]' + title,
-                                                        context.create_uri(['playlist', playlist_id]),
+                                                        context.create_uri(
+                                                            ['channel', channel_id, 'playlist', playlist_id]),
                                                         image=image)
                 subscription_item.set_fanart(provider.get_fanart(context))
                 result.append(subscription_item)
-                channel_id = snippet['channelId']
                 if not channel_id in channel_item_dict:
                     channel_item_dict[channel_id] = []
                 channel_item_dict[channel_id].append(subscription_item)

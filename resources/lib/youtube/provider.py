@@ -67,14 +67,13 @@ class Provider(kodion.AbstractProvider):
     def get_fanart(self, context):
         return context.create_resource_path('media', 'fanart.jpg')
 
-    @kodion.RegisterProviderPath('^/playlist/(?P<playlist_id>.*)/$')
+    @kodion.RegisterProviderPath('^/channel/(?P<channel_id>.*)/playlist/(?P<playlist_id>.*)/$')
     def _on_playlist(self, context, re_match):
         self._set_content_type(context, kodion.constants.content_type.EPISODES)
 
         result = []
 
         playlist_id = re_match.group('playlist_id')
-        page = int(context.get_param('page', 1))
         page_token = context.get_param('page_token', '')
 
         json_data = context.get_function_cache().get(FunctionCache.ONE_DAY, self.get_client(context).get_playlist_items,
