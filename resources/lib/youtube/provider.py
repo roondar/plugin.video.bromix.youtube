@@ -14,7 +14,7 @@ class Provider(kodion.AbstractProvider):
                  'youtube.go_to_channel': 30502,
                  'youtube.subscriptions': 30504,
                  'youtube.unsubscribe': 30505,
-
+                 'youtube.subscribe': 30506,
                  'youtube.my_channel': 30507}
 
     def __init__(self):
@@ -162,6 +162,9 @@ class Provider(kodion.AbstractProvider):
             self.get_client(context).unsubscribe(subscription_id)
             context.get_ui().refresh_container()
             pass
+        elif method == 'add':
+            self.get_client(context).subscribe(subscription_id)
+            pass
         return True
 
     @kodion.RegisterProviderPath('^/subscriptions/$')
@@ -169,8 +172,8 @@ class Provider(kodion.AbstractProvider):
         result = []
 
         page_token = context.get_param('page_token', '')
-        json_data = context.get_function_cache().get(FunctionCache.ONE_MINUTE, self.get_client(context).get_subscription,
-                                                     'mine', page_token=page_token)
+        # no caching
+        json_data = self.get_client(context).get_subscription('mine', page_token=page_token)
         result.extend(v3.response_to_items(self, context, json_data))
 
         return result

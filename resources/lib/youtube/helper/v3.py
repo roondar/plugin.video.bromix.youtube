@@ -214,6 +214,10 @@ def _process_list_response(provider, context, json_data):
                                                    context.create_uri(['channel', channel_id]),
                                                    image=image)
                 channel_item.set_fanart(provider.get_fanart(context))
+
+                context_subscribe = (context.localize(provider.LOCAL_MAP['youtube.subscribe']),
+                                     'RunPlugin(%s)' % context.create_uri(['subscription', 'add', channel_id]))
+                channel_item.set_context_menu([context_subscribe])
                 result.append(channel_item)
 
                 if not channel_id in channel_item_dict:

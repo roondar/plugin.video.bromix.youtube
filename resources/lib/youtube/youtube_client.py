@@ -41,7 +41,7 @@ class YouTubeClient(object):
                      'operatorCountry': 'de',
                      'lang': 'en_US',
                      'sdk_version': '19',
-                     #'google_play_services_version': '6188034',
+                     # 'google_play_services_version': '6188034',
                      'accountType': 'HOSTED_OR_GOOGLE',
                      'Email': username.encode('utf-8'),
                      'service': 'oauth2:https://www.googleapis.com/auth/youtube https://www.googleapis.com/auth/youtube.force-ssl https://www.googleapis.com/auth/plus.me https://www.googleapis.com/auth/emeraldsea.mobileapps.doritos.cookie https://www.googleapis.com/auth/plus.stream.read https://www.googleapis.com/auth/plus.stream.write https://www.googleapis.com/auth/plus.pages.manage https://www.googleapis.com/auth/identity.plus.page.impersonation',
@@ -79,6 +79,13 @@ class YouTubeClient(object):
     def unsubscribe(self, subscription_id):
         params = {'id': subscription_id}
         return self._perform_v3_request(method='DELETE', path='subscriptions', params=params)
+
+    def subscribe(self, channel_id):
+        params = {'part': 'snippet'}
+        post_data = {'kind': 'youtube#subscription',
+                     'snippet': {'resourceId': {'kind': 'youtube#channel',
+                                                'channelId': channel_id}}}
+        return self._perform_v3_request(method='POST', path='subscriptions', params=params, post_data=post_data)
 
     def get_subscription(self, channel_id, order='alphabetical', page_token=''):
         """
@@ -215,7 +222,6 @@ class YouTubeClient(object):
         if self._access_token:
             _headers['Authorization'] = 'Bearer %s' % self._access_token
             pass
-
         _headers.update(headers)
 
         # url
@@ -225,7 +231,8 @@ class YouTubeClient(object):
         if method == 'GET':
             result = requests.get(_url, params=_params, headers=_headers, verify=False, allow_redirects=allow_redirects)
         elif method == 'POST':
-            result = requests.post(_url, data=json.dumps(_post_data), params=_params, headers=_headers, verify=False,
+            _headers['content-type'] = 'application/json'
+            result = requests.post(_url, data=json.dumps(post_data), params=_params, headers=_headers, verify=False,
                                    allow_redirects=allow_redirects)
         elif method == 'PUT':
             result = requests.put(_url, data=json.dumps(_post_data), params=_params, headers=_headers, verify=False,
