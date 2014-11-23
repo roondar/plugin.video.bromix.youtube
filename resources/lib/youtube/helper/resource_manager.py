@@ -103,9 +103,12 @@ class ResourceManager(object):
             for key in result:
                 item = result[key]
                 break
-        playlists = item.get('contentDetails', {}).get('relatedPlaylists', {})
+            pass
 
-        return playlists
+        if item is None:
+            return {}
+
+        return item.get('contentDetails', {}).get('relatedPlaylists', {})
 
     def get_fanarts(self, channel_ids):
         if not self._enable_channel_fanart:

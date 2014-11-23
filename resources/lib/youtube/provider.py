@@ -80,7 +80,7 @@ class Provider(kodion.AbstractProvider):
         return context.create_resource_path('media', 'fanart.jpg')
 
     @kodion.RegisterProviderPath('^/channel/(?P<channel_id>.*)/playlist/(?P<playlist_id>.*)/$')
-    def _on_playlist(self, context, re_match):
+    def _on_channel_playlist(self, context, re_match):
         self._set_content_type(context, kodion.constants.content_type.EPISODES)
 
         result = []
@@ -88,8 +88,8 @@ class Provider(kodion.AbstractProvider):
         playlist_id = re_match.group('playlist_id')
         page_token = context.get_param('page_token', '')
 
-        json_data = context.get_function_cache().get(FunctionCache.ONE_DAY, self.get_client(context).get_playlist_items,
-                                                     playlist_id, page_token)
+        # no caching
+        json_data = self.get_client(context).get_playlist_items(playlist_id, page_token)
         result.extend(v3.response_to_items(self, context, json_data))
 
         return result
@@ -163,6 +163,18 @@ class Provider(kodion.AbstractProvider):
             pass
 
         return False
+
+    @kodion.RegisterProviderPath('^/playlist/(?P<playlist_id>.*)/(?P<method>.*)/(?P<video_id>.*)/$')
+    def _on_playlist(self, context, re_match):
+        playlist_id = re_match.group('playlist_id')
+        method = re_match.group('method')
+        video_id = re_match.group('video_id')
+
+        if method == 'add':
+            self.get_client(context).add_video_to_playlist(playlist_id=playlist_id, video_id=video_id)
+            pass
+
+        return True
 
     @kodion.RegisterProviderPath('^/subscription/(?P<method>.*)/(?P<subscription_id>.*)/$')
     def _on_subscription(self, context, re_match):

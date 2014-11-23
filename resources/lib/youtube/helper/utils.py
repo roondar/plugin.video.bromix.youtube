@@ -1,6 +1,7 @@
 import re
 from resources.lib import kodion
 from resources.lib.kodion import iso8601
+from resources.lib.youtube.helper import resource_manager
 
 __author__ = 'bromix'
 
@@ -10,11 +11,12 @@ def update_video_infos(provider, context, video_id_dict):
     if len(video_ids) == 0:
         return
 
-    video_data = provider.get_resource_manager(context).get_videos(video_ids)
+    resource_manager = provider.get_resource_manager(context)
+    video_data = resource_manager.get_videos(video_ids)
 
-    for key in video_data.keys():
-        yt_item = video_data[key]
-        video_item = video_id_dict[key]
+    for video_id in video_data.keys():
+        yt_item = video_data[video_id]
+        video_item = video_id_dict[video_id]
 
         snippet = yt_item['snippet']  # crash if not conform
 
@@ -68,13 +70,44 @@ def update_video_infos(provider, context, video_id_dict):
         # update context menu
         channel_id = snippet.get('channelId', '')
         channel_name = snippet.get('channelTitle', '')
+        my_related_playlists = resource_manager.get_related_playlists(channel_id='mine')
         if channel_id and channel_name:
+            context_menu = []
             # only if we are not in the channel provide to jump to the channel
             if kodion.utils.create_path('channel', channel_id) != context.get_path():
-                menu = [(context.localize(provider.LOCAL_MAP['youtube.go_to_channel']).replace("%CHANNEL%",
-                                                                                               '[B]%s[/B]' % channel_name),
-                         'Container.Update(%s)' % context.create_uri(['channel', channel_id]))]
-                video_item.set_context_menu(menu)
+                context_menu.append((context.localize(provider.LOCAL_MAP['youtube.go_to_channel']).replace("%CHANNEL%",
+                                                                                                           '[B]%s[/B]' % channel_name),
+                                     'Container.Update(%s)' % context.create_uri(['channel', channel_id])))
+                pass
+
+            """
+            Add 'watch later' only if:
+            - I'm logged in
+            - this is not my 'watch later' playlist
+            """
+            watch_later_playlist = my_related_playlists.get('watchLater', '')
+            if watch_later_playlist and kodion.utils.create_path('channel', 'mine', 'playlist',
+                                                                 watch_later_playlist) != context.get_path():
+                context_menu.append((context.localize(provider.LOCAL_MAP['youtube.watch_later']),
+                                     'RunPlugin(%s)' % context.create_uri(
+                                         ['playlist', my_related_playlists['watchLater'], 'add', video_id])))
+                pass
+
+            """
+            Add 'like' only if:
+            - I'm logged in
+            - this is not my 'liked videos' playlist
+            """
+            liked_videos_playlist = my_related_playlists.get('likes', '')
+            if liked_videos_playlist and kodion.utils.create_path('channel', 'mine', 'playlist',
+                                                                  liked_videos_playlist) != context.get_path():
+                context_menu.append((context.localize(provider.LOCAL_MAP['youtube.liked.videos']),
+                                     'RunPlugin(%s)' % context.create_uri(
+                                         ['playlist', my_related_playlists['likes'], 'add', video_id])))
+                pass
+
+            if len(context_menu) > 0:
+                video_item.set_context_menu(context_menu)
                 pass
             pass
         pass

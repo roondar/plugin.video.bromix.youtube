@@ -48,7 +48,7 @@ class YouTubeClient(object):
                      'source': 'android',
                      'androidId': '38c6ee9a82b8b10a',
                      'app': 'com.google.android.youtube',
-                     #'client_sig': '24bb24c05e47e0aefa68a58a766179d9b613a600',
+                     # 'client_sig': '24bb24c05e47e0aefa68a58a766179d9b613a600',
                      'callerPkg': 'com.google.android.youtube',
                      #'callerSig': '24bb24c05e47e0aefa68a58a766179d9b613a600',
                      'Passwd': password.encode('utf-8')}
@@ -79,10 +79,20 @@ class YouTubeClient(object):
     def get_uploaded_videos_of_subscriptions(self, start_index=0):
         params = {'max-results': str(self._max_results),
                   'alt': 'json'}
-        if start_index>0:
+        if start_index > 0:
             params['start-index'] = str(start_index)
             pass
-        return self._perform_v2_request(method='GET', path='feeds/api/users/default/newsubscriptionvideos', params=params)
+        return self._perform_v2_request(method='GET', path='feeds/api/users/default/newsubscriptionvideos',
+                                        params=params)
+
+    def add_video_to_playlist(self, playlist_id, video_id):
+        params = {'part': 'snippet',
+                  'mine': 'true'}
+        post_data = {'kind': 'youtube#playlistItem',
+                     'snippet': {'playlistId': playlist_id,
+                                 'resourceId': {'kind': 'youtube#video',
+                                                'videoId': video_id}}}
+        return self._perform_v3_request(method='POST', path='playlistItems', params=params, post_data=post_data)
 
     def unsubscribe(self, subscription_id):
         params = {'id': subscription_id}
@@ -121,7 +131,7 @@ class YouTubeClient(object):
     def get_activities(self, channel_id, page_token=''):
         params = {'part': 'snippet,contentDetails',
                   'maxResults': str(self._max_results)}
-        if channel_id =='home':
+        if channel_id == 'home':
             params['home'] = 'true'
             pass
         elif channel_id == 'mine':
