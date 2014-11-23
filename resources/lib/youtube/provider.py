@@ -21,7 +21,8 @@ class Provider(kodion.AbstractProvider):
                  'youtube.watch_later': 30107,
                  'youtube.liked.videos': 30508,
                  'youtube.history': 30509,
-                 'youtube.my_subscriptions': 30510}
+                 'youtube.my_subscriptions': 30510,
+                 'youtube.like': 30511}
 
     def __init__(self):
         kodion.AbstractProvider.__init__(self)
@@ -30,6 +31,9 @@ class Provider(kodion.AbstractProvider):
         self._resource_manager = None
         self._is_logged_in = False
         pass
+
+    def is_logged_in(self):
+        return self._is_logged_in
 
     def get_client(self, context):
         # set the items per page (later)

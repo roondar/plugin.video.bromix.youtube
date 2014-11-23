@@ -70,7 +70,6 @@ def update_video_infos(provider, context, video_id_dict):
         # update context menu
         channel_id = snippet.get('channelId', '')
         channel_name = snippet.get('channelTitle', '')
-        my_related_playlists = resource_manager.get_related_playlists(channel_id='mine')
         if channel_id and channel_name:
             context_menu = []
             # only if we are not in the channel provide to jump to the channel
@@ -80,30 +79,33 @@ def update_video_infos(provider, context, video_id_dict):
                                      'Container.Update(%s)' % context.create_uri(['channel', channel_id])))
                 pass
 
-            """
-            Add 'watch later' only if:
-            - I'm logged in
-            - this is not my 'watch later' playlist
-            """
-            watch_later_playlist = my_related_playlists.get('watchLater', '')
-            if watch_later_playlist and kodion.utils.create_path('channel', 'mine', 'playlist',
-                                                                 watch_later_playlist) != context.get_path():
-                context_menu.append((context.localize(provider.LOCAL_MAP['youtube.watch_later']),
-                                     'RunPlugin(%s)' % context.create_uri(
-                                         ['playlist', my_related_playlists['watchLater'], 'add', video_id])))
-                pass
+            if provider.is_logged_in():
+                my_related_playlists = resource_manager.get_related_playlists(channel_id='mine')
+                """
+                Add 'watch later' only if:
+                - I'm logged in
+                - this is not my 'watch later' playlist
+                """
+                watch_later_playlist = my_related_playlists.get('watchLater', '')
+                if watch_later_playlist and kodion.utils.create_path('channel', 'mine', 'playlist',
+                                                                     watch_later_playlist) != context.get_path():
+                    context_menu.append((context.localize(provider.LOCAL_MAP['youtube.watch_later']),
+                                         'RunPlugin(%s)' % context.create_uri(
+                                             ['playlist', my_related_playlists['watchLater'], 'add', video_id])))
+                    pass
 
-            """
-            Add 'like' only if:
-            - I'm logged in
-            - this is not my 'liked videos' playlist
-            """
-            liked_videos_playlist = my_related_playlists.get('likes', '')
-            if liked_videos_playlist and kodion.utils.create_path('channel', 'mine', 'playlist',
-                                                                  liked_videos_playlist) != context.get_path():
-                context_menu.append((context.localize(provider.LOCAL_MAP['youtube.liked.videos']),
-                                     'RunPlugin(%s)' % context.create_uri(
-                                         ['playlist', my_related_playlists['likes'], 'add', video_id])))
+                """
+                Add 'like' only if:
+                - I'm logged in
+                - this is not my 'liked videos' playlist
+                """
+                liked_videos_playlist = my_related_playlists.get('likes', '')
+                if liked_videos_playlist and kodion.utils.create_path('channel', 'mine', 'playlist',
+                                                                      liked_videos_playlist) != context.get_path():
+                    context_menu.append((context.localize(provider.LOCAL_MAP['youtube.like']),
+                                         'RunPlugin(%s)' % context.create_uri(
+                                             ['playlist', my_related_playlists['likes'], 'add', video_id])))
+                    pass
                 pass
 
             if len(context_menu) > 0:
