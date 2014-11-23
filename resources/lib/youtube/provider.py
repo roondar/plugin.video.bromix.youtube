@@ -13,7 +13,9 @@ class Provider(kodion.AbstractProvider):
                  'youtube.playlists': 30501,
                  'youtube.go_to_channel': 30502,
                  'youtube.subscriptions': 30504,
-                 'youtube.unsubscribe': 30505}
+                 'youtube.unsubscribe': 30505,
+
+                 'youtube.my_channel': 30507}
 
     def __init__(self):
         kodion.AbstractProvider.__init__(self)
@@ -220,6 +222,13 @@ class Provider(kodion.AbstractProvider):
         # subscriptions
         self.get_client(context)
         if self._is_logged_in:
+            # my channel
+            my_channel_item = DirectoryItem(context.localize(self.LOCAL_MAP['youtube.my_channel']),
+                                            context.create_uri(['channel', 'mine']),
+                                            image=context.create_resource_path('media', 'channel.png'))
+            my_channel_item.set_fanart(self.get_fanart(context))
+            result.append(my_channel_item)
+
             # subscriptions
             subscriptions_item = DirectoryItem(context.localize(self.LOCAL_MAP['youtube.subscriptions']),
                                                context.create_uri(['subscriptions']),

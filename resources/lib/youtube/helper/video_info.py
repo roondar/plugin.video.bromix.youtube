@@ -167,19 +167,9 @@ class VideoInfo(object):
                    'Accept-Language': 'en-US,en;q=0.8,de;q=0.6'}
         params = {'video_id': video_id,
                   'hl': self._youtube_client.get_language()}
-        """
-        params = {'html5': '1',
-                  'video_id': video_id,
-                  'hl': self._youtube_client.get_language(),
-                  'c': 'TVHTML5',
-                  'cver': '4',
-                  'cbr': 'Chrome',
-                  'cbrver': '39.0.2171.36',
-                  'cos': 'Windows',
-                  'cosver': '6.1',
-                  'ps': 'leanback',
-                  'el': 'leanback'}
-        """
+        if self._youtube_client.get_access_token():
+            params['access_token'] = self._youtube_client.get_access_token()
+            pass
 
         url = 'https://www.youtube.com/get_video_info'
 

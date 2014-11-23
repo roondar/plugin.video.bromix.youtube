@@ -25,6 +25,9 @@ class YouTubeClient(object):
         self._max_results = items_per_page
         pass
 
+    def get_access_token(self):
+        return self._access_token
+
     def authenticate(self, username, password):
         headers = {'device': '38c6ee9a82b8b10a',
                    'app': 'com.google.android.youtube',
@@ -132,8 +135,13 @@ class YouTubeClient(object):
             channel_id = ','.join(channel_id)
             pass
 
-        params = {'part': 'snippet,contentDetails,brandingSettings',
-                  'id': channel_id}
+        params = {'part': 'snippet,contentDetails,brandingSettings'}
+        if channel_id != 'mine':
+            params['id'] = channel_id
+            pass
+        else:
+            params['mine'] = 'true'
+            pass
         return self._perform_v3_request(method='GET', path='channels', params=params)
 
     def get_videos(self, video_id):

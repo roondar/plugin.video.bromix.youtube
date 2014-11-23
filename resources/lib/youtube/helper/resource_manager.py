@@ -95,7 +95,14 @@ class ResourceManager(object):
         result = self._update_channels([channel_id])
 
         # transform
-        item = result.get(channel_id, {})
+        item = None
+        if channel_id != 'mine':
+            item = result.get(channel_id, {})
+            pass
+        else:
+            for key in result:
+                item = result[key]
+                break
         playlists = item.get('contentDetails', {}).get('relatedPlaylists', {})
 
         return playlists

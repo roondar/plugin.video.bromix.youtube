@@ -7,12 +7,12 @@ import unittest
 
 
 class TestClient(unittest.TestCase):
-    def test_get_subscriptions(self):
+    def test_login(self):
         client = YouTubeClient()
 
         token, expires = client.authenticate('bromixbromix@gmail.com', 'lzZcnn0xMC1zCBuAU83g')
         client = YouTubeClient(access_token=token)
-        json_data = client.get_subscription(channel_id='mine')
+        json_data = client.get_channels(channel_id='mine')
         pass
 
     def test_authenticate(self):

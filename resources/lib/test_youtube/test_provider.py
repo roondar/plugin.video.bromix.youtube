@@ -8,9 +8,9 @@ import unittest
 
 
 class TestProvider(unittest.TestCase):
-    def test_subscriptions(self):
+    def test_login(self):
         provider = Provider()
-        path = kodion.utils.create_path('subscriptions')
+        path = kodion.utils.create_path('channel', 'mine')
         context = kodion.Context(path=path)
         context.get_settings().set_string(kodion.constants.setting.LOGIN_USERNAME, 'bromixbromix@gmail.com')
         context.get_settings().set_string(kodion.constants.setting.LOGIN_PASSWORD, 'lzZcnn0xMC1zCBuAU83g')
