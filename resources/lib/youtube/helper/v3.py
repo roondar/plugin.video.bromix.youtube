@@ -140,7 +140,7 @@ def _process_list_response(provider, context, json_data):
             image = snippet.get('thumbnails', {}).get('medium', {}).get('url', '')
 
             channel_id = snippet['channelId']
-            subscription_item = items.DirectoryItem('[PL]' + title,
+            subscription_item = items.DirectoryItem(title,
                                                     context.create_uri(
                                                         ['channel', channel_id, 'playlist', playlist_id]),
                                                     image=image)
@@ -212,7 +212,7 @@ def _process_list_response(provider, context, json_data):
                 title = snippet['title']
                 image = snippet.get('thumbnails', {}).get('medium', {}).get('url', '')
 
-                channel_item = items.DirectoryItem('[CH]' + title,
+                channel_item = items.DirectoryItem(title,
                                                    context.create_uri(['channel', channel_id]),
                                                    image=image)
                 channel_item.set_fanart(provider.get_fanart(context))

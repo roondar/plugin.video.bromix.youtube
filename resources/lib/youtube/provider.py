@@ -26,12 +26,18 @@ class Provider(kodion.AbstractProvider):
         pass
 
     def get_client(self, context):
+        # set the items per page (later)
         items_per_page = context.get_settings().get_items_per_page()
+        #TODO: get language or region to configure the client correctly
 
         access_manager = context.get_access_manager()
         access_token = access_manager.get_access_token()
         if access_manager.is_new_login_credential() or not access_token or access_manager.is_access_token_expired():
-            access_manager.update_access_token('')  # in case of an old access_token
+            # reset access_token
+            access_manager.update_access_token('')
+            # we clear the cache, so none cached data of an old account will be displayed.
+            context.get_function_cache().clear()
+            # reset the client
             self._client = None
             pass
 
@@ -255,4 +261,5 @@ class Provider(kodion.AbstractProvider):
             return False
 
         return True
+
     pass
