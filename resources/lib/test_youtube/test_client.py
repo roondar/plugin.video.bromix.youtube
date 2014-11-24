@@ -29,8 +29,11 @@ class TestClient(unittest.TestCase):
 
         context = kodion.Context()
 
+        # 1080p ?!?
+        streams = client.get_video_streams(context, 'qfPUVz_Hpqo')
+
         #Live
-        streams = client.get_video_streams(context, 'pvEWZY3Eqsg')
+        #streams = client.get_video_streams(context, 'pvEWZY3Eqsg')
 
         # Restricted?
         #streams = client.get_video_streams(context, 'U4DbJWA9JEw')
