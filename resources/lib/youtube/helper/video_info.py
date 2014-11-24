@@ -46,7 +46,11 @@ class VideoInfo(object):
                         '246': {'format': 'WEB', 'width': 640, 'height': 480, 'VOX': True},
                         '247': {'format': 'WEB', 'width': 1280, 'height': 720, 'VOX': True},
                         '248': {'format': 'WEB', 'width': 1920, 'height': 1080, 'VOX': True},
-                        '264': {'format': 'MP4', 'width': 1920, 'height': 1080, 'VOX': True}}
+                        '264': {'format': 'MP4', 'width': 1920, 'height': 1080, 'VOX': True},
+                        '298': {'format': 'video/mp4; codecs="avc1.4d4020', 'width': 1280, 'height': 720, 'fps': 60},
+                        '299': {'format': 'video/mp4; codecs="avc1.64002a', 'width': 1920, 'height': 1080, 'fps': 60},
+                        '302': {'format': 'video/webm; codecs="vp9', 'width': 1280, 'height': 720, 'fps': 60},
+                        '303': {'format': 'video/webm; codecs="vp9', 'width': 1920, 'height': 1080, 'fps': 60}}
 
     def __init__(self, context, youtube_client):
         self._context = context
@@ -206,7 +210,7 @@ class VideoInfo(object):
         for item in adaptive_fmts:
             stream_map = dict(urlparse.parse_qsl(item))
 
-            if stream_map['itag']!='140' and stream_map['itag']!='171':
+            if stream_map['itag'] != '140' and stream_map['itag'] != '171':
                 video_stream = {'url': stream_map['url'],
                                 'format': itag_map[stream_map['itag']]}
                 stream_list.append(video_stream)
