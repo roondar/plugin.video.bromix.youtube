@@ -32,7 +32,7 @@ def update_video_infos(provider, context, video_id_dict, playlist_item_id_dict=N
                                 'Ep.(?P<episode>\d+)',
                                 '\[(?P<episode>\d+)\]',
                                 'S(?P<season>\d+)E(?P<episode>\d+)',
-                                'Season (?P<season>\d+)(.*)+Episode (?P<episode>\d+)']
+                                'Season (?P<season>\d+)(.+)Episode (?P<episode>\d+)']
         for regex in season_episode_regex:
             re_match = re.search(regex, video_item.get_name())
             if re_match:
