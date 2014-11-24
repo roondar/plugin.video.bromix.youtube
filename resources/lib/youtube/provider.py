@@ -149,6 +149,7 @@ class Provider(kodion.AbstractProvider):
     @kodion.RegisterProviderPath('^/play/$')
     def _on_play(self, context, re_match):
         vq = context.get_settings().get_video_quality()
+        vq = 1080
 
         def _compare(item):
             return vq - item['format']['height']

@@ -35,8 +35,10 @@ class VideoInfo(object):
                         '134': {'format': 'MP4', 'width': 480, 'height': 360, 'VO': True},
                         '135': {'format': 'MP4', 'width': 640, 'height': 480, 'VO': True},
                         '136': {'format': 'MP4', 'width': 1280, 'height': 720, 'VO': True},
-                        '137': {'format': 'MP4', 'width': 1920, 'height': 1080, 'VO': True},
+                        '137': {'format': 'MP4', 'width': 1920, 'height': 1080, 'fps': 30},
+                        '140': {'format': 'audio/mp4'},
                         '160': {'format': 'MP4', 'width': 256, 'height': 144, 'VO': True},
+                        '171': {'format': 'audio/webm'},
                         '242': {'format': 'WEB', 'width': 320, 'height': 240, 'VOX': True},
                         '243': {'format': 'WEB', 'width': 480, 'height': 360, 'VOX': True},
                         '244': {'format': 'WEB', 'width': 640, 'height': 480, 'VOX': True},
@@ -196,6 +198,21 @@ class VideoInfo(object):
             itag_map[data[0]] = {'width': int(size[0]),
                                  'height': int(size[1])}
             pass
+
+        # read adaptive_fmts
+        """
+        adaptive_fmts = params['adaptive_fmts']
+        adaptive_fmts = adaptive_fmts.split(',')
+        for item in adaptive_fmts:
+            stream_map = dict(urlparse.parse_qsl(item))
+
+            if stream_map['itag']!='140' and stream_map['itag']!='171':
+                video_stream = {'url': stream_map['url'],
+                                'format': itag_map[stream_map['itag']]}
+                stream_list.append(video_stream)
+                pass
+            pass
+        """
 
         # extract streams from map
         url_encoded_fmt_stream_map = params['url_encoded_fmt_stream_map']
