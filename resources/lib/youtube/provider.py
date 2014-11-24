@@ -146,14 +146,14 @@ class Provider(kodion.AbstractProvider):
 
         return result
 
-    @kodion.RegisterProviderPath('^/play/(?P<video_id>.*)/$')
+    @kodion.RegisterProviderPath('^/play/$')
     def _on_play(self, context, re_match):
         vq = context.get_settings().get_video_quality()
 
         def _compare(item):
             return vq - item['format']['height']
 
-        video_id = re_match.group('video_id')
+        video_id = context.get_param('video_id')
 
         try:
             video_streams = self.get_client(context).get_video_streams(context, video_id)

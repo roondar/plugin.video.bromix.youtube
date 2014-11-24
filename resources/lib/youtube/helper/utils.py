@@ -24,7 +24,11 @@ def update_video_infos(provider, context, video_id_dict, playlist_item_id_dict=N
 
         snippet = yt_item['snippet']  # crash if not conform
 
-        # try to set season and episode
+        """
+        This is experimental. We try to get the most information out of the title of a video.
+        This is not based on any language. In some cases this won't work at all.
+        TODO: via language and settings provide the regex for matching episode and season.
+        """
         video_item.set_season(1)
         video_item.set_episode(1)
         season_episode_regex = ['Part (?P<episode>\d+)',
@@ -32,7 +36,8 @@ def update_video_infos(provider, context, video_id_dict, playlist_item_id_dict=N
                                 'Ep.(?P<episode>\d+)',
                                 '\[(?P<episode>\d+)\]',
                                 'S(?P<season>\d+)E(?P<episode>\d+)',
-                                'Season (?P<season>\d+)(.+)Episode (?P<episode>\d+)']
+                                'Season (?P<season>\d+)(.+)Episode (?P<episode>\d+)',
+                                'Episode (?P<episode>\d+)']
         for regex in season_episode_regex:
             re_match = re.search(regex, video_item.get_name())
             if re_match:

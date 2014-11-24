@@ -24,7 +24,7 @@ def response_to_items(provider, context, json_data):
             title = item['title']['$t']
 
             video_item = items.VideoItem(title,
-                                         context.create_uri(['play', video_id]))
+                                         context.create_uri(['play'], {'video_id': video_id}))
             video_item.set_fanart(provider.get_fanart(context))
             result.append(video_item)
 
