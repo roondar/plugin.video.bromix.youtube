@@ -14,7 +14,7 @@ def response_to_items(provider, context, json_data):
 
     feed = json_data.get('feed', None)
     if feed:
-        entry = feed['entry']
+        entry = feed.get('entry', [])
         for item in entry:
             video_id = ''
             video_id_match = re.match('tag:youtube.com,(\d+):video:(?P<video_id>.*)', item['id']['$t'])
