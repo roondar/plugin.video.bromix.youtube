@@ -1,3 +1,6 @@
+1.0.0~alpha22 (2014-10-25)
+FIX: signature calculation
+
 1.0.0~alpha21 (2014-10-24)
 CHG: method for playing a video changed to a more query like uri
 FIX: crash under android systems. Regular Expressions work a little different :)

@@ -88,7 +88,7 @@ class Cipher(object):
                 pass
 
             # real object functions
-            cipher_match = re.match('(?P<object_name>[a-zA-Z]+)\.(?P<function_name>[a-zA-Z]+)\((?P<parameter>[^)]+)\)',
+            cipher_match = re.match('(?P<object_name>[a-zA-Z0-9]+)\.(?P<function_name>[a-zA-Z0-9]+)\((?P<parameter>[^)]+)\)',
                                     line)
             if cipher_match:
                 object_name = cipher_match.group('object_name')

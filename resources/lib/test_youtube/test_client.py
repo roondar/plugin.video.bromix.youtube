@@ -29,8 +29,11 @@ class TestClient(unittest.TestCase):
 
         context = kodion.Context()
 
+        # VEVO
+        streams = client.get_video_streams(context, 'nfWlot6h_JM')
+
         # 60fps
-        streams = client.get_video_streams(context, '_zPm3SSj6W8')
+        #streams = client.get_video_streams(context, '_zPm3SSj6W8')
 
         # 1080p ?!?
         #streams = client.get_video_streams(context, 'qfPUVz_Hpqo')
