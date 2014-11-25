@@ -336,7 +336,7 @@ class YouTubeClient(object):
         if result is None:
             return {}
 
-        if method != 'DELETE':
+        if method != 'DELETE' and result.text:
             return result.json()
         pass
 
