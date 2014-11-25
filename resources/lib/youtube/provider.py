@@ -341,7 +341,7 @@ class Provider(kodion.AbstractProvider):
             context.set_content_type(content_type)
             context.add_sort_method(kodion.constants.sort_method.UNSORTED,
                                     kodion.constants.sort_method.VIDEO_RUNTIME,
-                                    kodion.constants.sort_method.LABEL,
+                                    kodion.constants.sort_method.VIDEO_TITLE,
                                     kodion.constants.sort_method.VIDEO_YEAR)
             pass
         pass

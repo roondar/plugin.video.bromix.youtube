@@ -16,7 +16,7 @@ class VideoItem(BaseItem):
         self._season = None
         self._year = None
         self._plot = None
-        self._title = None
+        self._title = name
         self._imdb_id = None
         self._cast = None
         self._rating = None
