@@ -1,4 +1,6 @@
 1.0.0~alpha22 (2014-10-25)
+ADD: sorting
+FIX: crash when calling 'My subscriptions'
 FIX: signature calculation
 
 1.0.0~alpha21 (2014-10-24)
