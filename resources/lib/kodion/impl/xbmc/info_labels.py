@@ -57,7 +57,9 @@ def _process_video_duration(info_labels, param):
 
         minutes = int(param) / 60
         seconds = int(param) % 60
-        info_labels['duration'] = '%02d:%02d' % (minutes, seconds)
+        #info_labels['duration'] = '%02d:%02d' % (minutes, seconds)
+        #TODO: based on the API version we have to call this differently in the future
+        info_labels['duration'] = '%d' % minutes
         pass
     pass
 
