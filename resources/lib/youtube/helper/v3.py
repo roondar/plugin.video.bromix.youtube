@@ -19,7 +19,24 @@ def _process_list_response(provider, context, json_data):
 
     for yt_item in yt_items:
         yt_kind = yt_item.get('kind', '')
-        if yt_kind == u'youtube#channel':
+        if yt_kind == u'youtube#video':
+            video_id = yt_item['id']
+            snippet = yt_item['snippet']
+            title = snippet['title']
+            image = snippet.get('thumbnails', {}).get('medium', {}).get('url', '')
+            video_item = items.VideoItem(title,
+                                         context.create_uri(['play'], {'video_id': video_id}),
+                                         image=image)
+            video_item.set_fanart(provider.get_fanart(context))
+            result.append(video_item)
+            video_id_dict[video_id] = video_item
+
+            channel_id = snippet['channelId']
+            if not channel_id in channel_item_dict:
+                channel_item_dict[channel_id] = []
+            channel_item_dict[channel_id].append(video_item)
+            pass
+        elif yt_kind == u'youtube#channel':
             channel_id = yt_item['id']
             snippet = yt_item['snippet']
             title = snippet['title']
@@ -187,7 +204,8 @@ def response_to_items(provider, context, json_data):
     kind = json_data.get('kind', '')
     if kind == u'youtube#searchListResponse' or kind == u'youtube#playlistItemListResponse' or \
                     kind == u'youtube#playlistListResponse' or kind == u'youtube#subscriptionListResponse' or \
-                    kind == 'youtube#guideCategoryListResponse' or kind == u'youtube#channelListResponse':
+                    kind == 'youtube#guideCategoryListResponse' or kind == u'youtube#channelListResponse' or \
+                    kind == u'youtube#videoListResponse':
         result.extend(_process_list_response(provider, context, json_data))
         pass
     else:

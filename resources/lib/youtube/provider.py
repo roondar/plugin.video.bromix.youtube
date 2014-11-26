@@ -24,7 +24,8 @@ class Provider(kodion.AbstractProvider):
                  'youtube.my_subscriptions': 30510,
                  'youtube.like': 30511,
                  'youtube.remove': 30108,
-                 'youtube.browse_channels': 30512}
+                 'youtube.browse_channels': 30512,
+                 'youtube.what_to_watch': 30513}
 
     def __init__(self):
         kodion.AbstractProvider.__init__(self)
@@ -239,6 +240,18 @@ class Provider(kodion.AbstractProvider):
 
         return result
 
+    @kodion.RegisterProviderPath('^/what_to_watch/$')
+    def _on_what_to_watch(self, context, re_match):
+        self._set_content_type(context, kodion.constants.content_type.EPISODES)
+
+        result = []
+
+        page_token = context.get_param('page_token', '')
+        json_data = self.get_client(context).get_popular_videos(page_token=page_token)
+        result.extend(v3.response_to_items(self, context, json_data))
+
+        return result
+
     def on_search(self, search_text, context, re_match):
         self._set_content_type(context, kodion.constants.content_type.EPISODES)
 
@@ -289,6 +302,13 @@ class Provider(kodion.AbstractProvider):
             my_subscriptions_item.set_fanart(self.get_fanart(context))
             result.append(my_subscriptions_item)
             pass
+
+        # what to watch
+        what_to_watch_item = DirectoryItem('[B]'+context.localize(self.LOCAL_MAP['youtube.what_to_watch'])+'[/B]',
+                                           context.create_uri(['what_to_watch']),
+                                           context.create_resource_path('media', 'what_to_watch.png'))
+        what_to_watch_item.set_fanart(self.get_fanart(context))
+        result.append(what_to_watch_item)
 
         # search
         search_item = kodion.items.create_search_item(context)
@@ -352,10 +372,12 @@ class Provider(kodion.AbstractProvider):
             result.append(subscriptions_item)
             pass
 
+        """
         browse_channels_item = DirectoryItem(context.localize(self.LOCAL_MAP['youtube.browse_channels']),
                                              context.create_uri(['guide']))
         browse_channels_item.set_fanart(self.get_fanart(context))
         result.append(browse_channels_item)
+        """
 
         return result
 

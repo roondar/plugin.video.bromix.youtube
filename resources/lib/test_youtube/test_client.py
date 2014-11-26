@@ -7,20 +7,38 @@ import unittest
 
 
 class TestClient(unittest.TestCase):
+    def test_popular_videos(self):
+        client = YouTubeClient(language='de-DE')
+
+        json_data = client.get_popular_videos()
+        pass
+
+    def test_video_categories(self):
+        client = YouTubeClient(language='de-DE')
+
+        json_data = client.get_video_categories()
+        pass
+
+    def test_guide_category(self):
+        client = YouTubeClient(language='de-DE')
+
+        # Best of YouTube
+        json_data = client.get_guide_category('GCQmVzdCBvZiBZb3VUdWJl')
+        pass
+
     def test_guide_categories(self):
         client = YouTubeClient(language='de-DE')
 
         json_data = client.get_guide_categories()
         pass
 
-    """
-    def test_login(self):
+    def test_activities(self):
         client = YouTubeClient()
 
         token, expires = client.authenticate('bromixbromix@gmail.com', '')
         client = YouTubeClient(access_token=token)
-        json_data = client.get_uploaded_videos_of_subscriptions()
-        #json_data = client.get_activities(channel_id='home')
+        #json_data = client.get_uploaded_videos_of_subscriptions()
+        json_data = client.get_activities(channel_id='home')
         pass
 
     def test_authenticate(self):
@@ -28,7 +46,6 @@ class TestClient(unittest.TestCase):
 
         token, expires = client.authenticate('bromixbromix@gmail.com', '')
         pass
-    """
 
     def test_get_video_streams(self):
         client = YouTubeClient()
@@ -73,7 +90,8 @@ class TestClient(unittest.TestCase):
     def test_get_channels(self):
         client = YouTubeClient()
 
-        json_data = client.get_channels(['UCDbAn9LEzqONk__uXA6a9jQ', 'UC8i4HhaJSZhm-fu84Bl72TA'])
+        json_data = client.get_channels('mine')
+        #json_data = client.get_channels(['UCDbAn9LEzqONk__uXA6a9jQ', 'UC8i4HhaJSZhm-fu84Bl72TA'])
         pass
 
     def test_get_videos(self):

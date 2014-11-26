@@ -16,6 +16,7 @@ class YouTubeClient(object):
 
     def __init__(self, key='', language='en-US', items_per_page=50, access_token=''):
         self._key = self.YOUTUBE_TV_KEY
+        #self._key = self.YOUTUBE_APP_KEY__
         if key:
             self._key = key
             pass
@@ -38,9 +39,9 @@ class YouTubeClient(object):
                    'Connection': 'Keep-Alive',
                    'Accept-Encoding': 'gzip'}
 
-        post_data = {'device_country': 'de',
-                     'operatorCountry': 'de',
-                     'lang': 'en_US',
+        post_data = {'device_country': self._country.lower(),
+                     'operatorCountry': self._country.lower(),
+                     'lang': self._language.replace('-','_'),
                      'sdk_version': '19',
                      # 'google_play_services_version': '6188034',
                      'accountType': 'HOSTED_OR_GOOGLE',
@@ -152,6 +153,27 @@ class YouTubeClient(object):
             pass
 
         return self._perform_v3_request(method='GET', path='guideCategories', params=params)
+
+    def get_popular_videos(self, page_token=''):
+        params = {'part': 'snippet,contentDetails',
+                  'maxResults': str(self._max_results),
+                  'regionCode': self._country,
+                  'chart': 'mostPopular'}
+        if page_token:
+            params['pageToken'] = page_token
+            pass
+        return self._perform_v3_request(method='GET', path='videos', params=params)
+
+    def get_video_categories(self, page_token=''):
+        params = {'part': 'snippet',
+                  'maxResults': str(self._max_results),
+                  'regionCode': self._country,
+                  'hl': self._language}
+        if page_token:
+            params['pageToken'] = page_token
+            pass
+
+        return self._perform_v3_request(method='GET', path='videoCategories', params=params)
 
     def get_activities(self, channel_id, page_token=''):
         params = {'part': 'snippet,contentDetails',
