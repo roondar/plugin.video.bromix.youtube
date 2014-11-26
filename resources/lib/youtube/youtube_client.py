@@ -308,7 +308,7 @@ class YouTubeClient(object):
             pass
         _headers = {'Host': 'gdata.youtube.com',
                     'X-GData-Key': 'key=%s' % self._key,
-                    'GData-Version': '2',
+                    'GData-Version': '2.1',
                     'User-Agent': 'Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/39.0.2171.36 Safari/537.36'}
         if self._access_token:
             _headers['Authorization'] = 'Bearer %s' % self._access_token
