@@ -56,7 +56,7 @@ class YouTubeClient(object):
         # url
         url = 'https://android.clients.google.com/auth'
 
-        result = requests.post(url, data=post_data, headers=headers, verify=True)
+        result = requests.post(url, data=post_data, headers=headers, verify=False)
         if result.status_code != requests.codes.ok:
             raise LoginException('Login Failed')
 
@@ -273,16 +273,16 @@ class YouTubeClient(object):
 
         result = None
         if method == 'GET':
-            result = requests.get(_url, params=_params, headers=_headers, verify=True, allow_redirects=allow_redirects)
+            result = requests.get(_url, params=_params, headers=_headers, verify=False, allow_redirects=allow_redirects)
         elif method == 'POST':
             _headers['content-type'] = 'application/json'
-            result = requests.post(_url, data=json.dumps(post_data), params=_params, headers=_headers, verify=True,
+            result = requests.post(_url, data=json.dumps(post_data), params=_params, headers=_headers, verify=False,
                                    allow_redirects=allow_redirects)
         elif method == 'PUT':
-            result = requests.put(_url, data=json.dumps(_post_data), params=_params, headers=_headers, verify=True,
+            result = requests.put(_url, data=json.dumps(_post_data), params=_params, headers=_headers, verify=False,
                                   allow_redirects=allow_redirects)
         elif method == 'DELETE':
-            result = requests.delete(_url, params=_params, headers=_headers, verify=True,
+            result = requests.delete(_url, params=_params, headers=_headers, verify=False,
                                      allow_redirects=allow_redirects)
             pass
 
@@ -320,16 +320,16 @@ class YouTubeClient(object):
 
         result = None
         if method == 'GET':
-            result = requests.get(url, params=_params, headers=_headers, verify=True, allow_redirects=allow_redirects)
+            result = requests.get(url, params=_params, headers=_headers, verify=False, allow_redirects=allow_redirects)
         elif method == 'POST':
             _headers['content-type'] = 'application/json'
-            result = requests.post(_url, data=json.dumps(post_data), params=_params, headers=_headers, verify=True,
+            result = requests.post(_url, data=json.dumps(post_data), params=_params, headers=_headers, verify=False,
                                    allow_redirects=allow_redirects)
         elif method == 'PUT':
-            result = requests.put(_url, data=json.dumps(_post_data), params=_params, headers=_headers, verify=True,
+            result = requests.put(_url, data=json.dumps(_post_data), params=_params, headers=_headers, verify=False,
                                   allow_redirects=allow_redirects)
         elif method == 'DELETE':
-            result = requests.delete(_url, params=_params, headers=_headers, verify=True,
+            result = requests.delete(_url, params=_params, headers=_headers, verify=False,
                                      allow_redirects=allow_redirects)
             pass
 
