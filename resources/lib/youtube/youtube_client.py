@@ -12,6 +12,7 @@ from .helper.video_info import VideoInfo
 
 class YouTubeClient(object):
     YOUTUBE_TV_KEY = 'AIzaSyAd-YEOqZz9nXVzGtn3KWzYLbLaajhqIDA'
+    YOUTUBE_APP_KEY__ = 'AIzaSyA8eiZmM1FaDVjRy-df2KTyQ_vz_yYM39w'
 
     def __init__(self, key='', language='en-US', items_per_page=50, access_token=''):
         self._key = self.YOUTUBE_TV_KEY
