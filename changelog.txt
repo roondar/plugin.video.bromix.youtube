@@ -21,6 +21,7 @@ UPD: switch to kodion
 - FIX: #28 display 'general' instead of 'like' in settings
 
 1.0.0~alpha17 (2014-08-10)
+
 - ADD: 'Go to CHANNEL' of a selected video
 - ADD: Support for 'Subscribe' and 'Unsubscribe' of channels
 - ADD: Full support for 'Like'

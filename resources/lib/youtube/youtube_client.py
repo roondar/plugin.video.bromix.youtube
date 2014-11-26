@@ -56,7 +56,7 @@ class YouTubeClient(object):
         # url
         url = 'https://android.clients.google.com/auth'
 
-        result = requests.post(url, data=post_data, headers=headers, verify=False)
+        result = requests.post(url, data=post_data, headers=headers, verify=True)
         if result.status_code != requests.codes.ok:
             raise LoginException('Login Failed')
 
