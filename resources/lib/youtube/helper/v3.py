@@ -19,7 +19,37 @@ def _process_list_response(provider, context, json_data):
 
     for yt_item in yt_items:
         yt_kind = yt_item.get('kind', '')
-        if yt_kind == u'youtube#subscription':
+        if yt_kind == u'youtube#channel':
+            channel_id = yt_item['id']
+            snippet = yt_item['snippet']
+            title = snippet['title']
+            image = snippet.get('thumbnails', {}).get('medium', {}).get('url', '')
+
+            channel_item = items.DirectoryItem(title,
+                                               context.create_uri(['channel', channel_id]),
+                                               image=image)
+            channel_item.set_fanart(provider.get_fanart(context))
+
+            context_subscribe = (context.localize(provider.LOCAL_MAP['youtube.subscribe']),
+                                 'RunPlugin(%s)' % context.create_uri(['subscription', 'add', channel_id]))
+            channel_item.set_context_menu([context_subscribe])
+            result.append(channel_item)
+
+            if not channel_id in channel_item_dict:
+                channel_item_dict[channel_id] = []
+            channel_item_dict[channel_id].append(channel_item)
+            pass
+        elif yt_kind == u'youtube#guideCategory':
+            guide_id = yt_item['id']
+            snippet = yt_item['snippet']
+            title = snippet['title']
+
+            guide_item = items.DirectoryItem(title,
+                                             context.create_uri(['guide'], {'guide_id': guide_id}))
+            guide_item.set_fanart(provider.get_fanart(context))
+            result.append(guide_item)
+            pass
+        elif yt_kind == u'youtube#subscription':
             snippet = yt_item['snippet']
             image = snippet.get('thumbnails', {}).get('high', {}).get('url', '')
             channel_id = snippet['resourceId']['channelId']
@@ -156,7 +186,8 @@ def response_to_items(provider, context, json_data):
 
     kind = json_data.get('kind', '')
     if kind == u'youtube#searchListResponse' or kind == u'youtube#playlistItemListResponse' or \
-                    kind == u'youtube#playlistListResponse' or kind == u'youtube#subscriptionListResponse':
+                    kind == u'youtube#playlistListResponse' or kind == u'youtube#subscriptionListResponse' or \
+                    kind == 'youtube#guideCategoryListResponse' or kind == u'youtube#channelListResponse':
         result.extend(_process_list_response(provider, context, json_data))
         pass
     else:

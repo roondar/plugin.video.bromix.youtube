@@ -132,6 +132,26 @@ class YouTubeClient(object):
 
         return self._perform_v3_request(method='GET', path='subscriptions', params=params)
 
+    def get_guide_category(self, guide_category_id, page_token=''):
+        params = {'part': 'snippet,contentDetails,brandingSettings',
+                  'maxResults': str(self._max_results),
+                  'categoryId': guide_category_id}
+        if page_token:
+            params['pageToken'] = page_token
+            pass
+        return self._perform_v3_request(method='GET', path='channels', params=params)
+
+    def get_guide_categories(self, page_token=''):
+        params = {'part': 'snippet',
+                  'maxResults': str(self._max_results),
+                  'regionCode': self._country,
+                  'hl': self._language}
+        if page_token:
+            params['pageToken'] = page_token
+            pass
+
+        return self._perform_v3_request(method='GET', path='guideCategories', params=params)
+
     def get_activities(self, channel_id, page_token=''):
         params = {'part': 'snippet,contentDetails',
                   'maxResults': str(self._max_results)}

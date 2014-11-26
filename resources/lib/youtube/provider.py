@@ -23,7 +23,8 @@ class Provider(kodion.AbstractProvider):
                  'youtube.history': 30509,
                  'youtube.my_subscriptions': 30510,
                  'youtube.like': 30511,
-                 'youtube.remove': 30108}
+                 'youtube.remove': 30108,
+                 'youtube.browse_channels': 30512}
 
     def __init__(self):
         kodion.AbstractProvider.__init__(self)
@@ -221,6 +222,23 @@ class Provider(kodion.AbstractProvider):
 
         return result
 
+    @kodion.RegisterProviderPath('^/guide/$')
+    def _on_guide(self, context, re_match):
+        result = []
+
+        page_token = context.get_param('page_token', '')
+        guide_id = context.get_param('guide_id', '')
+        if guide_id:
+            json_data = self.get_client(context).get_guide_category(guide_id)
+            result.extend(v3.response_to_items(self, context, json_data))
+            pass
+        else:
+            json_data = self.get_client(context).get_guide_categories()
+            result.extend(v3.response_to_items(self, context, json_data))
+            pass
+
+        return result
+
     def on_search(self, search_text, context, re_match):
         self._set_content_type(context, kodion.constants.content_type.EPISODES)
 
@@ -333,6 +351,11 @@ class Provider(kodion.AbstractProvider):
             subscriptions_item.set_fanart(self.get_fanart(context))
             result.append(subscriptions_item)
             pass
+
+        browse_channels_item = DirectoryItem(context.localize(self.LOCAL_MAP['youtube.browse_channels']),
+                                             context.create_uri(['guide']))
+        browse_channels_item.set_fanart(self.get_fanart(context))
+        result.append(browse_channels_item)
 
         return result
 

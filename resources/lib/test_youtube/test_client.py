@@ -7,6 +7,12 @@ import unittest
 
 
 class TestClient(unittest.TestCase):
+    def test_guide_categories(self):
+        client = YouTubeClient(language='de-DE')
+
+        json_data = client.get_guide_categories()
+        pass
+
     """
     def test_login(self):
         client = YouTubeClient()
