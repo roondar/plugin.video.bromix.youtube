@@ -1,3 +1,7 @@
+1.0.0~alpha23 (2014-10-26)
+ADD: 'What to watch'
+FIX: 'My subscriptions' switched to version APIv2.1 (Google) DAMN YOU!!!
+
 1.0.0~alpha22 (2014-10-25)
 ADD: sorting
 FIX: crash when calling 'My subscriptions'
