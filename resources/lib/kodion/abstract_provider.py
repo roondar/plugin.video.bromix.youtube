@@ -18,6 +18,7 @@ class AbstractProvider(object):
                            '_internal_watch_later')
         self.register_path('^/' + constants.paths.FAVORITES + '/(?P<command>add|remove|list)/?$', '_internal_favorite')
         self.register_path('^/' + constants.paths.SEARCH + '/(?P<command>new|query|list|remove)/?$', '_internal_search')
+        self.register_path('(?P<path>.*\/)extrafanart\/([\?#].+)?$', '_internal_on_extra_fanart')
 
         """
         Test each method of this class for the appended attribute '_re_match' by the
@@ -64,6 +65,20 @@ class AbstractProvider(object):
             pass
 
         raise KodimonException("Mapping for path '%s' not found" % path)
+
+    def on_extra_fanart(self, context, re_match):
+        """
+        The implementation of the provider can override this behavior.
+        :param context:
+        :param re_match:
+        :return:
+        """
+        return None
+
+    def _internal_on_extra_fanart(self, context, re_match):
+        path = re_match.group('path')
+        new_context = context.clone(new_path=path)
+        return self.on_extra_fanart(new_context, re_match)
 
     def on_search(self, search_text, context, re_match):
         """
