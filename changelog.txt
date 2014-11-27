@@ -1,4 +1,5 @@
 1.0.0~alpha24 (2014-10-XX)
+ADD: 'Browse Channels'
 FIX: support for skins calling '.*/extrafanart/'
 
 1.0.0~alpha23 (2014-10-26)
