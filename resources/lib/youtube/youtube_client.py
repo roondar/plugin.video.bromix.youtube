@@ -137,7 +137,9 @@ class YouTubeClient(object):
     def get_guide_category(self, guide_category_id, page_token=''):
         params = {'part': 'snippet,contentDetails,brandingSettings',
                   'maxResults': str(self._max_results),
-                  'categoryId': guide_category_id}
+                  'categoryId': guide_category_id,
+                  'regionCode': self._country,
+                  'hl': self._language}
         if page_token:
             params['pageToken'] = page_token
             pass
@@ -159,6 +161,18 @@ class YouTubeClient(object):
                   'maxResults': str(self._max_results),
                   'regionCode': self._country,
                   'chart': 'mostPopular'}
+        if page_token:
+            params['pageToken'] = page_token
+            pass
+        return self._perform_v3_request(method='GET', path='videos', params=params)
+
+    def get_video_category(self, video_category_id, page_token=''):
+        params = {'part': 'snippet,contentDetails',
+                  'maxResults': str(self._max_results),
+                  'regionCode': self._country,
+                  'videoCategoryId': video_category_id,
+                  'chart': 'mostPopular',
+                  'hl': self._language}
         if page_token:
             params['pageToken'] = page_token
             pass

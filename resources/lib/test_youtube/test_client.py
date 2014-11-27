@@ -13,14 +13,29 @@ class TestClient(unittest.TestCase):
         json_data = client.get_popular_videos()
         pass
 
+    def test_video_category(self):
+        client = YouTubeClient(language='de-DE')
+
+        token, expires = client.authenticate('bromixbromix@gmail.com', 'lzZcnn0xMC1zCBuAU83g')
+        client = YouTubeClient(language='en-US', access_token=token)
+        json_data = client.get_video_category(20)
+        pass
+
     def test_video_categories(self):
         client = YouTubeClient(language='de-DE')
 
+        token, expires = client.authenticate('bromixbromix@gmail.com', 'lzZcnn0xMC1zCBuAU83g')
+        client = YouTubeClient(language='de-DE', access_token=token)
         json_data = client.get_video_categories()
         pass
 
     def test_guide_category(self):
         client = YouTubeClient(language='de-DE')
+        token, expires = client.authenticate('bromixbromix@gmail.com', 'lzZcnn0xMC1zCBuAU83g')
+        client = YouTubeClient(language='de-DE', access_token=token)
+
+        # Music
+        #json_data = client.get_guide_category('GCTXVzaWM')
 
         # Best of YouTube
         json_data = client.get_guide_category('GCQmVzdCBvZiBZb3VUdWJl')
@@ -29,6 +44,8 @@ class TestClient(unittest.TestCase):
     def test_guide_categories(self):
         client = YouTubeClient(language='de-DE')
 
+        token, expires = client.authenticate('bromixbromix@gmail.com', 'lzZcnn0xMC1zCBuAU83g')
+        client = YouTubeClient(access_token=token)
         json_data = client.get_guide_categories()
         pass
 

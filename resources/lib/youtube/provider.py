@@ -372,12 +372,10 @@ class Provider(kodion.AbstractProvider):
             result.append(subscriptions_item)
             pass
 
-        """
         browse_channels_item = DirectoryItem(context.localize(self.LOCAL_MAP['youtube.browse_channels']),
                                              context.create_uri(['guide']))
         browse_channels_item.set_fanart(self.get_fanart(context))
         result.append(browse_channels_item)
-        """
 
         return result
 
