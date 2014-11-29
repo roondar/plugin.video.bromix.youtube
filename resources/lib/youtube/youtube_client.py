@@ -50,7 +50,7 @@ class YouTubeClient(object):
 
         post_data = {'device_country': self._country.lower(),
                      'operatorCountry': self._country.lower(),
-                     'lang': self._language.replace('-','_'),
+                     'lang': self._language.replace('-', '_'),
                      'sdk_version': '19',
                      # 'google_play_services_version': '6188034',
                      'accountType': 'HOSTED_OR_GOOGLE',
