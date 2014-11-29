@@ -275,6 +275,24 @@ class YouTubeClient(object):
                   'id': video_id}
         return self._perform_v3_request(method='GET', path='videos', params=params)
 
+    def get_related_videos(self, video_id, page_token=''):
+        # prepare page token
+        if not page_token:
+            page_token = ''
+            pass
+
+        # prepare params
+        params = {'relatedToVideoId': video_id,
+                  'part': 'snippet',
+                  'type': 'video',
+                  'regionCode': self._country,
+                  'maxResults': str(self._max_results)}
+        if page_token:
+            params['pageToken'] = page_token
+            pass
+
+        return self._perform_v3_request(method='GET', path='search', params=params)
+
     def search(self, q, search_type=['video', 'channel', 'playlist'], page_token=''):
         """
         Returns a collection of search results that match the query parameters specified in the API request. By default,

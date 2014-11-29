@@ -16,7 +16,7 @@ class TestClient(unittest.TestCase):
     def test_video_category(self):
         client = YouTubeClient(language='de-DE')
 
-        token, expires = client.authenticate('bromixbromix@gmail.com', 'lzZcnn0xMC1zCBuAU83g')
+        token, expires = client.authenticate('bromixbromix@gmail.com', '')
         client = YouTubeClient(language='en-US', access_token=token)
         json_data = client.get_video_category(20)
         pass
@@ -24,14 +24,14 @@ class TestClient(unittest.TestCase):
     def test_video_categories(self):
         client = YouTubeClient(language='de-DE')
 
-        token, expires = client.authenticate('bromixbromix@gmail.com', 'lzZcnn0xMC1zCBuAU83g')
+        token, expires = client.authenticate('bromixbromix@gmail.com', '')
         client = YouTubeClient(language='de-DE', access_token=token)
         json_data = client.get_video_categories()
         pass
 
     def test_guide_category(self):
         client = YouTubeClient(language='de-DE')
-        token, expires = client.authenticate('bromixbromix@gmail.com', 'lzZcnn0xMC1zCBuAU83g')
+        token, expires = client.authenticate('bromixbromix@gmail.com', '')
         client = YouTubeClient(language='de-DE', access_token=token)
 
         # Music
@@ -44,7 +44,7 @@ class TestClient(unittest.TestCase):
     def test_guide_categories(self):
         client = YouTubeClient(language='de-DE')
 
-        token, expires = client.authenticate('bromixbromix@gmail.com', 'lzZcnn0xMC1zCBuAU83g')
+        token, expires = client.authenticate('bromixbromix@gmail.com', '')
         client = YouTubeClient(access_token=token)
         json_data = client.get_guide_categories()
         pass
@@ -115,6 +115,12 @@ class TestClient(unittest.TestCase):
         client = YouTubeClient()
 
         json_data = client.get_videos(['vyD70Huufco', 'AFdezM3_m-c'])
+        pass
+
+    def test_get_related_videos(self):
+        client = YouTubeClient()
+
+        json_data = client.get_related_videos(video_id='dbgPETJ-J9E')
         pass
 
     def test_search(self):

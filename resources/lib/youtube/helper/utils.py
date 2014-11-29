@@ -92,6 +92,10 @@ def update_video_infos(provider, context, video_id_dict, playlist_item_id_dict=N
                                      'Container.Update(%s)' % context.create_uri(['channel', channel_id])))
                 pass
 
+            context_menu.append((context.localize(provider.LOCAL_MAP['youtube.related_videos']),
+                                 'Container.Update(%s)' % context.create_uri(['related_videos'],
+                                                                             {'video_id': video_id})))
+
             if provider.is_logged_in():
                 my_related_playlists = resource_manager.get_related_playlists(channel_id='mine')
                 """

@@ -25,7 +25,8 @@ class Provider(kodion.AbstractProvider):
                  'youtube.like': 30511,
                  'youtube.remove': 30108,
                  'youtube.browse_channels': 30512,
-                 'youtube.what_to_watch': 30513}
+                 'youtube.what_to_watch': 30513,
+                 'youtube.related_videos': 30514}
 
     def __init__(self):
         kodion.AbstractProvider.__init__(self)
@@ -249,6 +250,21 @@ class Provider(kodion.AbstractProvider):
         page_token = context.get_param('page_token', '')
         json_data = self.get_client(context).get_popular_videos(page_token=page_token)
         result.extend(v3.response_to_items(self, context, json_data))
+
+        return result
+
+    @kodion.RegisterProviderPath('^/related_videos/$')
+    def _on_related_videos(self, context, re_match):
+        self._set_content_type(context, kodion.constants.content_type.EPISODES)
+
+        result = []
+
+        page_token = context.get_param('page_token', '')
+        video_id = context.get_param('video_id', '')
+        if video_id:
+            json_data = self.get_client(context).get_related_videos(video_id=video_id, page_token=page_token)
+            result.extend(v3.response_to_items(self, context, json_data))
+            pass
 
         return result
 
