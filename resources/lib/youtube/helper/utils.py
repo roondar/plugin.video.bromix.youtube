@@ -1,7 +1,8 @@
 import re
+
 from resources.lib import kodion
 from resources.lib.kodion import iso8601
-from resources.lib.youtube.helper import resource_manager
+
 
 __author__ = 'bromix'
 
@@ -52,7 +53,11 @@ def update_video_infos(provider, context, video_id_dict, playlist_item_id_dict=N
             pass
 
         # plot
+        channel_name = snippet.get('channelTitle', '')
         description = kodion.utils.strip_html_from_text(snippet['description'])
+        if channel_name:
+            description = '[UPPERCASE][B]%s[/B][/UPPERCASE][CR][CR]%s' % (channel_name, description)
+            pass
         video_item.set_plot(description)
 
         # date time
@@ -78,7 +83,6 @@ def update_video_infos(provider, context, video_id_dict, playlist_item_id_dict=N
 
         # update context menu
         channel_id = snippet.get('channelId', '')
-        channel_name = snippet.get('channelTitle', '')
         if channel_id and channel_name:
             context_menu = []
             # only if we are not in the channel provide to jump to the channel

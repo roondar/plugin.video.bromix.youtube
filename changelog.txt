@@ -1,4 +1,5 @@
 1.0.0~alpha25 (2014-10-XX)
+UPD: show channel name in the description
 FIX: disable verification warnings
 
 1.0.0~alpha24 (2014-10-27)
