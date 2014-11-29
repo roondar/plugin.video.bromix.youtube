@@ -231,13 +231,24 @@ class YouTubeClient(object):
 
         return self._perform_v3_request(method='GET', path='playlists', params=params)
 
-    def get_playlist_items(self, playlist_id, page_token=''):
+    def get_playlist_item_id_of_video_id(self, playlist_id, video_id):
+        json_data = self.get_playlist_items(playlist_id=playlist_id, video_id=video_id)
+        items = json_data.get('items', [])
+        if len(items) > 0:
+            return items[0]['id']
+
+        return None
+
+    def get_playlist_items(self, playlist_id, video_id='', page_token=''):
         # prepare params
         params = {'part': 'snippet',
                   'maxResults': str(self._max_results),
                   'playlistId': playlist_id}
         if page_token:
             params['pageToken'] = page_token
+            pass
+        if video_id:
+            params['videoId'] = video_id
             pass
 
         return self._perform_v3_request(method='GET', path='playlistItems', params=params)

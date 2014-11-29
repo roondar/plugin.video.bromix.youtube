@@ -26,7 +26,8 @@ class Provider(kodion.AbstractProvider):
                  'youtube.remove': 30108,
                  'youtube.browse_channels': 30512,
                  'youtube.what_to_watch': 30513,
-                 'youtube.related_videos': 30514}
+                 'youtube.related_videos': 30514,
+                 'youtube.setting.auto_remove_watch_later': 30515}
 
     def __init__(self):
         kodion.AbstractProvider.__init__(self)
@@ -159,10 +160,21 @@ class Provider(kodion.AbstractProvider):
         video_id = context.get_param('video_id')
 
         try:
-            video_streams = self.get_client(context).get_video_streams(context, video_id)
+            client = self.get_client(context)
+            video_streams = client.get_video_streams(context, video_id)
             video_stream = kodion.utils.find_best_fit(video_streams, _compare)
             video_item = VideoItem(video_id,
                                    video_stream['url'])
+
+            # Auto-Remove video from 'Watch Later' playlist
+            if self.is_logged_in() and context.get_settings().get_bool('youtube.playlist.watchlater.autoremove', True):
+                playlist_item_id = client.get_playlist_item_id_of_video_id(playlist_id='WL',
+                                                                           video_id=video_id)
+                if playlist_item_id:
+                    client.remove_video_from_playlist('WL', playlist_item_id)
+                    pass
+                pass
+
             return video_item
         except YouTubeException, ex:
             message = ex.get_message()
@@ -320,7 +332,7 @@ class Provider(kodion.AbstractProvider):
             pass
 
         # what to watch
-        what_to_watch_item = DirectoryItem('[B]'+context.localize(self.LOCAL_MAP['youtube.what_to_watch'])+'[/B]',
+        what_to_watch_item = DirectoryItem('[B]' + context.localize(self.LOCAL_MAP['youtube.what_to_watch']) + '[/B]',
                                            context.create_uri(['what_to_watch']),
                                            context.create_resource_path('media', 'what_to_watch.png'))
         what_to_watch_item.set_fanart(self.get_fanart(context))

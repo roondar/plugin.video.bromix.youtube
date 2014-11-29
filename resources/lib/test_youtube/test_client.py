@@ -98,10 +98,22 @@ class TestClient(unittest.TestCase):
         json_data = client.get_playlists('UCDbAn9LEzqONk__uXA6a9jQ')
         pass
 
+    def test_playlist_items_id_of_video(self):
+        client = YouTubeClient()
+
+        token, expires = client.authenticate('bromixbromix@gmail.com', '')
+        client = YouTubeClient(access_token=token)
+
+        playlist_item_id = client.get_playlist_item_id_of_video_id(u'WL', '-Zotg42zEEA')
+        pass
+
     def test_get_playlist_items(self):
         client = YouTubeClient()
 
-        json_data = client.get_playlist_items(u'UUDbAn9LEzqONk__uXA6a9jQ')
+        token, expires = client.authenticate('bromixbromix@gmail.com', '')
+        client = YouTubeClient(access_token=token)
+
+        json_data = client.get_playlist_items(u'WL', video_id='-Zotg42zEEA')
         pass
 
     def test_get_channels(self):
