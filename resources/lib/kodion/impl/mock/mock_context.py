@@ -20,7 +20,15 @@ class MockContext(AbstractContext):
 
         self._ui = None
         self._system_version = MockSystemVersion(0, 0, 'Kodion Test System')
+        self._language = 'en-US'
         pass
+
+    def set_language(self, language):
+        self._language = language
+        pass
+
+    def get_language(self):
+        return self._language
 
     def get_system_version(self):
         return self._system_version

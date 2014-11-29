@@ -30,7 +30,7 @@ class YouTubeClient(object):
             self._key = key
             pass
 
-        self._language = language
+        self._language = language.replace('-', '_')
         self._country = language.split('-')[1]
         self._access_token = access_token
         self._max_results = items_per_page
@@ -169,6 +169,7 @@ class YouTubeClient(object):
         params = {'part': 'snippet,contentDetails',
                   'maxResults': str(self._max_results),
                   'regionCode': self._country,
+                  'hl': self._language,
                   'chart': 'mostPopular'}
         if page_token:
             params['pageToken'] = page_token
@@ -178,9 +179,9 @@ class YouTubeClient(object):
     def get_video_category(self, video_category_id, page_token=''):
         params = {'part': 'snippet,contentDetails',
                   'maxResults': str(self._max_results),
-                  'regionCode': self._country,
                   'videoCategoryId': video_category_id,
                   'chart': 'mostPopular',
+                  'regionCode': self._country,
                   'hl': self._language}
         if page_token:
             params['pageToken'] = page_token
@@ -200,7 +201,9 @@ class YouTubeClient(object):
 
     def get_activities(self, channel_id, page_token=''):
         params = {'part': 'snippet,contentDetails',
-                  'maxResults': str(self._max_results)}
+                  'maxResults': str(self._max_results),
+                  'regionCode': self._country,
+                  'hl': self._language}
         if channel_id == 'home':
             params['home'] = 'true'
             pass
@@ -297,6 +300,7 @@ class YouTubeClient(object):
                   'part': 'snippet',
                   'type': 'video',
                   'regionCode': self._country,
+                  'hl': self._language,
                   'maxResults': str(self._max_results)}
         if page_token:
             params['pageToken'] = page_token
@@ -332,6 +336,7 @@ class YouTubeClient(object):
         params = {'q': q,
                   'part': 'snippet',
                   'regionCode': self._country,
+                  'hl': self._language,
                   'maxResults': str(self._max_results)}
         if search_type:
             params['type'] = search_type

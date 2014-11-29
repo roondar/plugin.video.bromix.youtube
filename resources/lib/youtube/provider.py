@@ -43,7 +43,6 @@ class Provider(kodion.AbstractProvider):
     def get_client(self, context):
         # set the items per page (later)
         items_per_page = context.get_settings().get_items_per_page()
-        # TODO: get language or region to configure the client correctly
 
         access_manager = context.get_access_manager()
         access_token = access_manager.get_access_token()
@@ -57,20 +56,22 @@ class Provider(kodion.AbstractProvider):
             pass
 
         if not self._client:
+            language = context.get_language()
+
             if access_manager.has_login_credentials():
                 username, password = access_manager.get_login_credentials()
                 access_token = access_manager.get_access_token()
 
                 # create a new access_token
                 if not access_token:
-                    access_token, expires = YouTubeClient().authenticate(username, password)
+                    access_token, expires = YouTubeClient(language=language).authenticate(username, password)
                     access_manager.update_access_token(access_token, expires)
                     pass
 
                 self._is_logged_in = access_token != ''
-                self._client = YouTubeClient(items_per_page=items_per_page, access_token=access_token)
+                self._client = YouTubeClient(items_per_page=items_per_page, access_token=access_token, language=language)
             else:
-                self._client = YouTubeClient(items_per_page=items_per_page)
+                self._client = YouTubeClient(items_per_page=items_per_page, language=language)
                 pass
             pass
 
