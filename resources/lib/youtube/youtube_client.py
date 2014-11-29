@@ -1,11 +1,20 @@
+__author__ = 'bromix'
+
 import urlparse
-from resources.lib.kodion.exceptions import KodimonException
+
 from resources.lib.youtube.youtube_exceptions import LoginException
 
-__author__ = 'bromix'
 
 import json
 import requests
+# Verify is disabled and to avoid warnings we disable the warnings. Behind a proxy request isn't working correctly all
+# the time and if so can't validate the hosts correctly resulting in a exception and the addon won't work properly.
+try:
+    from requests.packages import urllib3
+    urllib3.disable_warnings()
+except:
+    # do nothing
+    pass
 
 from .helper.video_info import VideoInfo
 
