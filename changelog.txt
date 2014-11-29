@@ -1,4 +1,5 @@
 1.0.0~alpha25 (2014-10-XX)
+UPD: requests with language/region
 UPD: new icons
 ADD: Auto-Remove from 'Watch Later' list
 ADD: 'Related Videos'
