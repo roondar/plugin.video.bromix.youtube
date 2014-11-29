@@ -401,7 +401,8 @@ class Provider(kodion.AbstractProvider):
             pass
 
         browse_channels_item = DirectoryItem(context.localize(self.LOCAL_MAP['youtube.browse_channels']),
-                                             context.create_uri(['guide']))
+                                             context.create_uri(['guide']),
+                                             image=context.create_resource_path('media', 'browse_channels.png'))
         browse_channels_item.set_fanart(self.get_fanart(context))
         result.append(browse_channels_item)
 
