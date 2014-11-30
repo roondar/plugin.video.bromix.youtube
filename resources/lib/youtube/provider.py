@@ -101,7 +101,7 @@ class Provider(kodion.AbstractProvider):
         page_token = context.get_param('page_token', '')
 
         # no caching
-        json_data = self.get_client(context).get_playlist_items(playlist_id, page_token)
+        json_data = self.get_client(context).get_playlist_items(playlist_id=playlist_id, page_token=page_token)
         result.extend(v3.response_to_items(self, context, json_data))
 
         return result
