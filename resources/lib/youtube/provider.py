@@ -56,7 +56,8 @@ class Provider(kodion.AbstractProvider):
             pass
 
         if not self._client:
-            language = context.get_language()
+            # because Kodi doesn't return reliable language codes, we set 'en-US' for now
+            language = 'en-US'  # context.get_language()
 
             if access_manager.has_login_credentials():
                 username, password = access_manager.get_login_credentials()
@@ -69,7 +70,8 @@ class Provider(kodion.AbstractProvider):
                     pass
 
                 self._is_logged_in = access_token != ''
-                self._client = YouTubeClient(items_per_page=items_per_page, access_token=access_token, language=language)
+                self._client = YouTubeClient(items_per_page=items_per_page, access_token=access_token,
+                                             language=language)
             else:
                 self._client = YouTubeClient(items_per_page=items_per_page, language=language)
                 pass
