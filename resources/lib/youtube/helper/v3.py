@@ -204,7 +204,7 @@ def response_to_items(provider, context, json_data):
     kind = json_data.get('kind', '')
     if kind == u'youtube#searchListResponse' or kind == u'youtube#playlistItemListResponse' or \
                     kind == u'youtube#playlistListResponse' or kind == u'youtube#subscriptionListResponse' or \
-                    kind == 'youtube#guideCategoryListResponse' or kind == u'youtube#channelListResponse' or \
+                    kind == u'youtube#guideCategoryListResponse' or kind == u'youtube#channelListResponse' or \
                     kind == u'youtube#videoListResponse':
         result.extend(_process_list_response(provider, context, json_data))
         pass

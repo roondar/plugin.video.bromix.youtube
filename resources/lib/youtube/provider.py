@@ -218,12 +218,12 @@ class Provider(kodion.AbstractProvider):
         return True
 
     @kodion.RegisterProviderPath('^/my_subscriptions/$')
-    def _on_mysubscriptions(self, context, re_match):
+    def _on_my_subscriptions(self, context, re_match):
         self._set_content_type(context, kodion.constants.content_type.EPISODES)
 
         result = []
-
-        json_data = self.get_client(context).get_uploaded_videos_of_subscriptions()
+        start_index = int(context.get_param('start-index', 0))
+        json_data = self.get_client(context).get_uploaded_videos_of_subscriptions(start_index)
         result.extend(v2.response_to_items(self, context, json_data))
 
         return result
