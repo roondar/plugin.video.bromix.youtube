@@ -324,7 +324,8 @@ class Provider(kodion.AbstractProvider):
 
         result = []
 
-        if self._is_logged_in:
+        settings = context.get_settings()
+        if self._is_logged_in and settings.get_bool('youtube.folder.my_subscriptions.show', True):
             # my subscription
             my_subscriptions_item = DirectoryItem(
                 '[B]' + context.localize(self.LOCAL_MAP['youtube.my_subscriptions']) + '[/B]',
@@ -335,11 +336,13 @@ class Provider(kodion.AbstractProvider):
             pass
 
         # what to watch
-        what_to_watch_item = DirectoryItem('[B]' + context.localize(self.LOCAL_MAP['youtube.what_to_watch']) + '[/B]',
-                                           context.create_uri(['what_to_watch']),
-                                           context.create_resource_path('media', 'what_to_watch.png'))
-        what_to_watch_item.set_fanart(self.get_fanart(context))
-        result.append(what_to_watch_item)
+        if settings.get_bool('youtube.folder.what_to_watch.show', True):
+            what_to_watch_item = DirectoryItem('[B]' + context.localize(self.LOCAL_MAP['youtube.what_to_watch']) + '[/B]',
+                                               context.create_uri(['what_to_watch']),
+                                               context.create_resource_path('media', 'what_to_watch.png'))
+            what_to_watch_item.set_fanart(self.get_fanart(context))
+            result.append(what_to_watch_item)
+            pass
 
         # search
         search_item = kodion.items.create_search_item(context)
@@ -352,14 +355,16 @@ class Provider(kodion.AbstractProvider):
             playlists = resource_manager.get_related_playlists(channel_id='mine')
 
             # my channel
-            my_channel_item = DirectoryItem(context.localize(self.LOCAL_MAP['youtube.my_channel']),
-                                            context.create_uri(['channel', 'mine']),
-                                            image=context.create_resource_path('media', 'channel.png'))
-            my_channel_item.set_fanart(self.get_fanart(context))
-            result.append(my_channel_item)
+            if settings.get_bool('youtube.folder.my_channel.show', True):
+                my_channel_item = DirectoryItem(context.localize(self.LOCAL_MAP['youtube.my_channel']),
+                                                context.create_uri(['channel', 'mine']),
+                                                image=context.create_resource_path('media', 'channel.png'))
+                my_channel_item.set_fanart(self.get_fanart(context))
+                result.append(my_channel_item)
+                pass
 
             # watch later
-            if 'watchLater' in playlists:
+            if 'watchLater' in playlists and settings.get_bool('youtube.folder.watch_later.show', True):
                 watch_later_item = DirectoryItem(context.localize(self.LOCAL_MAP['youtube.watch_later']),
                                                  context.create_uri(
                                                      ['channel', 'mine', 'playlist', playlists['watchLater']]),
@@ -369,7 +374,7 @@ class Provider(kodion.AbstractProvider):
                 pass
 
             # liked videos
-            if 'likes' in playlists:
+            if 'likes' in playlists and settings.get_bool('youtube.folder.liked_videos.show', True):
                 liked_videos_item = DirectoryItem(context.localize(self.LOCAL_MAP['youtube.liked.videos']),
                                                   context.create_uri(
                                                       ['channel', 'mine', 'playlist', playlists['likes']]),
@@ -379,7 +384,7 @@ class Provider(kodion.AbstractProvider):
                 pass
 
             # history
-            if 'watchHistory' in playlists:
+            if 'watchHistory' in playlists and settings.get_bool('youtube.folder.history.show', False):
                 watch_history_item = DirectoryItem(context.localize(self.LOCAL_MAP['youtube.history']),
                                                    context.create_uri(
                                                        ['channel', 'mine', 'playlist', playlists['watchHistory']]),
@@ -389,25 +394,31 @@ class Provider(kodion.AbstractProvider):
                 pass
 
             # (my) playlists
-            playlists_item = DirectoryItem(context.localize(self.LOCAL_MAP['youtube.playlists']),
-                                           context.create_uri(['channel', 'mine', 'playlists']),
-                                           context.create_resource_path('media', 'playlist.png'))
-            playlists_item.set_fanart(self.get_fanart(context))
-            result.append(playlists_item)
+            if settings.get_bool('youtube.folder.playlists.show', True):
+                playlists_item = DirectoryItem(context.localize(self.LOCAL_MAP['youtube.playlists']),
+                                               context.create_uri(['channel', 'mine', 'playlists']),
+                                               context.create_resource_path('media', 'playlist.png'))
+                playlists_item.set_fanart(self.get_fanart(context))
+                result.append(playlists_item)
+                pass
 
             # subscriptions
-            subscriptions_item = DirectoryItem(context.localize(self.LOCAL_MAP['youtube.subscriptions']),
-                                               context.create_uri(['subscriptions']),
-                                               image=context.create_resource_path('media', 'channel.png'))
-            subscriptions_item.set_fanart(self.get_fanart(context))
-            result.append(subscriptions_item)
+            if settings.get_bool('youtube.folder.subscriptions.show', True):
+                subscriptions_item = DirectoryItem(context.localize(self.LOCAL_MAP['youtube.subscriptions']),
+                                                   context.create_uri(['subscriptions']),
+                                                   image=context.create_resource_path('media', 'channel.png'))
+                subscriptions_item.set_fanart(self.get_fanart(context))
+                result.append(subscriptions_item)
+                pass
             pass
 
-        browse_channels_item = DirectoryItem(context.localize(self.LOCAL_MAP['youtube.browse_channels']),
-                                             context.create_uri(['guide']),
-                                             image=context.create_resource_path('media', 'browse_channels.png'))
-        browse_channels_item.set_fanart(self.get_fanart(context))
-        result.append(browse_channels_item)
+        if settings.get_bool('youtube.folder.browse_channels.show', True):
+            browse_channels_item = DirectoryItem(context.localize(self.LOCAL_MAP['youtube.browse_channels']),
+                                                 context.create_uri(['guide']),
+                                                 image=context.create_resource_path('media', 'browse_channels.png'))
+            browse_channels_item.set_fanart(self.get_fanart(context))
+            result.append(browse_channels_item)
+            pass
 
         return result
 
