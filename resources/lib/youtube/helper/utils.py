@@ -19,6 +19,11 @@ def update_video_infos(provider, context, video_id_dict, playlist_item_id_dict=N
     resource_manager = provider.get_resource_manager(context)
     video_data = resource_manager.get_videos(video_ids)
 
+    my_related_playlists = {}
+    if provider.is_logged_in():
+        my_related_playlists = resource_manager.get_related_playlists(channel_id='mine')
+        pass
+
     for video_id in video_data.keys():
         yt_item = video_data[video_id]
         video_item = video_id_dict[video_id]
@@ -97,7 +102,6 @@ def update_video_infos(provider, context, video_id_dict, playlist_item_id_dict=N
                                                                              {'video_id': video_id})))
 
             if provider.is_logged_in():
-                my_related_playlists = resource_manager.get_related_playlists(channel_id='mine')
                 """
                 Add 'watch later' only if:
                 - I'm logged in
