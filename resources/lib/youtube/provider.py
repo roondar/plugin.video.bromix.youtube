@@ -166,16 +166,13 @@ class Provider(kodion.AbstractProvider):
             client = self.get_client(context)
             video_streams = client.get_video_streams(context, video_id)
             video_stream = kodion.utils.find_best_fit(video_streams, _compare)
-            video_item = VideoItem(video_id,
-                                   video_stream['url'])
+            video_item = VideoItem(video_id, video_stream['url'])
 
-            # Auto-Remove video from 'Watch Later' playlist
+            # Auto-Remove video from 'Watch Later' playlist - this should run asynchronous
             if self.is_logged_in() and context.get_settings().get_bool('youtube.playlist.watchlater.autoremove', True):
-                playlist_item_id = client.get_playlist_item_id_of_video_id(playlist_id='WL',
-                                                                           video_id=video_id)
-                if playlist_item_id:
-                    client.remove_video_from_playlist('WL', playlist_item_id)
-                    pass
+                import xbmc
+                xbmc.executebuiltin('RunPlugin(%s)' % context.create_uri(['internal', 'auto_remove_watch_later'],
+                                                                         {'video_id': video_id}))
                 pass
 
             return video_item
@@ -282,6 +279,19 @@ class Provider(kodion.AbstractProvider):
             pass
 
         return result
+
+    @kodion.RegisterProviderPath('^/internal/auto_remove_watch_later/$')
+    def _on_auto_remove_watch_later(self, context, re_match):
+
+        video_id = context.get_param('video_id', '')
+        if video_id:
+            client = self.get_client(context)
+            playlist_item_id = client.get_playlist_item_id_of_video_id(playlist_id='WL', video_id=video_id)
+            if playlist_item_id:
+                client.remove_video_from_playlist('WL', playlist_item_id)
+                pass
+            pass
+        return True
 
     def on_search(self, search_text, context, re_match):
         self._set_content_type(context, kodion.constants.content_type.EPISODES)
