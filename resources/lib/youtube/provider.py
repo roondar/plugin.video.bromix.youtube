@@ -147,7 +147,7 @@ class Provider(kodion.AbstractProvider):
         if upload_playlist:
             json_data = context.get_function_cache().get(FunctionCache.ONE_MINUTE * 5,
                                                          self.get_client(context).get_playlist_items, upload_playlist,
-                                                         page_token)
+                                                         page_token=page_token)
             result.extend(v3.response_to_items(self, context, json_data))
             pass
 
@@ -337,9 +337,10 @@ class Provider(kodion.AbstractProvider):
 
         # what to watch
         if settings.get_bool('youtube.folder.what_to_watch.show', True):
-            what_to_watch_item = DirectoryItem('[B]' + context.localize(self.LOCAL_MAP['youtube.what_to_watch']) + '[/B]',
-                                               context.create_uri(['what_to_watch']),
-                                               context.create_resource_path('media', 'what_to_watch.png'))
+            what_to_watch_item = DirectoryItem(
+                '[B]' + context.localize(self.LOCAL_MAP['youtube.what_to_watch']) + '[/B]',
+                context.create_uri(['what_to_watch']),
+                context.create_resource_path('media', 'what_to_watch.png'))
             what_to_watch_item.set_fanart(self.get_fanart(context))
             result.append(what_to_watch_item)
             pass
