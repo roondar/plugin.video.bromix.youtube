@@ -1,5 +1,6 @@
 1.0.0~alpha27 (2014-12-01)
-
+UPD: performance improved for auto-removing videos from 'Watch Later' list
+FIX: error while navigating to the next page
 
 1.0.0~alpha26 (2014-11-30)
 ADD: hide all entries (except search) via settings in the root menu
