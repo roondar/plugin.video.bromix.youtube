@@ -9,21 +9,11 @@ import unittest
 
 
 class TestProvider(unittest.TestCase):
-    def test_login(self):
-        provider = Provider()
-        path = kodion.utils.create_path('my_subscriptions')
-        context = kodion.Context(path=path)
-        context.get_settings().set_string(kodion.constants.setting.LOGIN_USERNAME, 'bromixbromix@gmail.com')
-        context.get_settings().set_string(kodion.constants.setting.LOGIN_PASSWORD, 'lzZcnn0xMC1zCBuAU83g')
-        result = provider.navigate(context)
-        items = result[0]
-        pass
-
     def test_play(self):
         provider = Provider()
 
-        path = kodion.utils.create_path('play', 'puMYeBRTsHs')
-        context = kodion.Context(path=path)
+        path = kodion.utils.create_path('play')
+        context = kodion.Context(path=path, params={'video_id': 'puMYeBRTsHs'})
         result = provider.navigate(context)
         items = result[0]
         pass
@@ -93,22 +83,6 @@ class TestProvider(unittest.TestCase):
         self.assertGreater(len(items), 0)
 
         kodion.utils.print_items(items)
-        pass
-
-    def test_performance(self):
-        provider = Provider()
-        context = kodion.Context(path='/')
-        context.get_settings().set_string(kodion.constants.setting.LOGIN_USERNAME, 'bromixbromix@gmail.com')
-        context.get_settings().set_string(kodion.constants.setting.LOGIN_PASSWORD, '')
-
-        # to initialize the client
-        result = provider.navigate(context)
-
-        new_context = context.clone(new_path='/my_subscriptions/')
-        start_time = time.time()
-        result = provider.navigate(new_context)
-        end_time = time.time()
-        print end_time-start_time
         pass
 
     pass

@@ -6,6 +6,7 @@ from resources.lib import kodion
 from resources.lib.kodion import iso8601
 from resources.lib.youtube.helper import yt_context_menu
 
+
 def update_video_infos(provider, context, video_id_dict, playlist_item_id_dict=None):
     video_ids = list(video_id_dict.keys())
     if len(video_ids) == 0:
@@ -18,9 +19,9 @@ def update_video_infos(provider, context, video_id_dict, playlist_item_id_dict=N
     resource_manager = provider.get_resource_manager(context)
     video_data = resource_manager.get_videos(video_ids)
 
-    my_related_playlists = {}
+    my_playlists = {}
     if provider.is_logged_in():
-        my_related_playlists = resource_manager.get_related_playlists(channel_id='mine')
+        my_playlists = resource_manager.get_related_playlists(channel_id='mine')
         pass
 
     for video_id in video_data.keys():
@@ -89,62 +90,41 @@ def update_video_infos(provider, context, video_id_dict, playlist_item_id_dict=N
         channel_id = snippet.get('channelId', '')
         if channel_id and channel_name:
             context_menu = []
-            # only if we are not in the channel provide to jump to the channel
+            # only if we are not directly in the channel provide a jump to the channel
             if kodion.utils.create_path('channel', channel_id) != context.get_path():
-                context_menu.append((context.localize(provider.LOCAL_MAP['youtube.go_to_channel']).replace("%CHANNEL%",
-                                                                                                           '[B]%s[/B]' % channel_name),
-                                     'Container.Update(%s)' % context.create_uri(['channel', channel_id])))
+                yt_context_menu.append_go_to_channel(context_menu, provider, context, channel_id, channel_name)
                 pass
+            pass
 
-            context_menu.append((context.localize(provider.LOCAL_MAP['youtube.related_videos']),
-                                 'Container.Update(%s)' % context.create_uri(['special', 'relatedvideos'],
-                                                                             {'video_id': video_id})))
+        if provider.is_logged_in():
+            # add 'Watch Later' only if we are not in my 'Watch Later' list
+            watch_later_playlist_id = my_playlists.get('watchLater', '')
+            yt_context_menu.append_watch_later(context_menu, provider, context, watch_later_playlist_id, video_id)
 
-            if provider.is_logged_in():
-                """
-                Add 'watch later' only if:
-                - I'm logged in
-                - this is not my 'watch later' playlist
-                """
-                watch_later_playlist = my_related_playlists.get('watchLater', '')
-                if watch_later_playlist and kodion.utils.create_path('channel', 'mine', 'playlist',
-                                                                     watch_later_playlist) != context.get_path():
-                    context_menu.append((context.localize(provider.LOCAL_MAP['youtube.watch_later']),
+            # add 'Like Video' only if we are not in my 'Liked Videos' list
+            liked_videos_playlist = my_playlists.get('likes', '')
+            yt_context_menu.append_like_video(context_menu, provider, context, liked_videos_playlist, video_id)
+
+            # subscribe to the channel of the video
+            yt_context_menu.append_subscribe_to_channel(context_menu, provider, context, channel_id, channel_name)
+
+            playlist_match = re.match('^/channel/mine/playlist/(?P<playlist_id>.*)/$', context.get_path())
+            if playlist_match:
+                playlist_id = playlist_match.group('playlist_id')
+                playlist_item_id = playlist_item_id_dict.get(video_id, '')
+                if playlist_item_id:
+                    context_menu.append((context.localize(provider.LOCAL_MAP['youtube.remove']),
                                          'RunPlugin(%s)' % context.create_uri(
-                                             ['playlist', my_related_playlists['watchLater'], 'add', video_id])))
-                    pass
-
-                """
-                Add 'like' only if:
-                - I'm logged in
-                - this is not my 'liked videos' playlist
-                """
-                liked_videos_playlist = my_related_playlists.get('likes', '')
-                if liked_videos_playlist and kodion.utils.create_path('channel', 'mine', 'playlist',
-                                                                      liked_videos_playlist) != context.get_path():
-                    context_menu.append((context.localize(provider.LOCAL_MAP['youtube.like']),
-                                         'RunPlugin(%s)' % context.create_uri(
-                                             ['playlist', my_related_playlists['likes'], 'add', video_id])))
-                    pass
-
-                # subscribe to the channel of the video
-                yt_context_menu.append_subscribe_to_channel(context_menu, provider, context, channel_id, channel_name)
-
-                playlist_match = re.match('^/channel/mine/playlist/(?P<playlist_id>.*)/$', context.get_path())
-                if playlist_match:
-                    playlist_id = playlist_match.group('playlist_id')
-                    playlist_item_id = playlist_item_id_dict.get(video_id, '')
-                    if playlist_item_id:
-                        context_menu.append((context.localize(provider.LOCAL_MAP['youtube.remove']),
-                                             'RunPlugin(%s)' % context.create_uri(
-                                                 ['playlist', playlist_id, 'remove', playlist_item_id])))
-                        pass
+                                             ['playlist', playlist_id, 'remove', playlist_item_id])))
                     pass
                 pass
+            pass
 
-            if len(context_menu) > 0:
-                video_item.set_context_menu(context_menu)
-                pass
+        # find related videos
+        yt_context_menu.append_related_videos(context_menu, provider, context, video_id)
+
+        if len(context_menu) > 0:
+            video_item.set_context_menu(context_menu)
             pass
         pass
 
