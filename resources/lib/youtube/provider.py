@@ -215,7 +215,13 @@ class Provider(kodion.AbstractProvider):
         video_id = re_match.group('video_id')
 
         if method == 'add':
-            self.get_client(context).add_video_to_playlist(playlist_id=playlist_id, video_id=video_id)
+            json_data = self.get_client(context).add_video_to_playlist(playlist_id=playlist_id, video_id=video_id)
+            if 'error' in json_data:
+                message = json_data['error'].get('message', '')
+                if message:
+                    context.get_ui().show_notification(message)
+                    pass
+                pass
             pass
         elif method == 'remove':
             self.get_client(context).remove_video_from_playlist(playlist_id=playlist_id, playlist_item_id=video_id)
