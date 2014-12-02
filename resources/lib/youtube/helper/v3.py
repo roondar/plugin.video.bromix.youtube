@@ -62,7 +62,7 @@ def _process_list_response(provider, context, json_data):
             title = snippet['title']
 
             guide_item = items.DirectoryItem(title,
-                                             context.create_uri(['guide'], {'guide_id': guide_id}))
+                                             context.create_uri(['special', 'browse_channels'], {'guide_id': guide_id}))
             guide_item.set_fanart(provider.get_fanart(context))
             result.append(guide_item)
             pass

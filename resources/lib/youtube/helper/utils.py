@@ -98,7 +98,7 @@ def update_video_infos(provider, context, video_id_dict, playlist_item_id_dict=N
                 pass
 
             context_menu.append((context.localize(provider.LOCAL_MAP['youtube.related_videos']),
-                                 'Container.Update(%s)' % context.create_uri(['related_videos'],
+                                 'Container.Update(%s)' % context.create_uri(['special', 'relatedvideos'],
                                                                              {'video_id': video_id})))
 
             if provider.is_logged_in():
