@@ -1,5 +1,5 @@
-1.0.0~alpha28 (2014-12-02)
-UPD: rework of subscription management via context menu
+1.0.0~alpha28 (2014-12-XX)
+UPD: rework of handling context menu
 FIX: remove next page for related videos (because APIv3 is broken)
 
 1.0.0~alpha27 (2014-12-01)
