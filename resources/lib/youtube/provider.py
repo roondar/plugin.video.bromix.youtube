@@ -216,7 +216,7 @@ class Provider(kodion.AbstractProvider):
 
         if method == 'add':
             json_data = self.get_client(context).add_video_to_playlist(playlist_id=playlist_id, video_id=video_id)
-            if 'error' in json_data:
+            if json_data and 'error' in json_data:
                 message = json_data['error'].get('message', '')
                 if message:
                     context.get_ui().show_notification(message)

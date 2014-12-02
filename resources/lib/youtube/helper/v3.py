@@ -53,7 +53,7 @@ def _process_list_response(provider, context, json_data):
             # if logged in => provide subscribing to the channel
             if provider.is_logged_in():
                 context_menu = []
-                yt_context_menu.append_subscribe_to_channel(context_menu, provider, context)
+                yt_context_menu.append_subscribe_to_channel(context_menu, provider, context, channel_id)
                 channel_item.set_context_menu(context_menu)
                 pass
             result.append(channel_item)
