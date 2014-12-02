@@ -1,3 +1,6 @@
+1.0.0~alpha28 (2014-12-02)
+FIX: remove next page for related videos (because APIv3 is broken)
+
 1.0.0~alpha27 (2014-12-01)
 UPD: performance improved for auto-removing videos from 'Watch Later' list
 FIX: error while navigating to the next page

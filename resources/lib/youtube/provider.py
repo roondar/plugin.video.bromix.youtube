@@ -275,6 +275,12 @@ class Provider(kodion.AbstractProvider):
         video_id = context.get_param('video_id', '')
         if video_id:
             json_data = self.get_client(context).get_related_videos(video_id=video_id, page_token=page_token)
+
+            # we remove the token for a next page, because the APIv3 is broken at this point
+            if 'nextPageToken' in json_data:
+                del json_data['nextPageToken']
+                pass
+
             result.extend(v3.response_to_items(self, context, json_data))
             pass
 
