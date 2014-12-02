@@ -1,11 +1,10 @@
+__author__ = 'bromix'
+
 import re
 
 from resources.lib import kodion
 from resources.lib.kodion import iso8601
-
-
-__author__ = 'bromix'
-
+from resources.lib.youtube.helper import yt_context_menu
 
 def update_video_infos(provider, context, video_id_dict, playlist_item_id_dict=None):
     video_ids = list(video_id_dict.keys())
@@ -127,6 +126,9 @@ def update_video_infos(provider, context, video_id_dict, playlist_item_id_dict=N
                                          'RunPlugin(%s)' % context.create_uri(
                                              ['playlist', my_related_playlists['likes'], 'add', video_id])))
                     pass
+
+                # subscribe to the channel of the video
+                yt_context_menu.append_subscribe_to_channel(context_menu, provider, context, channel_id, channel_name)
 
                 playlist_match = re.match('^/channel/mine/playlist/(?P<playlist_id>.*)/$', context.get_path())
                 if playlist_match:

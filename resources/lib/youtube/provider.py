@@ -1,4 +1,4 @@
-from resources.lib.youtube.helper import v2
+from resources.lib.youtube.helper import v2, yt_subscriptions
 
 __author__ = 'bromix'
 
@@ -27,7 +27,8 @@ class Provider(kodion.AbstractProvider):
                  'youtube.browse_channels': 30512,
                  'youtube.what_to_watch': 30513,
                  'youtube.related_videos': 30514,
-                 'youtube.setting.auto_remove_watch_later': 30515}
+                 'youtube.setting.auto_remove_watch_later': 30515,
+                 'youtube.subscribe_to': 30517}
 
     def __init__(self):
         kodion.AbstractProvider.__init__(self)
@@ -223,37 +224,17 @@ class Provider(kodion.AbstractProvider):
 
         return True
 
-    @kodion.RegisterProviderPath('^/subscription/(?P<method>.*)/(?P<subscription_id>.*)/$')
-    def _on_subscription(self, context, re_match):
-        method = re_match.group('method')
-        subscription_id = re_match.group('subscription_id')
-
-        if method == 'remove':
-            self.get_client(context).unsubscribe(subscription_id)
-            context.get_ui().refresh_container()
-            pass
-        elif method == 'add':
-            self.get_client(context).subscribe(subscription_id)
-            pass
-        return True
-
-    @kodion.RegisterProviderPath('^/subscriptions/$')
+    @kodion.RegisterProviderPath('^/subscriptions/(?P<method>.*)/$')
     def _on_subscriptions(self, context, re_match):
-        result = []
-
-        page_token = context.get_param('page_token', '')
-        # no caching
-        json_data = self.get_client(context).get_subscription('mine', page_token=page_token)
-        result.extend(v3.response_to_items(self, context, json_data))
-
-        return result
+        method = re_match.group('method')
+        return yt_subscriptions.process(method, self, context, re_match)
 
     @kodion.RegisterProviderPath('^/special/(?P<category>.*)/$')
     def _on_yt_specials(self, context, re_match):
         result = []
 
         category = re_match.group('category')
-        result.extend(yt_specials.process_yt_specials(category, self, context, re_match))
+        result.extend(yt_specials.process(category, self, context, re_match))
         return result
 
     """
@@ -395,7 +376,7 @@ class Provider(kodion.AbstractProvider):
             # subscriptions
             if settings.get_bool('youtube.folder.subscriptions.show', True):
                 subscriptions_item = DirectoryItem(context.localize(self.LOCAL_MAP['youtube.subscriptions']),
-                                                   context.create_uri(['subscriptions']),
+                                                   context.create_uri(['subscriptions', 'list']),
                                                    image=context.create_resource_path('media', 'channel.png'))
                 subscriptions_item.set_fanart(self.get_fanart(context))
                 result.append(subscriptions_item)

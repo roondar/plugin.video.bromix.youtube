@@ -65,7 +65,7 @@ def _process_new_uploaded_videos(provider, context, re_match):
     return result
 
 
-def process_yt_specials(category, provider, context, re_match):
+def process(category, provider, context, re_match):
     result = []
 
     if category == 'related_videos':
