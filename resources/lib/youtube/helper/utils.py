@@ -108,11 +108,12 @@ def update_video_infos(provider, context, video_id_dict, playlist_item_id_dict=N
             # subscribe to the channel of the video
             yt_context_menu.append_subscribe_to_channel(context_menu, provider, context, channel_id, channel_name)
 
-            playlist_match = re.match('^/channel/mine/playlist/(?P<playlist_id>.*)/$', context.get_path())
-            if playlist_match:
-                playlist_id = playlist_match.group('playlist_id')
-                playlist_item_id = playlist_item_id_dict.get(video_id, '')
-                if playlist_item_id:
+            # provide 'remove' for videos in my playlists
+            if video_id in playlist_item_id_dict:
+                playlist_match = re.match('^/channel/mine/playlist/(?P<playlist_id>.*)/$', context.get_path())
+                if playlist_match:
+                    playlist_id = playlist_match.group('playlist_id')
+                    playlist_item_id = playlist_item_id_dict[video_id]
                     context_menu.append((context.localize(provider.LOCAL_MAP['youtube.remove']),
                                          'RunPlugin(%s)' % context.create_uri(
                                              ['playlist', playlist_id, 'remove', playlist_item_id])))

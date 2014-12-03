@@ -109,6 +109,8 @@ class Provider(kodion.AbstractProvider):
 
         # no caching
         json_data = self.get_client(context).get_playlist_items(playlist_id=playlist_id, page_token=page_token)
+        if not v3.handle_error(self, context, json_data):
+            return False
         result.extend(v3.response_to_items(self, context, json_data))
 
         return result
@@ -129,6 +131,8 @@ class Provider(kodion.AbstractProvider):
 
         json_data = context.get_function_cache().get(FunctionCache.ONE_HOUR, self.get_client(context).get_playlists,
                                                      channel_id, page_token)
+        if not v3.handle_error(self, context, json_data):
+            return False
         result.extend(v3.response_to_items(self, context, json_data))
 
         return result
@@ -165,6 +169,8 @@ class Provider(kodion.AbstractProvider):
             json_data = context.get_function_cache().get(FunctionCache.ONE_MINUTE * 5,
                                                          self.get_client(context).get_playlist_items, upload_playlist,
                                                          page_token=page_token)
+            if not v3.handle_error(self, context, json_data):
+                return False
             result.extend(v3.response_to_items(self, context, json_data))
             pass
 
@@ -253,7 +259,9 @@ class Provider(kodion.AbstractProvider):
             client = self.get_client(context)
             playlist_item_id = client.get_playlist_item_id_of_video_id(playlist_id='WL', video_id=video_id)
             if playlist_item_id:
-                client.remove_video_from_playlist('WL', playlist_item_id)
+                json_data = client.remove_video_from_playlist('WL', playlist_item_id)
+                if not v3.handle_error(self, context, json_data):
+                    return False
                 pass
             pass
         return True
@@ -289,6 +297,8 @@ class Provider(kodion.AbstractProvider):
 
         json_data = context.get_function_cache().get(FunctionCache.ONE_MINUTE * 10, self.get_client(context).search,
                                                      q=search_text, search_type=search_type, page_token=page_token)
+        if not v3.handle_error(self, context, json_data):
+            return False
         result.extend(v3.response_to_items(self, context, json_data))
 
         return result
