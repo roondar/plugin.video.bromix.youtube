@@ -6,7 +6,7 @@ from resources.lib import kodion
 from resources.lib.kodion.utils import FunctionCache
 from resources.lib.kodion.items import *
 from .youtube_client import YouTubeClient
-from .helper import v3, v2, ResourceManager, yt_specials
+from .helper import v3, v2, ResourceManager, yt_specials, yt_playlist
 from .youtube_exceptions import YouTubeException, LoginException
 
 
@@ -214,26 +214,11 @@ class Provider(kodion.AbstractProvider):
 
         return False
 
-    @kodion.RegisterProviderPath('^/playlist/(?P<playlist_id>.*)/(?P<method>.*)/(?P<video_id>.*)/$')
+    @kodion.RegisterProviderPath('^/playlist/(?P<method>.*)/(?P<category>.*)/$')
     def _on_playlist(self, context, re_match):
-        playlist_id = re_match.group('playlist_id')
         method = re_match.group('method')
-        video_id = re_match.group('video_id')
-
-        if method == 'add':
-            json_data = self.get_client(context).add_video_to_playlist(playlist_id=playlist_id, video_id=video_id)
-            if not v3.handle_error(self, context, json_data):
-                return False
-            pass
-        elif method == 'remove':
-            json_data = self.get_client(context).remove_video_from_playlist(playlist_id=playlist_id, playlist_item_id=video_id)
-            if not v3.handle_error(self, context, json_data):
-                return False
-
-            context.get_ui().refresh_container()
-            pass
-
-        return True
+        category = re_match.group('category')
+        return yt_playlist.process(method, category, self, context, re_match)
 
     @kodion.RegisterProviderPath('^/subscriptions/(?P<method>.*)/$')
     def _on_subscriptions(self, context, re_match):

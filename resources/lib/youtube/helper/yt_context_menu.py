@@ -7,15 +7,18 @@ def append_like_video(context_menu, provider, context, playlist_id, video_id):
     playlist_path = kodion.utils.create_path('channel', 'mine', 'playlist', playlist_id)
     if playlist_id and playlist_path != context.get_path():
         context_menu.append((context.localize(provider.LOCAL_MAP['youtube.like']),
-                             'RunPlugin(%s)' % context.create_uri(['playlist', playlist_id, 'add', video_id])))
+                             'RunPlugin(%s)' % context.create_uri(['playlist', 'add', 'video'],
+                                                                  {'playlist_id': playlist_id, 'video_id': video_id})))
         pass
     pass
+
 
 def append_watch_later(context_menu, provider, context, playlist_id, video_id):
     playlist_path = kodion.utils.create_path('channel', 'mine', 'playlist', playlist_id)
     if playlist_id and playlist_path != context.get_path():
         context_menu.append((context.localize(provider.LOCAL_MAP['youtube.watch_later']),
-                             'RunPlugin(%s)' % context.create_uri(['playlist', playlist_id, 'add', video_id])))
+                             'RunPlugin(%s)' % context.create_uri(['playlist', 'add', 'video'],
+                                                                  {'playlist_id': playlist_id, 'video_id': video_id})))
         pass
     pass
 
