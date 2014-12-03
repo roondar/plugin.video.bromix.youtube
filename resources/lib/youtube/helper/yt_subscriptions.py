@@ -19,13 +19,8 @@ def _process_add(provider, context, re_match):
     subscription_id = context.get_param('subscription_id', '')
     if subscription_id:
         json_data = provider.get_client(context).subscribe(subscription_id)
-        if json_data and 'error' in json_data:
-            message = json_data['error'].get('message', '')
-            if message:
-                context.get_ui().show_notification(message)
-                pass
-            pass
-        pass
+        if not v3.handle_error(provider, context, json_data):
+            return False
     return True
 
 
@@ -33,12 +28,8 @@ def _process_remove(provider, context, re_match):
     subscription_id = context.get_param('subscription_id', '')
     if subscription_id:
         json_data = provider.get_client(context).unsubscribe(subscription_id)
-        if json_data and 'error' in json_data:
-            message = json_data['error'].get('message', '')
-            if message:
-                context.get_ui().show_notification(message)
-                pass
-            pass
+        if not v3.handle_error(provider, context, json_data):
+            return False
 
         context.get_ui().refresh_container()
         pass

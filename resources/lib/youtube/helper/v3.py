@@ -266,3 +266,14 @@ def response_to_items(provider, context, json_data):
         pass
 
     return result
+
+
+def handle_error(provider, context, json_data):
+    if json_data and 'error' in json_data:
+        message = json_data['error'].get('message', '')
+        if message:
+            context.get_ui().show_notification(message)
+            pass
+        return False
+
+    return True

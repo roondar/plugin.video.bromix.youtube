@@ -216,15 +216,14 @@ class Provider(kodion.AbstractProvider):
 
         if method == 'add':
             json_data = self.get_client(context).add_video_to_playlist(playlist_id=playlist_id, video_id=video_id)
-            if json_data and 'error' in json_data:
-                message = json_data['error'].get('message', '')
-                if message:
-                    context.get_ui().show_notification(message)
-                    pass
-                pass
+            if not v3.handle_error(self, context, json_data):
+                return False
             pass
         elif method == 'remove':
-            self.get_client(context).remove_video_from_playlist(playlist_id=playlist_id, playlist_item_id=video_id)
+            json_data = self.get_client(context).remove_video_from_playlist(playlist_id=playlist_id, playlist_item_id=video_id)
+            if not v3.handle_error(self, context, json_data):
+                return False
+
             context.get_ui().refresh_container()
             pass
 
