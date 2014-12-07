@@ -1,3 +1,5 @@
+from resources.lib.youtube.helper import yt_context_menu
+
 __author__ = 'bromix'
 
 from resources.lib import kodion
@@ -31,6 +33,7 @@ def _process_list_response(provider, context, json_data):
             result.append(video_item)
             video_id_dict[video_id] = video_item
 
+            # map video to channel
             channel_id = snippet['channelId']
             if not channel_id in channel_item_dict:
                 channel_item_dict[channel_id] = []
@@ -47,11 +50,15 @@ def _process_list_response(provider, context, json_data):
                                                image=image)
             channel_item.set_fanart(provider.get_fanart(context))
 
-            context_subscribe = (context.localize(provider.LOCAL_MAP['youtube.subscribe']),
-                                 'RunPlugin(%s)' % context.create_uri(['subscription', 'add', channel_id]))
-            channel_item.set_context_menu([context_subscribe])
+            # if logged in => provide subscribing to the channel
+            if provider.is_logged_in():
+                context_menu = []
+                yt_context_menu.append_subscribe_to_channel(context_menu, provider, context, channel_id)
+                channel_item.set_context_menu(context_menu)
+                pass
             result.append(channel_item)
 
+            # map channel
             if not channel_id in channel_item_dict:
                 channel_item_dict[channel_id] = []
             channel_item_dict[channel_id].append(channel_item)
@@ -62,7 +69,7 @@ def _process_list_response(provider, context, json_data):
             title = snippet['title']
 
             guide_item = items.DirectoryItem(title,
-                                             context.create_uri(['guide'], {'guide_id': guide_id}))
+                                             context.create_uri(['special', 'browse_channels'], {'guide_id': guide_id}))
             guide_item.set_fanart(provider.get_fanart(context))
             result.append(guide_item)
             pass
@@ -70,20 +77,23 @@ def _process_list_response(provider, context, json_data):
             snippet = yt_item['snippet']
             image = snippet.get('thumbnails', {}).get('high', {}).get('url', '')
             channel_id = snippet['resourceId']['channelId']
-            subscription_item = items.DirectoryItem(snippet['title'],
-                                                    context.create_uri(['channel', channel_id]),
-                                                    image=image)
-            subscription_item.set_fanart(provider.get_fanart(context))
+            playlist_item = items.DirectoryItem(snippet['title'],
+                                                context.create_uri(['channel', channel_id]),
+                                                image=image)
+            playlist_item.set_fanart(provider.get_fanart(context))
 
+            # unsubscribe from a channel
             subscription_id = yt_item['id']
-            context_unsubscribe = (context.localize(provider.LOCAL_MAP['youtube.unsubscribe']),
-                                   'RunPlugin(%s)' % context.create_uri(['subscription', 'remove', subscription_id]))
-            subscription_item.set_context_menu([context_unsubscribe])
-            result.append(subscription_item)
+            context_menu = []
+            yt_context_menu.append_unsubscribe_from_channel(context_menu, provider, context, subscription_id)
+            playlist_item.set_context_menu(context_menu)
 
+            result.append(playlist_item)
+
+            # map playlist to channel
             if not channel_id in channel_item_dict:
                 channel_item_dict[channel_id] = []
-            channel_item_dict[channel_id].append(subscription_item)
+            channel_item_dict[channel_id].append(playlist_item)
             pass
         elif yt_kind == u'youtube#playlist':
             playlist_id = yt_item['id']
@@ -92,19 +102,30 @@ def _process_list_response(provider, context, json_data):
             image = snippet.get('thumbnails', {}).get('medium', {}).get('url', '')
 
             channel_id = snippet['channelId']
-            # we correct the channel id here so we know where we are
+
+            # if the path directs to a playlist of our own, we correct the channel id to 'mine'
             if context.get_path() == '/channel/mine/playlists/':
                 channel_id = 'mine'
                 pass
-            subscription_item = items.DirectoryItem(title,
-                                                    context.create_uri(
-                                                        ['channel', channel_id, 'playlist', playlist_id]),
-                                                    image=image)
-            subscription_item.set_fanart(provider.get_fanart(context))
-            result.append(subscription_item)
+            playlist_item = items.DirectoryItem(title,
+                                                context.create_uri(['channel', channel_id, 'playlist', playlist_id]),
+                                                image=image)
+            playlist_item.set_fanart(provider.get_fanart(context))
+
+            # subscribe to the channel via the playlist item
+            channel_name = snippet.get('channelTitle', '')
+            if channel_id != 'mine' and provider.is_logged_in():
+                context_menu = []
+                yt_context_menu.append_subscribe_to_channel(context_menu, provider, context, channel_id, channel_name)
+                playlist_item.set_context_menu(context_menu)
+                pass
+
+            result.append(playlist_item)
+
+            # map playlist to channel
             if not channel_id in channel_item_dict:
                 channel_item_dict[channel_id] = []
-            channel_item_dict[channel_id].append(subscription_item)
+            channel_item_dict[channel_id].append(playlist_item)
             pass
         elif yt_kind == u'youtube#playlistItem':
             snippet = yt_item['snippet']
@@ -122,6 +143,7 @@ def _process_list_response(provider, context, json_data):
             result.append(video_item)
             video_id_dict[video_id] = video_item
 
+            # map video to channel
             channel_id = snippet['channelId']
             if not channel_id in channel_item_dict:
                 channel_item_dict[channel_id] = []
@@ -143,6 +165,7 @@ def _process_list_response(provider, context, json_data):
                 result.append(video_item)
                 video_id_dict[video_id] = video_item
 
+                # map video to channel
                 channel_id = snippet['channelId']
                 if not channel_id in channel_item_dict:
                     channel_item_dict[channel_id] = []
@@ -156,15 +179,26 @@ def _process_list_response(provider, context, json_data):
                 image = snippet.get('thumbnails', {}).get('medium', {}).get('url', '')
 
                 channel_id = snippet['channelId']
-                subscription_item = items.DirectoryItem('[PL]' + title,
-                                                        context.create_uri(
-                                                            ['channel', channel_id, 'playlist', playlist_id]),
-                                                        image=image)
-                subscription_item.set_fanart(provider.get_fanart(context))
-                result.append(subscription_item)
+                channel_name = snippet.get('channelTitle', '')
+                playlist_item = items.DirectoryItem(title,
+                                                    context.create_uri(
+                                                        ['channel', channel_id, 'playlist', playlist_id]),
+                                                    image=image)
+                playlist_item.set_fanart(provider.get_fanart(context))
+
+                if provider.is_logged_in():
+                    context_menu = []
+                    yt_context_menu.append_subscribe_to_channel(context_menu, provider, context, channel_id,
+                                                                channel_name)
+                    playlist_item.set_context_menu(context_menu)
+                    pass
+
+                result.append(playlist_item)
+
+                # map playlist to channel
                 if not channel_id in channel_item_dict:
                     channel_item_dict[channel_id] = []
-                channel_item_dict[channel_id].append(subscription_item)
+                channel_item_dict[channel_id].append(playlist_item)
                 pass
             elif yt_kind == 'youtube#channel':
                 channel_id = yt_item['id']['channelId']
@@ -177,11 +211,16 @@ def _process_list_response(provider, context, json_data):
                                                    image=image)
                 channel_item.set_fanart(provider.get_fanart(context))
 
-                context_subscribe = (context.localize(provider.LOCAL_MAP['youtube.subscribe']),
-                                     'RunPlugin(%s)' % context.create_uri(['subscription', 'add', channel_id]))
-                channel_item.set_context_menu([context_subscribe])
+                # subscribe to the channel
+                if provider.is_logged_in():
+                    context_menu = []
+                    yt_context_menu.append_subscribe_to_channel(context_menu, provider, context, channel_id)
+                    channel_item.set_context_menu(context_menu)
+                    pass
+
                 result.append(channel_item)
 
+                # map channel
                 if not channel_id in channel_item_dict:
                     channel_item_dict[channel_id] = []
                 channel_item_dict[channel_id].append(channel_item)
@@ -227,3 +266,14 @@ def response_to_items(provider, context, json_data):
         pass
 
     return result
+
+
+def handle_error(provider, context, json_data):
+    if json_data and 'error' in json_data:
+        message = json_data['error'].get('message', '')
+        if message:
+            context.get_ui().show_notification(message)
+            pass
+        return False
+
+    return True

@@ -389,8 +389,9 @@ class YouTubeClient(object):
         if result is None:
             return {}
 
-        if method != 'DELETE':
+        if result.headers.get('content-type', '').startswith('application/json'):
             return result.json()
+
         pass
 
     def _perform_v2_request(self, method='GET', headers=None, path=None, post_data=None, params=None,
