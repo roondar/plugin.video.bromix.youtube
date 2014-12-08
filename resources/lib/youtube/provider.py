@@ -1,3 +1,4 @@
+import time
 from resources.lib.youtube.helper import v2, yt_subscriptions
 
 __author__ = 'bromix'
@@ -60,13 +61,18 @@ class Provider(kodion.AbstractProvider):
             # because Kodi doesn't return reliable language codes, we set 'en-US' for now
             language = 'en-US'  # context.get_language()
 
-            if access_manager.has_login_credentials():
+            if access_manager.has_login_credentials() or access_manager.has_refresh_token():
                 username, password = access_manager.get_login_credentials()
                 access_token = access_manager.get_access_token()
+                refresh_token = access_manager.get_refresh_token()
 
                 # create a new access_token
-                if not access_token:
+                if not access_token and username and password:
                     access_token, expires = YouTubeClient(language=language).authenticate(username, password)
+                    access_manager.update_access_token(access_token, expires)
+                    pass
+                elif not access_token and refresh_token:
+                    access_token, expires = YouTubeClient(language=language).refresh_token(refresh_token)
                     access_manager.update_access_token(access_token, expires)
                     pass
 
@@ -98,6 +104,7 @@ class Provider(kodion.AbstractProvider):
     channel_id : ['mine'|<CHANNEL_ID>]
     playlist_id: <PLAYLIST_ID>
     """
+
     @kodion.RegisterProviderPath('^/channel/(?P<channel_id>.*)/playlist/(?P<playlist_id>.*)/$')
     def _on_channel_playlist(self, context, re_match):
         self.set_content_type(context, kodion.constants.content_type.EPISODES)
@@ -120,6 +127,7 @@ class Provider(kodion.AbstractProvider):
     path      : '/channel/(?P<channel_id>.*)/playlists/'
     channel_id: <CHANNEL_ID>
     """
+
     @kodion.RegisterProviderPath('^/channel/(?P<channel_id>.*)/playlists/$')
     def _on_channel_playlists(self, context, re_match):
         self.set_content_type(context, kodion.constants.content_type.EPISODES)
@@ -142,6 +150,7 @@ class Provider(kodion.AbstractProvider):
     path      :'/channel/(?P<channel_id>.*)/'
     channel_id: <CHANNEL_ID>
     """
+
     @kodion.RegisterProviderPath('^/channel/(?P<channel_id>.*)/$')
     def _on_channel(self, context, re_match):
         self.set_content_type(context, kodion.constants.content_type.EPISODES)
@@ -183,6 +192,7 @@ class Provider(kodion.AbstractProvider):
     TODO: path for playlist: '/play/?playlist_id=XXXXXXX&mode=[OPTION]'
     OPTION: [normal(default)|reverse|shuffle]
     """
+
     @kodion.RegisterProviderPath('^/play/$')
     def _on_play(self, context, re_match):
         vq = context.get_settings().get_video_quality()
@@ -201,6 +211,7 @@ class Provider(kodion.AbstractProvider):
             # Auto-Remove video from 'Watch Later' playlist - this should run asynchronous
             if self.is_logged_in() and context.get_settings().get_bool('youtube.playlist.watchlater.autoremove', True):
                 import xbmc
+
                 xbmc.executebuiltin('RunPlugin(%s)' % context.create_uri(['internal', 'auto_remove_watch_later'],
                                                                          {'video_id': video_id}))
                 pass
@@ -236,6 +247,7 @@ class Provider(kodion.AbstractProvider):
     """
 
     """
+
     @kodion.RegisterProviderPath('^/internal/auto_remove_watch_later/$')
     def _on_auto_remove_watch_later(self, context, re_match):
 
@@ -249,6 +261,61 @@ class Provider(kodion.AbstractProvider):
                     return False
                 pass
             pass
+        return True
+
+    @kodion.RegisterProviderPath('^/sign/(?P<mode>.*)/$')
+    def _on_sign(self, context, re_match):
+        mode = re_match.group('mode')
+
+        if mode == 'out':
+            access_manager = context.get_access_manager()
+            client = self.get_client(context)
+            if access_manager.has_refresh_token():
+                client.revoke(access_manager.get_refresh_token())
+                pass
+            self._client = None
+            access_manager.update_access_token(access_token='', refresh_token='')
+            context.get_ui().refresh_container()
+            pass
+        elif mode == 'in':
+            client = self.get_client(context)
+            json_data = client.generate_user_code()
+            interval = int(json_data.get('interval', 5)) * 1000
+            if interval > 60000:
+                interval = 5000
+                pass
+            device_code = json_data['device_code']
+            user_code = json_data['user_code']
+
+            import xbmcgui
+            import xbmc
+
+            dialog = xbmcgui.DialogProgress()
+            dialog.create('Go To', '[B]youtube.com/activate[/B]', 'and enter', '[B]%s[/B]' % user_code)
+
+            expires_in = 10 * 60 * 1000  # 10 Minutes
+            steps = expires_in / interval
+            for i in range(steps):
+                dialog.update(i)
+                json_data = client.get_device_token(device_code)
+                if not 'error' in json_data:
+                    access_token = json_data.get('access_token', '')
+                    expires_in = time.time() + int(json_data.get('expires_in', 3600))
+                    refresh_token = json_data.get('refresh_token', '')
+                    if access_token and refresh_token:
+                        self._client = None
+                        context.get_access_manager().update_access_token(access_token, expires_in, refresh_token)
+                        context.get_ui().refresh_container()
+                        break
+                    pass
+
+                if dialog.iscanceled():
+                    break
+
+                xbmc.sleep(interval)
+                pass
+            pass
+
         return True
 
     def on_search(self, search_text, context, re_match):
@@ -294,8 +361,14 @@ class Provider(kodion.AbstractProvider):
 
         result = []
 
+        if not self.is_logged_in():
+            sign_in_item = DirectoryItem('sign in',
+                                         context.create_uri(['sign', 'in']))
+            result.append(sign_in_item)
+            pass
+
         settings = context.get_settings()
-        if self._is_logged_in and settings.get_bool('youtube.folder.my_subscriptions.show', True):
+        if self.is_logged_in() and settings.get_bool('youtube.folder.my_subscriptions.show', True):
             # my subscription
             my_subscriptions_item = DirectoryItem(
                 '[B]' + context.localize(self.LOCAL_MAP['youtube.my_subscriptions']) + '[/B]',
@@ -322,7 +395,7 @@ class Provider(kodion.AbstractProvider):
         result.append(search_item)
 
         # subscriptions
-        if self._is_logged_in:
+        if self.is_logged_in():
             playlists = resource_manager.get_related_playlists(channel_id='mine')
 
             # my channel
@@ -389,6 +462,12 @@ class Provider(kodion.AbstractProvider):
                                                  image=context.create_resource_path('media', 'browse_channels.png'))
             browse_channels_item.set_fanart(self.get_fanart(context))
             result.append(browse_channels_item)
+            pass
+
+        if self.is_logged_in():
+            sign_out_item = DirectoryItem('sign out',
+                                          context.create_uri(['sign', 'out']))
+            result.append(sign_out_item)
             pass
 
         return result

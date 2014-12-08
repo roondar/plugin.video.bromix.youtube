@@ -7,6 +7,11 @@ import unittest
 
 
 class TestClient(unittest.TestCase):
+    def test_generate_user_code(self):
+        client = YouTubeClient(language='de-DE')
+        json_data = client.generate_user_code()
+        pass
+
     def test_popular_videos(self):
         client = YouTubeClient(language='de-DE')
 
