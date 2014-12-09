@@ -1,3 +1,5 @@
+import time
+
 __author__ = 'bromix'
 
 import tempfile
@@ -83,5 +85,13 @@ class MockContext(AbstractContext):
         new_context._access_manager = self._access_manager
 
         return new_context
+
+    def execute(self, command):
+        log("execute '%s'" % command)
+        pass
+
+    def sleep(self, milli_seconds):
+        time.sleep(milli_seconds/1000.0)
+        pass
 
     pass
