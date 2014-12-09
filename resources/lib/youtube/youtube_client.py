@@ -1,36 +1,90 @@
 __author__ = 'bromix'
 
+import urlparse
+
+from resources.lib.youtube.youtube_exceptions import LoginException
+
+
 import json
-
 import requests
-
-
 # Verify is disabled and to avoid warnings we disable the warnings. Behind a proxy request isn't working correctly all
 # the time and if so can't validate the hosts correctly resulting in a exception and the addon won't work properly.
 try:
     from requests.packages import urllib3
-
     urllib3.disable_warnings()
 except:
     # do nothing
     pass
 
-from .login_client import LoginClient
-from ..helper.video_info import VideoInfo
+from .helper.video_info import VideoInfo
 
 
-class YouTube(LoginClient):
+class YouTubeClient(object):
+    YOUTUBE_TV_KEY = 'AIzaSyAd-YEOqZz9nXVzGtn3KWzYLbLaajhqIDA'
+    YOUTUBE_APP_KEY__ = 'AIzaSyA8eiZmM1FaDVjRy-df2KTyQ_vz_yYM39w'
+
     def __init__(self, key='', language='en-US', items_per_page=50, access_token=''):
-        LoginClient.__init__(self, key=key, language=language, access_token=access_token)
+        self._key = self.YOUTUBE_TV_KEY
+        #self._key = self.YOUTUBE_APP_KEY__
+        if key:
+            self._key = key
+            pass
 
+        self._language = language.replace('-', '_')
+        self._country = language.split('-')[1]
+        self._access_token = access_token
         self._max_results = items_per_page
         pass
+
+    def get_access_token(self):
+        return self._access_token
+
+    def authenticate(self, username, password):
+        headers = {'device': '38c6ee9a82b8b10a',
+                   'app': 'com.google.android.youtube',
+                   'User-Agent': 'GoogleAuth/1.4 (GT-I9100 KTU84Q)',
+                   'content-type': 'application/x-www-form-urlencoded',
+                   'Host': 'android.clients.google.com',
+                   'Connection': 'Keep-Alive',
+                   'Accept-Encoding': 'gzip'}
+
+        post_data = {'device_country': self._country.lower(),
+                     'operatorCountry': self._country.lower(),
+                     'lang': self._language.replace('-', '_'),
+                     'sdk_version': '19',
+                     # 'google_play_services_version': '6188034',
+                     'accountType': 'HOSTED_OR_GOOGLE',
+                     'Email': username.encode('utf-8'),
+                     'service': 'oauth2:https://www.googleapis.com/auth/youtube https://www.googleapis.com/auth/youtube.force-ssl https://www.googleapis.com/auth/plus.me https://www.googleapis.com/auth/emeraldsea.mobileapps.doritos.cookie https://www.googleapis.com/auth/plus.stream.read https://www.googleapis.com/auth/plus.stream.write https://www.googleapis.com/auth/plus.pages.manage https://www.googleapis.com/auth/identity.plus.page.impersonation',
+                     'source': 'android',
+                     'androidId': '38c6ee9a82b8b10a',
+                     'app': 'com.google.android.youtube',
+                     # 'client_sig': '24bb24c05e47e0aefa68a58a766179d9b613a600',
+                     'callerPkg': 'com.google.android.youtube',
+                     #'callerSig': '24bb24c05e47e0aefa68a58a766179d9b613a600',
+                     'Passwd': password.encode('utf-8')}
+
+        # url
+        url = 'https://android.clients.google.com/auth'
+
+        result = requests.post(url, data=post_data, headers=headers, verify=False)
+        if result.status_code != requests.codes.ok:
+            raise LoginException('Login Failed')
+
+        lines = result.text.replace('\n', '&')
+        params = dict(urlparse.parse_qsl(lines))
+        token = params.get('Auth', '')
+        expires = int(params.get('Expiry', -1))
+        if not token or expires == -1:
+            raise LoginException('Failed to get token')
+
+        return token, expires
 
     def get_language(self):
         return self._language
 
     def get_video_streams(self, context, video_id):
-        video_info = VideoInfo(context, access_token=self._access_token, language=self._language)
+        video_info = VideoInfo(context, self)
         return video_info.load_stream_infos(video_id)
 
     def get_uploaded_videos_of_subscriptions(self, start_index=0):
@@ -41,11 +95,6 @@ class YouTube(LoginClient):
             pass
         return self._perform_v2_request(method='GET', path='feeds/api/users/default/newsubscriptionvideos',
                                         params=params)
-
-    def remove_playlist(self, playlist_id):
-        params = {'id': playlist_id,
-                  'mine': 'true'}
-        return self._perform_v3_request(method='DELETE', path='playlists', params=params)
 
     def add_video_to_playlist(self, playlist_id, video_id):
         params = {'part': 'snippet',
@@ -325,12 +374,13 @@ class YouTube(LoginClient):
         result = None
         if method == 'GET':
             result = requests.get(_url, params=_params, headers=_headers, verify=False, allow_redirects=allow_redirects)
-            pass
         elif method == 'POST':
             _headers['content-type'] = 'application/json'
             result = requests.post(_url, data=json.dumps(post_data), params=_params, headers=_headers, verify=False,
                                    allow_redirects=allow_redirects)
-            pass
+        elif method == 'PUT':
+            result = requests.put(_url, data=json.dumps(_post_data), params=_params, headers=_headers, verify=False,
+                                  allow_redirects=allow_redirects)
         elif method == 'DELETE':
             result = requests.delete(_url, params=_params, headers=_headers, verify=False,
                                      allow_redirects=allow_redirects)
@@ -372,6 +422,16 @@ class YouTube(LoginClient):
         result = None
         if method == 'GET':
             result = requests.get(url, params=_params, headers=_headers, verify=False, allow_redirects=allow_redirects)
+        elif method == 'POST':
+            _headers['content-type'] = 'application/json'
+            result = requests.post(_url, data=json.dumps(post_data), params=_params, headers=_headers, verify=False,
+                                   allow_redirects=allow_redirects)
+        elif method == 'PUT':
+            result = requests.put(_url, data=json.dumps(_post_data), params=_params, headers=_headers, verify=False,
+                                  allow_redirects=allow_redirects)
+        elif method == 'DELETE':
+            result = requests.delete(_url, params=_params, headers=_headers, verify=False,
+                                     allow_redirects=allow_redirects)
             pass
 
         if result is None:
