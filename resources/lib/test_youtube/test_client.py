@@ -1,5 +1,5 @@
 from resources.lib import kodion
-from resources.lib.youtube import YouTubeClient
+from resources.lib.youtube.client import YouTube
 
 __author__ = 'bromix'
 
@@ -7,32 +7,50 @@ import unittest
 
 
 class TestClient(unittest.TestCase):
+    USERNAME = 'ENTER USERNAME FOR TESTS'
+    PASSWORD = 'ENTER PASSWORD FOR TESTS'
+
+    def test_generate_user_code(self):
+        client = YouTube(language='de-DE')
+        json_data = client.generate_user_code()
+        pass
+
     def test_popular_videos(self):
-        client = YouTubeClient(language='de-DE')
+        client = YouTube(language='de-DE')
 
         json_data = client.get_popular_videos()
         pass
 
-    def test_video_category(self):
-        client = YouTubeClient(language='de-DE')
+    """
+    def test_activities(self):
+        client = YouTube()
 
-        token, expires = client.authenticate('bromixbromix@gmail.com', '')
-        client = YouTubeClient(language='en-US', access_token=token)
+        token, expires = client.authenticate(self.USERNAME, self.PASSWORD)
+        client = YouTube(access_token=token)
+        #json_data = client.get_uploaded_videos_of_subscriptions()
+        json_data = client.get_activities(channel_id='home')
+        pass
+
+    def test_video_category(self):
+        client = YouTube(language='de-DE')
+
+        token, expires = client.authenticate(self.USERNAME, self.PASSWORD)
+        client = YouTube(language='en-US', access_token=token)
         json_data = client.get_video_category(20)
         pass
 
     def test_video_categories(self):
-        client = YouTubeClient(language='de-DE')
+        client = YouTube(language='de-DE')
 
-        token, expires = client.authenticate('bromixbromix@gmail.com', '')
-        client = YouTubeClient(language='de-DE', access_token=token)
+        token, expires = client.authenticate(self.USERNAME, self.PASSWORD)
+        client = YouTube(language='de-DE', access_token=token)
         json_data = client.get_video_categories()
         pass
 
     def test_guide_category(self):
-        client = YouTubeClient(language='de-DE')
-        token, expires = client.authenticate('bromixbromix@gmail.com', '')
-        client = YouTubeClient(language='de-DE', access_token=token)
+        client = YouTube(language='de-DE')
+        token, expires = client.authenticate(self.USERNAME, self.PASSWORD)
+        client = YouTube(language='de-DE', access_token=token)
 
         # Music
         #json_data = client.get_guide_category('GCTXVzaWM')
@@ -42,29 +60,49 @@ class TestClient(unittest.TestCase):
         pass
 
     def test_guide_categories(self):
-        client = YouTubeClient(language='de-DE')
+        client = YouTube(language='de-DE')
 
-        token, expires = client.authenticate('bromixbromix@gmail.com', '')
-        client = YouTubeClient(access_token=token)
+        token, expires = client.authenticate(self.USERNAME, self.PASSWORD)
+        client = YouTube(access_token=token)
         json_data = client.get_guide_categories()
         pass
 
-    def test_activities(self):
-        client = YouTubeClient()
-
-        token, expires = client.authenticate('bromixbromix@gmail.com', '')
-        client = YouTubeClient(access_token=token)
-        #json_data = client.get_uploaded_videos_of_subscriptions()
-        json_data = client.get_activities(channel_id='home')
-        pass
-
     def test_authenticate(self):
-        client = YouTubeClient()
-        #token, expires = client.authenticate('bromixbromix@gmail.com', '')
+        client = YouTube()
+        token, expires = client.authenticate(self.USERNAME, self.PASSWORD)
         pass
+
+    def test_playlist_items_id_of_video(self):
+        client = YouTube()
+
+        token, expires = client.authenticate(self.USERNAME, self.PASSWORD)
+        client = YouTube(access_token=token)
+
+        playlist_item_id = client.get_playlist_item_id_of_video_id(u'WL', '-Zotg42zEEA')
+        pass
+
+    def test_get_playlist_items(self):
+        client = YouTube()
+
+        token, expires = client.authenticate(self.USERNAME, self.PASSWORD)
+        client = YouTube(access_token=token)
+
+        json_data = client.get_playlist_items(u'WL', video_id='-Zotg42zEEA')
+        pass
+
+    def test_get_channels(self):
+        client = YouTube()
+
+        token, expires = client.authenticate(self.USERNAME, self.PASSWORD)
+        client = YouTube(access_token=token)
+
+        json_data = client.get_channels('mine')
+        #json_data = client.get_channels(['UCDbAn9LEzqONk__uXA6a9jQ', 'UC8i4HhaJSZhm-fu84Bl72TA'])
+        pass
+    """
 
     def test_get_video_streams(self):
-        client = YouTubeClient()
+        client = YouTube()
 
         context = kodion.Context()
 
@@ -92,53 +130,25 @@ class TestClient(unittest.TestCase):
         pass
 
     def test_get_playlists(self):
-        client = YouTubeClient()
+        client = YouTube()
 
         json_data = client.get_playlists('UCDbAn9LEzqONk__uXA6a9jQ')
         pass
 
-    def test_playlist_items_id_of_video(self):
-        client = YouTubeClient()
-
-        token, expires = client.authenticate('bromixbromix@gmail.com', '')
-        client = YouTubeClient(access_token=token)
-
-        playlist_item_id = client.get_playlist_item_id_of_video_id(u'WL', '-Zotg42zEEA')
-        pass
-
-    def test_get_playlist_items(self):
-        client = YouTubeClient()
-
-        token, expires = client.authenticate('bromixbromix@gmail.com', '')
-        client = YouTubeClient(access_token=token)
-
-        json_data = client.get_playlist_items(u'WL', video_id='-Zotg42zEEA')
-        pass
-
-    def test_get_channels(self):
-        client = YouTubeClient()
-
-        token, expires = client.authenticate('bromixbromix@gmail.com', '')
-        client = YouTubeClient(access_token=token)
-
-        json_data = client.get_channels('mine')
-        #json_data = client.get_channels(['UCDbAn9LEzqONk__uXA6a9jQ', 'UC8i4HhaJSZhm-fu84Bl72TA'])
-        pass
-
     def test_get_videos(self):
-        client = YouTubeClient()
+        client = YouTube()
 
         json_data = client.get_videos(['vyD70Huufco', 'AFdezM3_m-c'])
         pass
 
     def test_get_related_videos(self):
-        client = YouTubeClient()
+        client = YouTube()
 
         json_data = client.get_related_videos(video_id='dbgPETJ-J9E')
         pass
 
     def test_search(self):
-        client = YouTubeClient()
+        client = YouTube()
 
         #json_data = client.search(q='batman')
         #json_data = client.search(q='batman', search_type='channel')

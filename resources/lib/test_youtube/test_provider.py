@@ -1,9 +1,7 @@
-import time
-from resources.lib.youtube import Provider, YouTubeClient
-
 __author__ = 'bromix'
 
 from resources.lib import kodion
+from resources.lib.youtube import Provider
 
 import unittest
 
