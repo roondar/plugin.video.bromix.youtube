@@ -32,7 +32,9 @@ class Provider(kodion.AbstractProvider):
                  'youtube.what_to_watch': 30513,
                  'youtube.related_videos': 30514,
                  'youtube.setting.auto_remove_watch_later': 30515,
-                 'youtube.subscribe_to': 30517}
+                 'youtube.subscribe_to': 30517,
+                 'youtube.sign.in': 30111,
+                 'youtube.sign.out': 30112, }
 
     def __init__(self):
         kodion.AbstractProvider.__init__(self)
@@ -64,24 +66,31 @@ class Provider(kodion.AbstractProvider):
             # because Kodi doesn't return reliable language codes, we set 'en-US' for now
             language = 'en-US'  # context.get_language()
 
+            # remove the old login.
+            if access_manager.has_login_credentials():
+                access_manager.remove_login_credentials()
+                pass
+
             if access_manager.has_login_credentials() or access_manager.has_refresh_token():
                 username, password = access_manager.get_login_credentials()
                 access_token = access_manager.get_access_token()
                 refresh_token = access_manager.get_refresh_token()
 
                 # create a new access_token
+                """
                 if not access_token and username and password:
                     access_token, expires = YouTube(language=language).authenticate(username, password)
                     access_manager.update_access_token(access_token, expires)
                     pass
-                elif not access_token and refresh_token:
+                """
+                if not access_token and refresh_token:
                     access_token, expires = YouTube(language=language).refresh_token(refresh_token)
                     access_manager.update_access_token(access_token, expires)
                     pass
 
                 self._is_logged_in = access_token != ''
                 self._client = YouTube(items_per_page=items_per_page, access_token=access_token,
-                                             language=language)
+                                       language=language)
             else:
                 self._client = YouTube(items_per_page=items_per_page, language=language)
                 pass
@@ -362,13 +371,16 @@ class Provider(kodion.AbstractProvider):
 
         result = []
 
-        if not self.is_logged_in():
-            sign_in_item = DirectoryItem('sign in',
+        settings = context.get_settings()
+
+        # sign in
+        if not self.is_logged_in() and settings.get_bool('youtube.folder.sign.in.show', True):
+            sign_in_item = DirectoryItem('[B]%s[/B]' % context.localize(self.LOCAL_MAP['youtube.sign.in']),
                                          context.create_uri(['sign', 'in']))
+            sign_in_item.set_fanart(self.get_fanart(context))
             result.append(sign_in_item)
             pass
 
-        settings = context.get_settings()
         if self.is_logged_in() and settings.get_bool('youtube.folder.my_subscriptions.show', True):
             # my subscription
             my_subscriptions_item = DirectoryItem(
@@ -465,9 +477,11 @@ class Provider(kodion.AbstractProvider):
             result.append(browse_channels_item)
             pass
 
-        if self.is_logged_in():
-            sign_out_item = DirectoryItem('sign out',
+        # sign out
+        if self.is_logged_in() and settings.get_bool('youtube.folder.sign.out.show', True):
+            sign_out_item = DirectoryItem(context.localize(self.LOCAL_MAP['youtube.sign.out']),
                                           context.create_uri(['sign', 'out']))
+            sign_out_item.set_fanart(self.get_fanart(context))
             result.append(sign_out_item)
             pass
 

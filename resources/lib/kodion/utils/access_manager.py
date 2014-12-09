@@ -20,6 +20,11 @@ class AccessManager(object):
         password = self._settings.get_string(constants.setting.LOGIN_PASSWORD, '')
         return username != '' and password != ''
 
+    def remove_login_credentials(self):
+        self._settings.set_string(constants.setting.LOGIN_USERNAME, '')
+        self._settings.set_string(constants.setting.LOGIN_PASSWORD, '')
+        pass
+
     def get_login_credentials(self):
         """
         Returns the username and password (Tuple)
