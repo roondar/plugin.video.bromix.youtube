@@ -136,12 +136,4 @@ class XbmcContext(AbstractContext):
 
         return new_context
 
-    def execute(self, command):
-        xbmc.executebuiltin(command)
-        pass
-
-    def sleep(self, milli_seconds):
-        xbmc.sleep(milli_seconds)
-        pass
-
     pass
