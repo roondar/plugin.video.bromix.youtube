@@ -155,8 +155,8 @@ class Provider(kodion.AbstractProvider):
         channel_id = re_match.group('channel_id')
         page_token = context.get_param('page_token', '')
 
-        json_data = context.get_function_cache().get(FunctionCache.ONE_HOUR, self.get_client(context).get_playlists,
-                                                     channel_id, page_token)
+        # no caching
+        json_data = self.get_client(context).get_playlists(channel_id, page_token)
         if not v3.handle_error(self, context, json_data):
             return False
         result.extend(v3.response_to_items(self, context, json_data))

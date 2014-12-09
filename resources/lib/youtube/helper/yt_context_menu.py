@@ -3,6 +3,13 @@ __author__ = 'bromix'
 from resources.lib import kodion
 
 
+def append_remove_playlist(context_menu, provider, context, playlist_id):
+    context_menu.append((context.localize(provider.LOCAL_MAP['youtube.remove']),
+                         'RunPlugin(%s)' % context.create_uri(['playlist', 'remove', 'playlist'],
+                                                              {'playlist_id': playlist_id})))
+    pass
+
+
 def append_like_video(context_menu, provider, context, playlist_id, video_id):
     playlist_path = kodion.utils.create_path('channel', 'mine', 'playlist', playlist_id)
     if playlist_id and playlist_path != context.get_path():

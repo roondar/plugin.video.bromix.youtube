@@ -42,6 +42,11 @@ class YouTube(LoginClient):
         return self._perform_v2_request(method='GET', path='feeds/api/users/default/newsubscriptionvideos',
                                         params=params)
 
+    def remove_playlist(self, playlist_id):
+        params = {'id': playlist_id,
+                  'mine': 'true'}
+        return self._perform_v3_request(method='DELETE', path='playlists', params=params)
+
     def add_video_to_playlist(self, playlist_id, video_id):
         params = {'part': 'snippet',
                   'mine': 'true'}
