@@ -210,10 +210,9 @@ class Provider(kodion.AbstractProvider):
 
             # Auto-Remove video from 'Watch Later' playlist - this should run asynchronous
             if self.is_logged_in() and context.get_settings().get_bool('youtube.playlist.watchlater.autoremove', True):
-                import xbmc
-
-                xbmc.executebuiltin('RunPlugin(%s)' % context.create_uri(['internal', 'auto_remove_watch_later'],
-                                                                         {'video_id': video_id}))
+                command = 'RunPlugin(%s)' % context.create_uri(['internal', 'auto_remove_watch_later'],
+                                                               {'video_id': video_id})
+                context.execute(command)
                 pass
 
             return video_item
@@ -288,7 +287,6 @@ class Provider(kodion.AbstractProvider):
             user_code = json_data['user_code']
 
             import xbmcgui
-            import xbmc
 
             dialog = xbmcgui.DialogProgress()
             dialog.create('Go To', '[B]youtube.com/activate[/B]', 'and enter', '[B]%s[/B]' % user_code)
@@ -312,7 +310,7 @@ class Provider(kodion.AbstractProvider):
                 if dialog.iscanceled():
                     break
 
-                xbmc.sleep(interval)
+                context.sleep(interval)
                 pass
             pass
 
