@@ -1,13 +1,16 @@
 import time
-from resources.lib.youtube.helper import v2, yt_subscriptions
+from resources.lib.youtube.client.youtube import YouTube
+
+from resources.lib.youtube.helper import yt_subscriptions
+
 
 __author__ = 'bromix'
 
 from resources.lib import kodion
 from resources.lib.kodion.utils import FunctionCache
 from resources.lib.kodion.items import *
-from .youtube_client import YouTubeClient
-from .helper import v3, v2, ResourceManager, yt_specials, yt_playlist
+from resources.lib.youtube.client import YouTube
+from .helper import v3, ResourceManager, yt_specials, yt_playlist
 from .youtube_exceptions import YouTubeException, LoginException
 
 
@@ -68,19 +71,19 @@ class Provider(kodion.AbstractProvider):
 
                 # create a new access_token
                 if not access_token and username and password:
-                    access_token, expires = YouTubeClient(language=language).authenticate(username, password)
+                    access_token, expires = YouTube(language=language).authenticate(username, password)
                     access_manager.update_access_token(access_token, expires)
                     pass
                 elif not access_token and refresh_token:
-                    access_token, expires = YouTubeClient(language=language).refresh_token(refresh_token)
+                    access_token, expires = YouTube(language=language).refresh_token(refresh_token)
                     access_manager.update_access_token(access_token, expires)
                     pass
 
                 self._is_logged_in = access_token != ''
-                self._client = YouTubeClient(items_per_page=items_per_page, access_token=access_token,
+                self._client = YouTube(items_per_page=items_per_page, access_token=access_token,
                                              language=language)
             else:
-                self._client = YouTubeClient(items_per_page=items_per_page, language=language)
+                self._client = YouTube(items_per_page=items_per_page, language=language)
                 pass
             pass
 
