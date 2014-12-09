@@ -10,7 +10,7 @@ from resources.lib import kodion
 from resources.lib.kodion.utils import FunctionCache
 from resources.lib.kodion.items import *
 from resources.lib.youtube.client import YouTube
-from .helper import v3, ResourceManager, yt_specials, yt_playlist
+from .helper import v3, ResourceManager, yt_specials, yt_playlist, yt_login
 from .youtube_exceptions import YouTubeException, LoginException
 
 
@@ -34,7 +34,9 @@ class Provider(kodion.AbstractProvider):
                  'youtube.setting.auto_remove_watch_later': 30515,
                  'youtube.subscribe_to': 30517,
                  'youtube.sign.in': 30111,
-                 'youtube.sign.out': 30112, }
+                 'youtube.sign.out': 30112,
+                 'youtube.sign.go_to': 30518,
+                 'youtube.sign.enter_code': 30519}
 
     def __init__(self):
         kodion.AbstractProvider.__init__(self)
@@ -46,6 +48,10 @@ class Provider(kodion.AbstractProvider):
 
     def is_logged_in(self):
         return self._is_logged_in
+
+    def reset_client(self):
+        self._client = None
+        pass
 
     def get_client(self, context):
         # set the items per page (later)
@@ -277,55 +283,7 @@ class Provider(kodion.AbstractProvider):
     @kodion.RegisterProviderPath('^/sign/(?P<mode>.*)/$')
     def _on_sign(self, context, re_match):
         mode = re_match.group('mode')
-
-        if mode == 'out':
-            access_manager = context.get_access_manager()
-            client = self.get_client(context)
-            if access_manager.has_refresh_token():
-                client.revoke(access_manager.get_refresh_token())
-                pass
-            self._client = None
-            access_manager.update_access_token(access_token='', refresh_token='')
-            context.get_ui().refresh_container()
-            pass
-        elif mode == 'in':
-            client = self.get_client(context)
-            json_data = client.generate_user_code()
-            interval = int(json_data.get('interval', 5)) * 1000
-            if interval > 60000:
-                interval = 5000
-                pass
-            device_code = json_data['device_code']
-            user_code = json_data['user_code']
-
-            import xbmcgui
-
-            dialog = xbmcgui.DialogProgress()
-            dialog.create('Go To', '[B]youtube.com/activate[/B]', 'and enter', '[B]%s[/B]' % user_code)
-
-            expires_in = 10 * 60 * 1000  # 10 Minutes
-            steps = expires_in / interval
-            for i in range(steps):
-                dialog.update(i)
-                json_data = client.get_device_token(device_code)
-                if not 'error' in json_data:
-                    access_token = json_data.get('access_token', '')
-                    expires_in = time.time() + int(json_data.get('expires_in', 3600))
-                    refresh_token = json_data.get('refresh_token', '')
-                    if access_token and refresh_token:
-                        self._client = None
-                        context.get_access_manager().update_access_token(access_token, expires_in, refresh_token)
-                        context.get_ui().refresh_container()
-                        break
-                    pass
-
-                if dialog.iscanceled():
-                    break
-
-                context.sleep(interval)
-                pass
-            pass
-
+        yt_login.process(mode, self, context, re_match)
         return True
 
     def on_search(self, search_text, context, re_match):
