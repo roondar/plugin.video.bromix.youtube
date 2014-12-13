@@ -191,3 +191,9 @@ class AbstractContext(object):
 
     def clone(self, new_path=None, new_params=None):
         raise NotImplementedError()
+
+    def execute(self, command):
+        raise NotImplementedError()
+
+    def sleep(self, milli_seconds):
+        raise NotImplementedError()
