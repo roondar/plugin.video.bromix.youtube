@@ -1,6 +1,7 @@
 __author__ = 'bromix'
 
 import xbmc
+import xbmcgui
 
 from ..abstract_context_ui import AbstractContextUI
 
@@ -20,7 +21,7 @@ class XbmcContextUI(AbstractContextUI):
         if keyboard.isConfirmed() and keyboard.getText():
             text = keyboard.getText()
             """
-            It seams kodi returns utf-8 encoded strings. We need unicode (multibyte) strings. We we check if the
+            It seams kodi returns utf-8 encoded strings. We need unicode (multibyte) strings. We check if the
             text is str and call decode to create afterwards an unicode string.
             """
             if isinstance(text, str):
@@ -29,6 +30,28 @@ class XbmcContextUI(AbstractContextUI):
             return True, text
 
         return False, u''
+
+    def on_select(self, title, items=[]):
+        dialog = xbmcgui.Dialog()
+
+        _dict = {}
+        _items = []
+        i = 0
+        for item in items:
+            if isinstance(item, tuple):
+                _dict[i] = item[1]
+                _items.append(item[0])
+                pass
+            else:
+                _dict[i] = i
+                _items.append(item)
+                pass
+
+            i += 1
+            pass
+
+        result = dialog.select(title, _items)
+        return _dict.get(result, -1)
 
     def show_notification(self, message, header='', image_uri='', time_milliseconds=5000):
         _header = header
@@ -41,7 +64,8 @@ class XbmcContextUI(AbstractContextUI):
             _image = self._context.get_icon()
             pass
 
-        xbmc.executebuiltin("Notification(%s, %s, %d, %s)" % (_header, message.replace(',', ' '), time_milliseconds, _image))
+        xbmc.executebuiltin(
+            "Notification(%s, %s, %d, %s)" % (_header, message.replace(',', ' '), time_milliseconds, _image))
         pass
 
     def open_settings(self):

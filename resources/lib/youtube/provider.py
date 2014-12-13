@@ -36,7 +36,9 @@ class Provider(kodion.AbstractProvider):
                  'youtube.sign.in': 30111,
                  'youtube.sign.out': 30112,
                  'youtube.sign.go_to': 30518,
-                 'youtube.sign.enter_code': 30519}
+                 'youtube.sign.enter_code': 30519,
+                 'youtube.video.add_to_playlist': 30520,
+                 'youtube.playlist.select': 30521}
 
     def __init__(self):
         kodion.AbstractProvider.__init__(self)
