@@ -18,17 +18,9 @@ class XbmcContextUI(AbstractContextUI):
         keyboard = xbmc.Keyboard(default, title, hidden)
         keyboard.doModal()
         if keyboard.isConfirmed() and keyboard.getText():
-            text = keyboard.getText()
-            """
-            It seams kodi returns utf-8 encoded strings. We need unicode (multibyte) strings. We we check if the
-            text is str and call decode to create afterwards an unicode string.
-            """
-            if isinstance(text, str):
-                text = unicode(text.decode('utf-8'))
-                pass
-            return True, text
+            return True, keyboard.getText()
 
-        return False, u''
+        return False, ''
 
     def show_notification(self, message, header='', image_uri='', time_milliseconds=5000):
         _header = header
