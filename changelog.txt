@@ -1,3 +1,9 @@
+1.0.0~alpha29 (2014-12-14)
+UPD: new login mechanism (removed the old one)
+ADD: translation fr-FR (thanks to roondar)
+ADD: manage playlists - create, remove and add videos to a selected playlists
+FIX: support cyrillic letters
+
 1.0.0~alpha28 (2014-12-07)
 ADD: subscribe to channel (from videos and playlist)
 UPD: rework of handling context menu
