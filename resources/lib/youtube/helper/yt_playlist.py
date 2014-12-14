@@ -52,17 +52,21 @@ def _process_remove_playlist(provider, context, re_match):
 
 
 def _process_select_playlist(provider, context, re_match):
-    json_data = context.get_function_cache().get(FunctionCache.ONE_MINUTE, provider.get_client(context).get_playlists,
+    json_data = context.get_function_cache().get(FunctionCache.ONE_MINUTE/3, provider.get_client(context).get_playlists,
                                                  channel_id='mine')
     playlists = json_data.get('items', [])
 
     items = []
+    # create playlist
+    items.append(('[B]' + context.localize(provider.LOCAL_MAP['youtube.playlist.create']) + '[/B]', 'playlist.create'))
+
     # add the 'Watch Later' playlist
     resource_manager = provider.get_resource_manager(context)
     my_playlists = resource_manager.get_related_playlists(channel_id='mine')
     if 'watchLater' in my_playlists:
         watch_later_playlist_id = my_playlists.get('watchLater', '')
-        items.append(('[B]'+context.localize(provider.LOCAL_MAP['youtube.watch_later'])+'[/B]', watch_later_playlist_id))
+        items.append(
+            ('[B]' + context.localize(provider.LOCAL_MAP['youtube.watch_later']) + '[/B]', watch_later_playlist_id))
         pass
 
     for playlist in playlists:
@@ -75,7 +79,25 @@ def _process_select_playlist(provider, context, re_match):
         pass
 
     result = context.get_ui().on_select(context.localize(provider.LOCAL_MAP['youtube.playlist.select']), items)
-    if result != -1:
+    if result == 'playlist.create':
+        result, text = context.get_ui().on_keyboard_input(
+            context.localize(provider.LOCAL_MAP['youtube.playlist.create']))
+        if result and text:
+            json_data = provider.get_client(context).create_playlist(title=text)
+            if not v3.handle_error(provider, context, json_data):
+                return
+
+            playlist_id = json_data.get('id', '')
+            if playlist:
+                new_params = {}
+                new_params.update(context.get_params())
+                new_params['playlist_id'] = playlist_id
+                new_context = context.clone(new_params=new_params)
+                _process_add_video(provider, new_context, re_match)
+                pass
+            pass
+        pass
+    elif result != -1:
         new_params = {}
         new_params.update(context.get_params())
         new_params['playlist_id'] = result

@@ -7,8 +7,8 @@ import unittest
 
 
 class TestClient(unittest.TestCase):
-    USERNAME = 'ENTER USERNAME FOR TESTS'
-    PASSWORD = 'ENTER PASSWORD FOR TESTS'
+    USERNAME = ''
+    PASSWORD = ''
 
     def test_generate_user_code(self):
         client = YouTube(language='de-DE')
@@ -22,6 +22,14 @@ class TestClient(unittest.TestCase):
         pass
 
     """
+    def test_create_playlist(self):
+        client = YouTube()
+
+        token, expires = client.authenticate(self.USERNAME, self.PASSWORD)
+        client = YouTube(access_token=token)
+        json_data = client.create_playlist(title='BLA')
+        pass
+
     def test_activities(self):
         client = YouTube()
 
@@ -110,10 +118,10 @@ class TestClient(unittest.TestCase):
         streams = client.get_video_streams(context, 'nfWlot6h_JM')
 
         # 60fps
-        #streams = client.get_video_streams(context, '_zPm3SSj6W8')
+        # streams = client.get_video_streams(context, '_zPm3SSj6W8')
 
         # 1080p ?!?
-        #streams = client.get_video_streams(context, 'qfPUVz_Hpqo')
+        # streams = client.get_video_streams(context, 'qfPUVz_Hpqo')
 
         #Live
         #streams = client.get_video_streams(context, 'pvEWZY3Eqsg')
@@ -150,8 +158,8 @@ class TestClient(unittest.TestCase):
     def test_search(self):
         client = YouTube()
 
-        #json_data = client.search(q='batman')
-        #json_data = client.search(q='batman', search_type='channel')
+        # json_data = client.search(q='batman')
+        # json_data = client.search(q='batman', search_type='channel')
         json_data = client.search(q='batman', search_type='playlist')
         pass
 

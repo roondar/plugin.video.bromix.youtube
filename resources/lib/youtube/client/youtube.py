@@ -47,6 +47,13 @@ class YouTube(LoginClient):
                   'mine': 'true'}
         return self._perform_v3_request(method='DELETE', path='playlists', params=params)
 
+    def create_playlist(self, title, privacy_status='private'):
+        params = {'part': 'snippet,status'}
+        post_data = {'kind': 'youtube#playlist',
+                     'snippet': {'title': title},
+                     'starus': {'privacyStatus': privacy_status}}
+        return self._perform_v3_request(method='POST', path='playlists', params=params, post_data=post_data)
+
     def add_video_to_playlist(self, playlist_id, video_id):
         params = {'part': 'snippet',
                   'mine': 'true'}
