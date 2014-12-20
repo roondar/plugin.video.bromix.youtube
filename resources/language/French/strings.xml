@@ -32,7 +32,7 @@
     <!-- YouTube -->
     <string id="30500">Chaînes</string>
     <string id="30501">Playlists</string>
-    <string id="30502">Aller à %CHANNEL%</string>
+    <string id="30502">Aller à %s</string>
     <string id="30503">Afficher le fanart de la chaîne</string>
     <string id="30504">Mes abonnements</string>
     <string id="30505">Se désabonner</string>

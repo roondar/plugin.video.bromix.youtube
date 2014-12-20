@@ -28,11 +28,13 @@
     <string id="30108">Entfernen</string>
     <string id="30109">Neueste Videos</string>
     <string id="30110">Neue Suche</string>
+    <string id="30111">Anmelden</string>
+    <string id="30112">Abmelden</string>
 
     <!-- YouTube -->
     <string id="30500">Kanäle</string>
     <string id="30501">Playlisten</string>
-    <string id="30502">Zu %CHANNEL%</string>
+    <string id="30502">Zu %s</string>
     <string id="30503">Kanal-Fanart anzeigen</string>
     <string id="30504">ABOS</string>
     <string id="30505">Abmelden</string>
@@ -48,4 +50,9 @@
     <string id="30515">Auto-Entfernen für "Später ansehen"</string>
     <string id="30516">Verzeichnisse</string>
     <string id="30517">%s abonieren</string>
+    <string id="30518">Gehen Sie auf '%s'</string>
+    <string id="30519">und geben Sie dort den folgenden code ein:</string>
+    <string id="30520">Hinzufügen zu...</string>
+    <string id="30521">Wählen Sie die Playliste</string>
+    <string id="30522">Neue Playliste...</string>
 </strings>

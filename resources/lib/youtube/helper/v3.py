@@ -112,11 +112,19 @@ def _process_list_response(provider, context, json_data):
                                                 image=image)
             playlist_item.set_fanart(provider.get_fanart(context))
 
-            # subscribe to the channel via the playlist item
             channel_name = snippet.get('channelTitle', '')
-            if channel_id != 'mine' and provider.is_logged_in():
+            if provider.is_logged_in():
                 context_menu = []
-                yt_context_menu.append_subscribe_to_channel(context_menu, provider, context, channel_id, channel_name)
+
+                if channel_id != 'mine':
+                    # subscribe to the channel via the playlist item
+                    yt_context_menu.append_subscribe_to_channel(context_menu, provider, context, channel_id, channel_name)
+                    pass
+                else:
+                    # remove my playlist
+                    yt_context_menu.append_remove_playlist(context_menu, provider, context, playlist_id)
+                    pass
+
                 playlist_item.set_context_menu(context_menu)
                 pass
 
@@ -179,6 +187,10 @@ def _process_list_response(provider, context, json_data):
                 image = snippet.get('thumbnails', {}).get('medium', {}).get('url', '')
 
                 channel_id = snippet['channelId']
+                # if the path directs to a playlist of our own, we correct the channel id to 'mine'
+                if context.get_path() == '/channel/mine/playlists/':
+                    channel_id = 'mine'
+                    pass
                 channel_name = snippet.get('channelTitle', '')
                 playlist_item = items.DirectoryItem(title,
                                                     context.create_uri(
@@ -188,8 +200,11 @@ def _process_list_response(provider, context, json_data):
 
                 if provider.is_logged_in():
                     context_menu = []
+
+                    # subscribe to the channel of the playlist
                     yt_context_menu.append_subscribe_to_channel(context_menu, provider, context, channel_id,
                                                                 channel_name)
+
                     playlist_item.set_context_menu(context_menu)
                     pass
 

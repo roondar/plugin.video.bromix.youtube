@@ -28,11 +28,13 @@
     <string id="30108">Remove</string>
     <string id="30109">Latest Videos</string>
     <string id="30110">New Search</string>
+    <string id="30111">Sign In</string>
+    <string id="30112">Sign Out</string>
 
     <!-- YouTube -->
     <string id="30500">Channels</string>
     <string id="30501">Playlists</string>
-    <string id="30502">Go to %CHANNEL%</string>
+    <string id="30502">Go to %s</string>
     <string id="30503">Show channel fanart</string>
     <string id="30504">Subscriptions</string>
     <string id="30505">Unsubscribe</string>
@@ -48,4 +50,9 @@
     <string id="30515">Auto-Remove from 'Watch Later'</string>
     <string id="30516">Folders</string>
     <string id="30517">Subscribe to %s</string>
+    <string id="30518">Go to '%s'</string>
+    <string id="30519">and enter the following code:</string>
+    <string id="30520">Add to...</string>
+    <string id="30521">Select playlist</string>
+    <string id="30522">New playlist...</string>
 </strings>

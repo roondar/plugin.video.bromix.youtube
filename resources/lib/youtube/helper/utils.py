@@ -101,6 +101,9 @@ def update_video_infos(provider, context, video_id_dict, playlist_item_id_dict=N
             watch_later_playlist_id = my_playlists.get('watchLater', '')
             yt_context_menu.append_watch_later(context_menu, provider, context, watch_later_playlist_id, video_id)
 
+            # add video to a selected playlist
+            yt_context_menu.append_add_video_to_playlist(context_menu, provider, context, video_id)
+
             # add 'Like Video' only if we are not in my 'Liked Videos' list
             liked_videos_playlist = my_playlists.get('likes', '')
             yt_context_menu.append_like_video(context_menu, provider, context, liked_videos_playlist, video_id)

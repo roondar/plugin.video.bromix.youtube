@@ -60,9 +60,10 @@ class VideoInfo(object):
                         '302': {'format': 'video/webm; codecs="vp9', 'width': 1280, 'height': 720, 'fps': 60},
                         '303': {'format': 'video/webm; codecs="vp9', 'width': 1920, 'height': 1080, 'fps': 60}}
 
-    def __init__(self, context, youtube_client):
+    def __init__(self, context, access_token='', language='en-US'):
         self._context = context
-        self._youtube_client = youtube_client
+        self._language = language.replace('-', '_')
+        self._access_token = access_token
         pass
 
     def load_stream_infos(self, video_id):
@@ -180,9 +181,9 @@ class VideoInfo(object):
                    'Accept-Encoding': 'gzip, deflate',
                    'Accept-Language': 'en-US,en;q=0.8,de;q=0.6'}
         params = {'video_id': video_id,
-                  'hl': self._youtube_client.get_language()}
-        if self._youtube_client.get_access_token():
-            params['access_token'] = self._youtube_client.get_access_token()
+                  'hl': self._language}
+        if self._access_token:
+            params['access_token'] = self._access_token
             pass
 
         url = 'https://www.youtube.com/get_video_info'
